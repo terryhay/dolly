@@ -1,0 +1,50 @@
+# required
+version: 1.0.0
+
+# required
+app_help_description:
+  # required fields:
+  app_name: "example2"
+  name_help_info: "shows how parser generator works without commands"
+  description_help_info:
+    - "you can write more detailed description here"
+
+# required
+help_command_description:
+  command: "help"
+  # optional fields
+  additional_commands:
+    - "-h"
+
+# optional
+flag_descriptions:
+  - flag: &checkCommandArguments "-check"
+    description_help_info: "check command arguments types"
+    # optional fields
+    arguments_description:
+      # required fields
+      amount_type: "single"
+      synopsis_description: "str"
+      # optional fields:
+      arguments_description:
+        amount_type: "single"
+        synopsis_description: "log level"
+        default_values:
+          - "s"
+        allowed_values:
+          - "s"
+          - "i"
+          - "f"
+
+# required if this is no command_descriptions
+nameless_command_description:
+  # required
+  description_help_info: "checks arguments types"
+  # optional fields
+  arguments_description:
+    # required fields
+    amount_type: "list"
+    synopsis_description: "str list"
+  required_flags:
+    - *checkCommandArguments
+

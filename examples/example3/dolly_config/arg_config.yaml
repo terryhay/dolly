@@ -1,0 +1,24 @@
+# required
+version: 1.0.0
+
+# required
+app_help_description:
+  # required fields:
+  app_name: "example3"
+  name_help_info: "shows how parser generator works without commands and flags"
+  description_help_info:
+    - "you can write more detailed description here"
+
+# required if this is no command_descriptions
+nameless_command_description:
+  # required
+  description_help_info: "runs example3"
+
+# required
+help_command_description:
+  command: "help"
+  # optional fields
+  additional_commands:
+    - "-h"
+
+

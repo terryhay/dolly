@@ -1,0 +1,52 @@
+version: 1.0.0
+
+app_help_description:
+  app_name: "example"
+  name_help_info: "shows how parser generator works"
+  description_help_info:
+    - "you can write more detailed description here"
+
+flag_descriptions:
+  - flag: &langFlag "-lang"
+    description_help_info: "HTML code of default language for process files"
+    arguments_description:
+      amount_type: "single"
+      default_values:
+        - "ru"
+      allowed_values:
+        - "en"
+        - "ru"
+
+  - flag: &logLevelFlag "-log"
+    description_help_info: "log level for output messages"
+    arguments_description:
+      amount_type: "single"
+      synopsis_description: "log level"
+      default_values:
+        - "i"
+      allowed_values:
+        - "d"
+        - "i"
+        - "w"
+        - "e"
+        - "f"
+
+  - flag: &outputDirectoryFlag "-o"
+    description_help_info: "output directory path"
+    arguments_description:
+      amount_type: "single"
+      synopsis_description: "out path"
+
+command_descriptions:
+  - command: "file"
+    description_help_info: "precesses all file from dir"
+    required_flags:
+      - *outputDirectoryFlag
+    optional_flags:
+      - *logLevelFlag
+      - *langFlag
+
+help_command_description:
+  command: "help"
+  additional_commands:
+    - "-h"

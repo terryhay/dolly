@@ -1,0 +1,29 @@
+version: 1.0.0
+
+command_descriptions:
+  - command: "dir"
+    description_help_info: "precesses all file from dir"
+    arguments_description:
+      amount_type: "single"
+      synopsis_description: "path"
+    required_flags:
+      - "-o"
+    optional_flags:
+      - "-log"
+      - "lang"
+
+  - command: "file"
+    description_help_info: "processes a file"
+    arguments:
+      amount_type: "single"
+      synopsis_description: "path"
+    required_flags:
+      - "-o"
+    optional_flags:
+      - "-log"
+      - "lang"
+
+help_command_description:
+  command: "help"
+  additional_commands:
+    - "-h"
