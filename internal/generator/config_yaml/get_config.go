@@ -3,14 +3,14 @@ package config_yaml
 import (
 	"fmt"
 	"github.com/terryhay/dolly/pkg/dollyerr"
-	"io/ioutil"
+	"os"
 
 	"gopkg.in/yaml.v3"
 )
 
 // GetConfig - loads a config yaml file and unmarshal it into Config object
 func GetConfig(configPath string) (*Config, *dollyerr.Error) {
-	yamlFile, err := ioutil.ReadFile(configPath)
+	yamlFile, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, dollyerr.NewError(
 			dollyerr.CodeGetConfigReadFileError,

@@ -42,7 +42,7 @@ func GenArgDescriptionPart(
 	}
 
 	if argumentsDescription == nil {
-		return fmt.Sprintf(fmt.Sprintf(argumentsDescriptionNilPart, indent, prefix))
+		return fmt.Sprintf(argumentsDescriptionNilPart, indent, prefix)
 	}
 
 	builder := strings.Builder{}

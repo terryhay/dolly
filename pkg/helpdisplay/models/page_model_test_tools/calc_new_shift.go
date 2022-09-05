@@ -13,24 +13,12 @@ func calcNewShift(oldRows []string, shift int, newRows []string) int {
 	if shift != 0 {
 		for i := 0; i <= shift; i++ {
 			anchorWordNumber += countWords(oldRows[i])
-			// todo: remove it
-			if len(oldRows[i]) == 0 {
-				t := 1
-				t++
-			}
-			//
 		}
 		anchorWordNumber++ // add next after shift word
 
 		counter := 0
 		for shift = 0; shift < len(newRows); shift++ {
 			counter += countWords(newRows[shift])
-			// todo: remove it
-			if len(newRows[shift]) == 0 {
-				t := 1
-				t++
-			}
-			//
 			if anchorWordNumber <= counter {
 				shift--
 				break

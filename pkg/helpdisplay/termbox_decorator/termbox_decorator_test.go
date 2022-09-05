@@ -4,6 +4,7 @@ import (
 	"github.com/nsf/termbox-go"
 	"github.com/stretchr/testify/require"
 	"github.com/terryhay/dolly/pkg/helpdisplay/runes"
+	"sync"
 	"testing"
 	"time"
 )
@@ -28,24 +29,24 @@ func TestTermBoxDecorator(t *testing.T) {
 	err = tbDecor.Flush()
 	require.Nil(t, err)
 
+	wg := sync.WaitGroup{}
 	ch := make(chan bool, 1)
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		time.Sleep(4 * time.Second)
 
 		ch <- false
 	}()
 
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		tbDecor.PollEvent()
 		ch <- true
 	}()
 
-	var ev termbox.Event
+	wg.Wait()
 
-	select {
-	case <-ch:
-		break
-	}
-
-	require.NotNil(t, ev)
+	// todo: fin this test
 }

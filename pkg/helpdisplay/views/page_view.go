@@ -68,19 +68,13 @@ func (pv *PageView) Run() *dollyerr.Error {
 			case termbox.KeyArrowDown:
 				err := pv.render(1)
 				if err != nil {
-					return dollyerr.NewError(
-						dollyerr.CodeHelpDisplayRunError,
-						multierror.Append(err, fmt.Errorf("PageView.Run: render call error for termbox event '%v'", ev)),
-					)
+					return err.AppendError(fmt.Errorf("PageView.Run: render call error for termbox event '%v'", ev))
 				}
 
 			case termbox.KeyArrowUp:
 				err := pv.render(-1)
 				if err != nil {
-					return dollyerr.NewError(
-						dollyerr.CodeHelpDisplayRunError,
-						multierror.Append(err, fmt.Errorf("PageView.Run: render call error for termbox event '%v'", ev)),
-					)
+					return err.AppendError(fmt.Errorf("PageView.Run: render call error for termbox event '%v'", ev))
 				}
 
 			case termbox.KeyCtrlTilde:
@@ -89,28 +83,19 @@ func (pv *PageView) Run() *dollyerr.Error {
 				}
 				err := pv.render(0)
 				if err != nil {
-					return dollyerr.NewError(
-						dollyerr.CodeHelpDisplayRunError,
-						multierror.Append(err, fmt.Errorf("PageView.Run: render call error for termbox event '%v'", ev)),
-					)
+					return err.AppendError(fmt.Errorf("PageView.Run: render call error for termbox event '%v'", ev))
 				}
 
 			default:
 				err := pv.render(0)
 				if err != nil {
-					return dollyerr.NewError(
-						dollyerr.CodeHelpDisplayRunError,
-						multierror.Append(err, fmt.Errorf("PageView.Run: render call error for termbox event '%v'", ev)),
-					)
+					return err.AppendError(fmt.Errorf("PageView.Run: render call error for termbox event '%v'", ev))
 				}
 			}
 		default:
 			err := pv.render(0)
 			if err != nil {
-				return dollyerr.NewError(
-					dollyerr.CodeHelpDisplayRunError,
-					multierror.Append(err, fmt.Errorf("PageView.Run: render call error for termbox event '%v'", ev)),
-				)
+				return err.AppendError(fmt.Errorf("PageView.Run: render call error for termbox event '%v'", ev))
 			}
 		}
 

@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	argParserDirName  = "parser"
-	argParserFileName = "parser.go"
+	argParserDirName  = "dolly"
+	argParserFileName = "dolly.go"
 )
 
 // Write - write file string by dir path

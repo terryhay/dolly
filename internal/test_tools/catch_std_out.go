@@ -1,7 +1,7 @@
 package test_tools
 
 import (
-	"io/ioutil"
+	"io"
 	"os"
 )
 
@@ -12,16 +12,16 @@ func CatchStdOut(runnable func()) string {
 		os.Stdout = realStdout
 	}()
 
-	r, fakeStdout, err := os.Pipe()
-	mustBeNoError(err)
+	r, fakeStdout, errPipe := os.Pipe()
+	mustBeNoError(errPipe)
 	os.Stdout = fakeStdout
 
 	runnable()
 
 	// Need to close here, otherwise ReadAll never gets "EOF".
 	mustBeNoError(fakeStdout.Close())
-	newOutBytes, err := ioutil.ReadAll(r)
-	mustBeNoError(err)
+	newOutBytes, errReadAll := io.ReadAll(r)
+	mustBeNoError(errReadAll)
 	mustBeNoError(r.Close())
 
 	return string(newOutBytes)

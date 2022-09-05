@@ -9,7 +9,7 @@ import (
 // CheckSpaces checks if text contains too much new lines or spaces in a row
 func CheckSpaces(text string) (res bool, msg string) {
 
-	if regexp.MustCompilePOSIX("  ").MatchString(text) {
+	if regexp.MustCompilePOSIX(" {2}").MatchString(text) {
 		return false, fmt.Sprintf("text \"%s\" contains too much spaces in a row", text)
 	}
 
