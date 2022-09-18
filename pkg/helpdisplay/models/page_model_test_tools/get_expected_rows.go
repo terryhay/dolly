@@ -2,12 +2,13 @@ package page_model_test_tools
 
 import (
 	"fmt"
-	"github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter"
+	rll "github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter"
+	"github.com/terryhay/dolly/pkg/helpdisplay/size"
 )
 
 const (
 	TerminalWidth100  = 100
-	TerminalWidth20   = row_len_limiter.TerminalMinWidth
+	TerminalWidth20   = rll.TerminalMinWidth
 	TerminalHeight7   = 7
 	TerminalHeight100 = 100
 )
@@ -29,7 +30,7 @@ const (
 	ActionResizeToMaxWeight TestAction = 20000
 )
 
-func GetExpectedData(action TestAction, terminalWidth, terminalHeight, shift int) (rows []string, newWidth, newHeight, newShift int) {
+func GetExpectedData(action TestAction, terminalWidth size.Width, terminalHeight size.Height, shift int) (rows []string, newWidth size.Width, newHeight size.Height, newShift int) {
 	allDisplayRows := getExpectedRowsByWidth(terminalWidth)
 
 	if int(action) > 1000 {
@@ -42,13 +43,13 @@ func GetExpectedData(action TestAction, terminalWidth, terminalHeight, shift int
 		shift += int(action)
 	}
 
-	if len(allDisplayRows) < terminalHeight {
+	if len(allDisplayRows) < terminalHeight.ToInt() {
 		return allDisplayRows, terminalWidth, terminalHeight, 0
 	}
 
 	checkSize := len(allDisplayRows) - shift
-	if checkSize < terminalHeight {
-		shift = len(allDisplayRows) - terminalHeight
+	if checkSize < terminalHeight.ToInt() {
+		shift = len(allDisplayRows) - terminalHeight.ToInt()
 	}
 	if shift < 0 {
 		shift = 0
@@ -58,15 +59,16 @@ func GetExpectedData(action TestAction, terminalWidth, terminalHeight, shift int
 	res = append(res, allDisplayRows[0])
 
 	i := shift + 1
-	for counter := 1; counter < terminalHeight; counter++ {
+	for counter := 2; counter < terminalHeight.ToInt(); counter++ {
 		res = append(res, allDisplayRows[i])
 		i++
 	}
+	res = append(res, ":")
 
 	return res, terminalWidth, terminalHeight, shift
 }
 
-func getNewWidth(action TestAction) int {
+func getNewWidth(action TestAction) size.Width {
 	switch action {
 	case ActionResizeToMinWeight:
 		return TerminalWidth20

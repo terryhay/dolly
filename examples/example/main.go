@@ -16,7 +16,7 @@ const (
 )
 
 func main() {
-	osd := os_decorator.NewOSDecorator()
+	osd := os_decorator.NewOSDecorator(nil)
 
 	pd, err := dolly.Parse(osd.GetArgs())
 	if err != nil {

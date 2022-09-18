@@ -5,6 +5,8 @@ import (
 	"github.com/terryhay/dolly/pkg/dollyerr"
 	"github.com/terryhay/dolly/pkg/helpdisplay/data"
 	tt "github.com/terryhay/dolly/pkg/helpdisplay/models/page_model_test_tools"
+	rll "github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter"
+	"github.com/terryhay/dolly/pkg/helpdisplay/size"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -13,7 +15,7 @@ import (
 func TestEmptyPageViewShifting(t *testing.T) {
 	t.Parallel()
 
-	var pageModel PageModel
+	pageModel := NewPageModel(data.Page{}, TerminalSize{})
 	require.Nil(t, pageModel.Shift(1, 1))
 	require.Nil(t, pageModel.Shift(1, -1))
 }
@@ -24,8 +26,8 @@ func TestPageViewShifting(t *testing.T) {
 	testData := []struct {
 		caseName string
 
-		defaultWidth   int
-		defaultHeight  int
+		defaultWidth   size.Width
+		defaultHeight  size.Height
 		actionSequence []tt.TestAction
 	}{
 		// check full windows
@@ -292,7 +294,8 @@ func TestPageViewShifting(t *testing.T) {
 			terminalWidth := td.defaultWidth
 			terminalHeight := td.defaultHeight
 
-			pageModel := getPageModel(terminalWidth, terminalHeight)
+			rowLenLimiter := rll.MakeRowLenLimiter()
+			pageModel := getPageModel(rowLenLimiter.GetRowLenLimit(terminalWidth), terminalHeight)
 			absShift = 0
 
 			for actionIndex, action := range td.actionSequence {
@@ -310,10 +313,10 @@ func TestPageViewShifting(t *testing.T) {
 						added = -1
 					}
 
-					for width := oldTerminalWidth + added; width != terminalWidth; width += added {
-						require.Nil(t, pageModel.Update(width, terminalHeight, 0))
+					for width := oldTerminalWidth.ToInt() + added; width != terminalWidth.ToInt(); width += added {
+						require.Nil(t, pageModel.Update(MakeTerminalSize(rowLenLimiter.GetRowLenLimit(size.Width(width)), terminalHeight), 0))
 					}
-					require.Nil(t, pageModel.Update(terminalWidth, terminalHeight, 0))
+					require.Nil(t, pageModel.Update(MakeTerminalSize(rowLenLimiter.GetRowLenLimit(terminalWidth), terminalHeight), 0))
 				}
 
 				if shift != 0 {
@@ -324,7 +327,7 @@ func TestPageViewShifting(t *testing.T) {
 					delta := absInt(shift)
 
 					for i := 0; i < delta; i++ {
-						require.Nil(t, pageModel.Update(terminalWidth, terminalHeight, added))
+						require.Nil(t, pageModel.Update(MakeTerminalSize(rowLenLimiter.GetRowLenLimit(terminalWidth), terminalHeight), added))
 					}
 				}
 
@@ -336,7 +339,8 @@ func TestPageViewShifting(t *testing.T) {
 			terminalWidth := td.defaultWidth
 			terminalHeight := td.defaultHeight
 
-			pageModel := getPageModel(terminalWidth, terminalHeight)
+			rowLenlimiter := rll.MakeRowLenLimiter()
+			pageModel := getPageModel(rowLenlimiter.GetRowLenLimit(terminalWidth), terminalHeight)
 			absShift = 0
 
 			for actionIndex, action := range td.actionSequence {
@@ -347,7 +351,7 @@ func TestPageViewShifting(t *testing.T) {
 					shift = int(action)
 				}
 
-				require.Nil(t, pageModel.Update(terminalWidth, terminalHeight, shift))
+				require.Nil(t, pageModel.Update(MakeTerminalSize(rowLenlimiter.GetRowLenLimit(terminalWidth), terminalHeight), shift))
 
 				checkRows(t, expectedRows, absShift, terminalWidth, actionIndex, shift, pageModel)
 			}
@@ -355,22 +359,26 @@ func TestPageViewShifting(t *testing.T) {
 	}
 }
 
-func checkRows(t *testing.T, expectedRows []string, absShift, terminalWidth, actionIndex, shift int, pgm PageModel) {
+func checkRows(t *testing.T, expectedRows []string, absShift int, terminalWidth size.Width, actionIndex, shift int, pgm *PageModel) {
+	var err *dollyerr.Error
+
 	//pageModel.Update(terminalWidth, terminalHeight, shift)
-	require.Equal(t, absShift, pgm.GetAnchorRowAbsolutelyIndex(),
+	require.Equal(t, absShift, pgm.GetAnchorRowAbsolutelyIndex().ToInt(),
 		fmt.Sprintf("absolutely shift must be equal anchorRowAbsolutelyIndex. Action iter №%d; current shift: %d", actionIndex, shift))
 
 	counter := 0
-	for it := pgm.RowBegin(); !it.End(); it = pgm.RowNext(it) {
+	for it := MakeRowIterator(pgm); !it.End(); err = it.Next() {
+		require.Nil(t, err)
+
 		require.True(t, counter < len(expectedRows),
 			fmt.Sprintf("can't get expected row. Action iter №: %d; shift: %d, iteration: %d", actionIndex, shift, counter))
 
-		row := rowToString(it.ShiftIndex, it.Cells)
+		row := it.Row().String()
 
 		require.Equal(t, expectedRows[counter], row,
 			fmt.Sprintf("rows must be equal. Action iter №: %d; shift: %d, iteration: %d", actionIndex, shift, counter))
 
-		require.True(t, len([]rune(row)) <= terminalWidth, fmt.Sprintf("rune amount must be less or equal to terminal width. Action iter №: %d; shift: %d, iteration: %d", actionIndex, shift, counter))
+		require.True(t, len([]rune(row)) <= terminalWidth.ToInt(), fmt.Sprintf("rune amount must be less or equal to terminal width. Action iter №: %d; shift: %d, iteration: %d", actionIndex, shift, counter))
 
 		counter++
 	}
@@ -379,8 +387,8 @@ func checkRows(t *testing.T, expectedRows []string, absShift, terminalWidth, act
 		fmt.Sprintf("must be checked all expected rows. Action iter №: %d; shift: %d", actionIndex, shift))
 }
 
-func getPageModel(terminalWidth, terminalHeight int) PageModel {
-	return MakePageModel(
+func getPageModel(rowLenLimit rll.RowLenLimit, terminalHeight size.Height) *PageModel {
+	return NewPageModel(
 		data.Page{
 			Header: "example",
 			Paragraphs: []*data.Paragraph{
@@ -483,21 +491,21 @@ func getPageModel(terminalWidth, terminalHeight int) PageModel {
 				},
 			},
 		},
-		terminalWidth,
-		terminalHeight,
+		MakeTerminalSize(rowLenLimit, terminalHeight),
 	)
 }
 
 func TestErrors(t *testing.T) {
 	t.Parallel()
 
-	pageModel := getPageModel(tt.TerminalWidth20, tt.TerminalHeight100)
+	rowLenLimiter := rll.MakeRowLenLimiter()
+	pageModel := getPageModel(rowLenLimiter.GetRowLenLimit(tt.TerminalWidth20), tt.TerminalHeight100)
 	{
-		err := pageModel.Update(0, 0, 0)
+		err := pageModel.Update(MakeTerminalSize(rowLenLimiter.GetRowLenLimit(0), 0), 0)
 		require.Equal(t, dollyerr.CodeHelpDisplayTerminalWidthLimitError, err.Code())
 	}
 	{
-		err := pageModel.Shift(-1, 0)
-		require.Equal(t, dollyerr.CodeHelpDisplayInvalidTerminalHeightArgument, err.Code())
+		pageModel.bodyModel = nil
+		require.Error(t, pageModel.Update(TerminalSize{rowLenLimiter.GetRowLenLimit(40), 1}, 0))
 	}
 }

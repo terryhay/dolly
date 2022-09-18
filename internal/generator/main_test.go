@@ -9,7 +9,7 @@ import (
 	"github.com/terryhay/dolly/internal/generator/config_yaml"
 	"github.com/terryhay/dolly/internal/generator/parser"
 	"github.com/terryhay/dolly/internal/os_decorator"
-	osdMock "github.com/terryhay/dolly/internal/os_decorator/os_decorator_mock"
+	osd "github.com/terryhay/dolly/internal/os_decorator"
 	"github.com/terryhay/dolly/pkg/dollyconf"
 	"github.com/terryhay/dolly/pkg/dollyerr"
 	"github.com/terryhay/dolly/pkg/parsed_data"
@@ -38,9 +38,11 @@ func TestLogic(t *testing.T) {
 			dollyParseFunc: func(arg []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 				return nil, parsingErr
 			},
-			osd: osdMock.NewOSDecoratorMock(
-				osdMock.OSDecoratorMockInit{
-					Args: []string{},
+			osd: osd.NewOSDecorator(
+				&osd.Mock{
+					FuncGetArgs: func() []string {
+						return nil
+					},
 				},
 			),
 			expectedErrCode: parsingErr.Code(),
@@ -51,9 +53,11 @@ func TestLogic(t *testing.T) {
 			dollyParseFunc: func(arg []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 				return nil, nil
 			},
-			osd: osdMock.NewOSDecoratorMock(
-				osdMock.OSDecoratorMockInit{
-					Args: []string{},
+			osd: osd.NewOSDecorator(
+				&osd.Mock{
+					FuncGetArgs: func() []string {
+						return nil
+					},
 				},
 			),
 			expectedErrCode: dollyerr.CodeGeneratorNoRequiredFlag,
@@ -75,9 +79,11 @@ func TestLogic(t *testing.T) {
 					},
 					nil
 			},
-			osd: osdMock.NewOSDecoratorMock(
-				osdMock.OSDecoratorMockInit{
-					Args: []string{},
+			osd: osd.NewOSDecorator(
+				&osd.Mock{
+					FuncGetArgs: func() []string {
+						return nil
+					},
 				},
 			),
 			expectedErrCode: dollyerr.CodeGeneratorNoRequiredFlag,
@@ -109,9 +115,11 @@ func TestLogic(t *testing.T) {
 			getYAMLConfigFunc: func(configPath string) (*config_yaml.Config, *dollyerr.Error) {
 				return nil, getYAMLConfigErr
 			},
-			osd: osdMock.NewOSDecoratorMock(
-				osdMock.OSDecoratorMockInit{
-					Args: []string{},
+			osd: osd.NewOSDecorator(
+				&osd.Mock{
+					FuncGetArgs: func() []string {
+						return nil
+					},
 				},
 			),
 			expectedErrCode: dollyerr.CodeConfigFlagIsNotUsedInCommands,
@@ -148,9 +156,11 @@ func TestLogic(t *testing.T) {
 					},
 					nil
 			},
-			osd: osdMock.NewOSDecoratorMock(
-				osdMock.OSDecoratorMockInit{
-					Args: []string{},
+			osd: osd.NewOSDecorator(
+				&osd.Mock{
+					FuncGetArgs: func() []string {
+						return nil
+					},
 				},
 			),
 			expectedErrCode: dollyerr.CodeUndefinedError,
@@ -187,9 +197,11 @@ func TestLogic(t *testing.T) {
 					},
 					nil
 			},
-			osd: osdMock.NewOSDecoratorMock(
-				osdMock.OSDecoratorMockInit{
-					Args: []string{},
+			osd: osd.NewOSDecorator(
+				&osd.Mock{
+					FuncGetArgs: func() []string {
+						return nil
+					},
 				},
 			),
 			expectedErrCode: dollyerr.CodeUndefinedError,
@@ -231,9 +243,11 @@ func TestLogic(t *testing.T) {
 					},
 					nil
 			},
-			osd: osdMock.NewOSDecoratorMock(
-				osdMock.OSDecoratorMockInit{
-					Args: []string{},
+			osd: osd.NewOSDecorator(
+				&osd.Mock{
+					FuncGetArgs: func() []string {
+						return nil
+					},
 				},
 			),
 			expectedErrCode: dollyerr.CodeConfigFlagMustHaveDashInFront,
@@ -266,12 +280,14 @@ func TestLogic(t *testing.T) {
 				return &config_yaml.Config{},
 					nil
 			},
-			osd: osdMock.NewOSDecoratorMock(osdMock.OSDecoratorMockInit{
-				Args: []string{},
-				IsNotExistFunc: func(err error) bool {
+			osd: osd.NewOSDecorator(&osd.Mock{
+				FuncGetArgs: func() []string {
+					return nil
+				},
+				FuncIsNotExist: func(err error) bool {
 					return err != nil
 				},
-				StatFunc: func(path string) (os.FileInfo, error) {
+				FuncStat: func(path string) (os.FileInfo, error) {
 					return nil, dollyerr.NewError(dollyerr.CodeUndefinedError, fmt.Errorf(gofakeit.Name()))
 				},
 			}),

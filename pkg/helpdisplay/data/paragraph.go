@@ -1,7 +1,8 @@
 package data
 
 import (
-	"github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter"
+	rll "github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter"
+	"github.com/terryhay/dolly/pkg/helpdisplay/size"
 	"strings"
 )
 
@@ -12,9 +13,9 @@ type Paragraph struct {
 
 	// TabCount - amount of tabs which will be added before every paragraph row
 	// How it works: TabCount*tabSize is a rune actionSequence of every paragraph row
-	TabCount row_len_limiter.RowSize
+	TabCount size.Width
 }
 
 func (p *Paragraph) String() string {
-	return strings.Repeat(" ", int(p.TabCount*row_len_limiter.TabSize)) + p.Text
+	return strings.Repeat(" ", int(p.TabCount*rll.TabSize)) + p.Text
 }

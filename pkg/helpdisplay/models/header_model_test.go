@@ -1,11 +1,9 @@
 package models
 
 import (
-	"github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter"
+	"github.com/stretchr/testify/require"
 	rowLenLimitMock "github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter/mock"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestMakeHeaderModel(t *testing.T) {
@@ -14,29 +12,30 @@ func TestMakeHeaderModel(t *testing.T) {
 	testData := []struct {
 		caseName string
 
-		headerText  string
-		rowLenLimit row_len_limiter.RowLenLimit
+		headerText string
+		size       TerminalSize
 
-		expectedHeaderModel HeaderModel
+		expectedHeaderModel *HeaderModel
 	}{
 		{
-			caseName: "empty_headerText_and_rowLenLimit",
+			caseName:            "empty_headerText_and_rowLenLimit",
+			expectedHeaderModel: NewHeaderModel("", TerminalSize{}),
 		},
 		{
-			caseName:    "empty_headerText_with_max_rowLenLimit",
-			rowLenLimit: rowLenLimitMock.GetRowLenLimitMax(),
+			caseName: "empty_headerText_with_max_rowLenLimit",
+			size:     MakeTerminalSize(rowLenLimitMock.GetRowLenLimitMax(), 20),
 
-			expectedHeaderModel: HeaderModel{
+			expectedHeaderModel: &HeaderModel{
 				usingRowLeLimit: rowLenLimitMock.GetRowLenLimitMax(),
 				shift:           33,
 			},
 		},
 		{
-			caseName:    "header_with_max_rowLenLimit",
-			headerText:  "example",
-			rowLenLimit: rowLenLimitMock.GetRowLenLimitMax(),
+			caseName:   "header_with_max_rowLenLimit",
+			headerText: "example",
+			size:       MakeTerminalSize(rowLenLimitMock.GetRowLenLimitMax(), 20),
 
-			expectedHeaderModel: HeaderModel{
+			expectedHeaderModel: &HeaderModel{
 				headerCells:     textToCells("example"),
 				outputCells:     textToCells("example"),
 				usingRowLeLimit: rowLenLimitMock.GetRowLenLimitMax(),
@@ -44,11 +43,11 @@ func TestMakeHeaderModel(t *testing.T) {
 			},
 		},
 		{
-			caseName:    "header_with_rowLenLimit25",
-			headerText:  "example",
-			rowLenLimit: rowLenLimitMock.GetRowLenLimitForTerminalWidth25(),
+			caseName:   "header_with_rowLenLimit25",
+			headerText: "example",
+			size:       MakeTerminalSize(rowLenLimitMock.GetRowLenLimitForTerminalWidth25(), 20),
 
-			expectedHeaderModel: HeaderModel{
+			expectedHeaderModel: &HeaderModel{
 				headerCells:     textToCells("example"),
 				outputCells:     textToCells("example"),
 				usingRowLeLimit: rowLenLimitMock.GetRowLenLimitForTerminalWidth25(),
@@ -56,11 +55,11 @@ func TestMakeHeaderModel(t *testing.T) {
 			},
 		},
 		{
-			caseName:    "header_with_min_rowLenLimit",
-			headerText:  "example",
-			rowLenLimit: rowLenLimitMock.GetRowLenLimitMin(),
+			caseName:   "header_with_min_rowLenLimit",
+			headerText: "example",
+			size:       MakeTerminalSize(rowLenLimitMock.GetRowLenLimitMin(), 20),
 
-			expectedHeaderModel: HeaderModel{
+			expectedHeaderModel: &HeaderModel{
 				headerCells:     textToCells("example"),
 				outputCells:     textToCells("example"),
 				usingRowLeLimit: rowLenLimitMock.GetRowLenLimitMin(),
@@ -68,22 +67,22 @@ func TestMakeHeaderModel(t *testing.T) {
 			},
 		},
 		{
-			caseName:    "using_max_terminal_size",
-			headerText:  "Help info: example utility",
-			rowLenLimit: rowLenLimitMock.GetRowLenLimitForTerminalWidth25(),
+			caseName:   "using_max_terminal_size",
+			headerText: "Help info: example utility",
+			size:       MakeTerminalSize(rowLenLimitMock.GetRowLenLimitForTerminalWidth25(), 20),
 
-			expectedHeaderModel: HeaderModel{
+			expectedHeaderModel: &HeaderModel{
 				headerCells:     textToCells("Help info: example utility"),
 				outputCells:     textToCells("Help info: example utility"),
 				usingRowLeLimit: rowLenLimitMock.GetRowLenLimitForTerminalWidth25(),
 			},
 		},
 		{
-			caseName:    "header_cutting",
-			headerText:  "Help info: example application",
-			rowLenLimit: rowLenLimitMock.GetRowLenLimitMin(),
+			caseName:   "header_cutting",
+			headerText: "Help info: example application",
+			size:       MakeTerminalSize(rowLenLimitMock.GetRowLenLimitMin(), 20),
 
-			expectedHeaderModel: HeaderModel{
+			expectedHeaderModel: &HeaderModel{
 				headerCells:     textToCells("Help info: example application"),
 				outputCells:     textToCells("Help info: exampl..."),
 				usingRowLeLimit: rowLenLimitMock.GetRowLenLimitMin(),
@@ -93,7 +92,7 @@ func TestMakeHeaderModel(t *testing.T) {
 
 	for _, td := range testData {
 		t.Run(td.caseName, func(t *testing.T) {
-			headerModel := MakeHeaderModel(td.headerText, td.rowLenLimit)
+			headerModel := NewHeaderModel(td.headerText, td.size)
 			require.Equal(t, td.expectedHeaderModel, headerModel)
 		})
 	}

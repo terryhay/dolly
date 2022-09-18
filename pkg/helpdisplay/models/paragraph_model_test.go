@@ -2,12 +2,13 @@ package models
 
 import (
 	"fmt"
-	"github.com/nsf/termbox-go"
 	"github.com/stretchr/testify/require"
 	"github.com/terryhay/dolly/pkg/helpdisplay/data"
-	"github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter"
+	"github.com/terryhay/dolly/pkg/helpdisplay/row"
+	rll "github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter"
 	rowLenLimitMock "github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter/mock"
 	"github.com/terryhay/dolly/pkg/helpdisplay/runes"
+	"github.com/terryhay/dolly/pkg/helpdisplay/size"
 	"strings"
 	"testing"
 )
@@ -19,11 +20,15 @@ func TestParagraphViewInit(t *testing.T) {
 		caseName string
 
 		sourceText  string
-		tabCount    row_len_limiter.RowSize
-		rowLenLimit row_len_limiter.RowLenLimit
+		tabCount    size.Width
+		rowLenLimit rll.RowLenLimit
 
 		expectedRows []string
 	}{
+		{
+			caseName:    "no_strings_no_limit",
+			rowLenLimit: rll.RowLenLimit{},
+		},
 		{
 			caseName:    "no_strings",
 			rowLenLimit: rowLenLimitMock.GetRowLenLimitForTerminalWidth25(),
@@ -295,8 +300,7 @@ func TestParagraphViewInit(t *testing.T) {
 
 	for _, td := range testData {
 		t.Run(td.caseName, func(t *testing.T) {
-			var p ParagraphModel
-			p.Init(
+			prm := NewParagraphModel(
 				td.rowLenLimit,
 				&data.Paragraph{
 					Text:     td.sourceText,
@@ -304,19 +308,19 @@ func TestParagraphViewInit(t *testing.T) {
 				})
 
 			if len(td.expectedRows) == 0 {
-				require.Equal(t, 1, p.GetRowCount(),
+				require.Equal(t, 1, prm.GetRowCount().ToInt(),
 					"expected rows count must be equal to paragraph row count")
 				return
 			}
 
-			require.Equal(t, len(td.expectedRows), p.GetRowCount(),
+			require.Equal(t, len(td.expectedRows), prm.GetRowCount().ToInt(),
 				"expected rows count must be equal to paragraph row count")
 
-			for i := 0; i < p.GetRowCount(); i++ {
+			for i := size.Height(0); i < prm.GetRowCount(); i++ {
 				require.True(t, len([]rune(td.expectedRows[i])) < td.rowLenLimit.Max().ToInt()+1,
 					fmt.Sprintf("row len is more than max limit = %d", td.rowLenLimit.Max()))
 
-				require.Equal(t, td.expectedRows[i], rowToString(p.GetRow(i)))
+				require.Equal(t, td.expectedRows[i], rowToString(prm.GetRow(i)))
 			}
 		})
 	}
@@ -327,14 +331,13 @@ func TestUpdate(t *testing.T) {
 
 	t.Run("resizing_with_not_null_anchor", func(t *testing.T) {
 		rowLenLimit := rowLenLimitMock.GetRowLenLimitMin()
-		var prm ParagraphModel
-		prm.Init(
+		prm := NewParagraphModel(
 			rowLenLimit,
 			&data.Paragraph{
 				Text: `You motherfucker, come on you little ass… fuck with me, eh? You fucking little asshole, dickhead cocksucker…`,
 			})
 
-		require.Equal(t, 8, prm.GetRowCount())
+		require.Equal(t, 8, prm.GetRowCount().ToInt())
 		require.True(t, prm.ShiftAnchorRow(4))
 
 		prm.Update(rowLenLimitMock.GetRowLenLimitMax())
@@ -342,14 +345,13 @@ func TestUpdate(t *testing.T) {
 
 	t.Run("resizing_with_not_null_anchor", func(t *testing.T) {
 		rowLenLimit := rowLenLimitMock.GetRowLenLimitMin()
-		var prm ParagraphModel
-		prm.Init(
+		prm := NewParagraphModel(
 			rowLenLimit,
 			&data.Paragraph{
 				Text: `You motherfucker, come on you little ass… fuck with me, eh? You fucking little asshole, dickhead cocksucker…`,
 			})
 
-		require.Equal(t, 8, prm.GetRowCount())
+		require.Equal(t, 8, prm.GetRowCount().ToInt())
 		require.True(t, prm.ShiftAnchorRow(4))
 
 		prm.Update(rowLenLimitMock.GetRowLenLimitMin())
@@ -359,48 +361,46 @@ func TestUpdate(t *testing.T) {
 func TestSecondUpdate(t *testing.T) {
 	t.Parallel()
 
-	// usingRowLeLimit contains hardcode values
+	// usingRowLenLimit contains hardcode values
 	// which creates row_len_limiter.RowLenLimiter.GetRowLenLimit method
 	// if terminal width value is 25
 	rowLenLimit := rowLenLimitMock.GetRowLenLimitMin()
 
-	var pr ParagraphModel
-	pr.Init(
+	prm := NewParagraphModel(
 		rowLenLimit,
 		&data.Paragraph{Text: `[1mexample[0m – shows how argtools generator works`})
 
-	rowLenLimit = row_len_limiter.MakeRowLenLimit(25, 29, 33)
+	rowLenLimit = rll.MakeRowLenLimit(25, 29, 33)
 
-	pr.Update(rowLenLimit)
-	updatedPr := pr
+	prm.Update(rowLenLimit)
+	updatedPr := prm
 
-	pr.Update(rowLenLimit)
-	require.Equal(t, updatedPr, pr)
+	prm.Update(rowLenLimit)
+	require.Equal(t, updatedPr, prm)
 }
 
 func TestGetRow(t *testing.T) {
 	t.Parallel()
 
 	t.Run("call_with_invalid_index", func(t *testing.T) {
-		var prm ParagraphModel
-		prm.Init(
+		prm := NewParagraphModel(
 			rowLenLimitMock.GetRowLenLimitMax(),
 			&data.Paragraph{Text: `[1mexample[0m – shows how argtools generator works`})
 
-		row, cells := prm.GetRow(prm.GetRowCount())
-		require.Equal(t, 0, row)
-		require.Nil(t, cells)
+		r := prm.GetRow(prm.GetRowCount())
+		require.Equal(t, 0, r.GetShiftIndex().ToInt())
+		require.Nil(t, r.GetCells())
 	})
 }
 
-func rowToString(shiftIndex int, cells []termbox.Cell) string {
+func rowToString(r row.Row) string {
 	builder := strings.Builder{}
 	builder.Reset()
 
-	for i := 0; i < shiftIndex; i++ {
+	for i := size.Width(0); i < r.GetShiftIndex(); i++ {
 		builder.WriteRune(runes.RuneSpace)
 	}
-	for _, cell := range cells {
+	for _, cell := range r.GetCells() {
 		builder.WriteRune(cell.Ch)
 	}
 

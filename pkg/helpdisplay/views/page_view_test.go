@@ -7,9 +7,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/terryhay/dolly/pkg/dollyerr"
 	"github.com/terryhay/dolly/pkg/helpdisplay/data"
-	rowLenLimit "github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter"
+	"github.com/terryhay/dolly/pkg/helpdisplay/models"
+	rll "github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter"
 	"github.com/terryhay/dolly/pkg/helpdisplay/runes"
-	tbDecorMock "github.com/terryhay/dolly/pkg/helpdisplay/termbox_decorator/mock"
+	tbd "github.com/terryhay/dolly/pkg/helpdisplay/termbox_decorator"
 	"testing"
 )
 
@@ -19,8 +20,8 @@ func TestPageView(t *testing.T) {
 	t.Run("error_initialization", func(t *testing.T) {
 		var pageView PageView
 		err := pageView.Init(
-			tbDecorMock.NewTermBoxDecoratorMock(
-				tbDecorMock.TermBoxDecoratorMockInit{
+			tbd.NewTermBoxDecorator(
+				&tbd.Mock{
 					FuncInit: func() error {
 						return dollyerr.NewError(
 							dollyerr.CodeTermBoxDecoratorInitError,
@@ -65,9 +66,9 @@ func TestPageView(t *testing.T) {
 
 		var pageView PageView
 		err := pageView.Init(
-			tbDecorMock.NewTermBoxDecoratorMock(
-				tbDecorMock.TermBoxDecoratorMockInit{
-					FuncClear: func() error {
+			tbd.NewTermBoxDecorator(
+				&tbd.Mock{
+					FuncClear: func(_, _ termbox.Attribute) error {
 						return nil
 					},
 					FuncClose: func() {
@@ -83,10 +84,10 @@ func TestPageView(t *testing.T) {
 					},
 					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
 					},
-					FuncSetRune: func(x, y int, ch rune) {
+					FuncSetChar: func(x, y int, ch rune) {
 					},
 					FuncSize: func() (width int, height int) {
-						return rowLenLimit.TerminalMinWidth, 7
+						return rll.TerminalMinWidth.ToInt(), 7
 					},
 				}),
 			data.Page{
@@ -104,7 +105,7 @@ func TestPageView(t *testing.T) {
 		require.Nil(t, err)
 	})
 
-	/*t.Run("running2", func(t *testing.T) {
+	t.Run("running2", func(t *testing.T) {
 		ev := make(chan termbox.Event, 1)
 		go func() {
 			ev <- termbox.Event{
@@ -116,9 +117,9 @@ func TestPageView(t *testing.T) {
 
 		var pageView PageView
 		err := pageView.Init(
-			tbDecorMock.NewTermBoxDecoratorMock(
-				tbDecorMock.TermBoxDecoratorMockInit{
-					FuncClear: func() error {
+			tbd.NewTermBoxDecorator(
+				&tbd.Mock{
+					FuncClear: func(_, _ termbox.Attribute) error {
 						return nil
 					},
 					FuncClose: func() {
@@ -134,10 +135,10 @@ func TestPageView(t *testing.T) {
 					},
 					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
 					},
-					FuncSetRune: func(x, y int, ch rune) {
+					FuncSetChar: func(x, y int, ch rune) {
 					},
 					FuncSize: func() (width int, height int) {
-						return rowLenLimit.TerminalMinWidth, 7
+						return rll.TerminalMinWidth.ToInt(), 7
 					},
 				}),
 			data.Page{
@@ -150,7 +151,7 @@ func TestPageView(t *testing.T) {
 			},
 		)
 		require.Nil(t, err)
-	})//*/
+	})
 }
 
 func TestErrorsBeforeEventLoop(t *testing.T) {
@@ -175,21 +176,21 @@ func TestErrorsBeforeEventLoop(t *testing.T) {
 
 	widthsChan := make(chan int, 1)
 	go func() {
-		widthsChan <- rowLenLimit.TerminalMinWidth
+		widthsChan <- rll.TerminalMinWidth.ToInt()
 		widthsChan <- 0
 	}()
 
 	testData := []struct {
 		caseName string
 
-		initData     tbDecorMock.TermBoxDecoratorMockInit
+		initData     tbd.Mock
 		expectedCode dollyerr.Code
 	}{
 		{
 			caseName: "clear_call_error",
 
-			initData: tbDecorMock.TermBoxDecoratorMockInit{
-				FuncClear: func() error {
+			initData: tbd.Mock{
+				FuncClear: func(_, _ termbox.Attribute) error {
 					return funcClearRes
 				},
 				FuncClose: func() {
@@ -198,7 +199,7 @@ func TestErrorsBeforeEventLoop(t *testing.T) {
 					return nil
 				},
 				FuncSize: func() (width int, height int) {
-					return rowLenLimit.TerminalMinWidth, 7
+					return rll.TerminalMinWidth.ToInt(), 7
 				},
 			},
 			expectedCode: dollyerr.CodeHelpDisplayRenderError,
@@ -206,8 +207,8 @@ func TestErrorsBeforeEventLoop(t *testing.T) {
 		{
 			caseName: "flush_call_error",
 
-			initData: tbDecorMock.TermBoxDecoratorMockInit{
-				FuncClear: func() error {
+			initData: tbd.Mock{
+				FuncClear: func(_, _ termbox.Attribute) error {
 					return nil
 				},
 				FuncClose: func() {
@@ -221,7 +222,7 @@ func TestErrorsBeforeEventLoop(t *testing.T) {
 				FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
 				},
 				FuncSize: func() (width int, height int) {
-					return rowLenLimit.TerminalMinWidth, 7
+					return rll.TerminalMinWidth.ToInt(), 7
 				},
 			},
 			expectedCode: dollyerr.CodeHelpDisplayRunError,
@@ -229,8 +230,8 @@ func TestErrorsBeforeEventLoop(t *testing.T) {
 		{
 			caseName: "page_model_update_error",
 
-			initData: tbDecorMock.TermBoxDecoratorMockInit{
-				FuncClear: func() error {
+			initData: tbd.Mock{
+				FuncClear: func(_, _ termbox.Attribute) error {
 					return nil
 				},
 				FuncClose: func() {
@@ -254,7 +255,7 @@ func TestErrorsBeforeEventLoop(t *testing.T) {
 	for _, td := range testData {
 		t.Run(td.caseName, func(t *testing.T) {
 			var pageView PageView
-			err := pageView.Init(tbDecorMock.NewTermBoxDecoratorMock(td.initData), pageData)
+			err := pageView.Init(tbd.NewTermBoxDecorator(&td.initData), pageData)
 			require.Nil(t, err)
 
 			err = pageView.Run()
@@ -290,9 +291,9 @@ func TestErrorInsideEventLoop(t *testing.T) {
 
 		var pageView PageView
 		err := pageView.Init(
-			tbDecorMock.NewTermBoxDecoratorMock(
-				tbDecorMock.TermBoxDecoratorMockInit{
-					FuncClear: func() error {
+			tbd.NewTermBoxDecorator(
+				&tbd.Mock{
+					FuncClear: func(_, _ termbox.Attribute) error {
 						return <-clearResChan
 					},
 					FuncClose: func() {
@@ -308,10 +309,10 @@ func TestErrorInsideEventLoop(t *testing.T) {
 					},
 					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
 					},
-					FuncSetRune: func(x, y int, ch rune) {
+					FuncSetChar: func(x, y int, ch rune) {
 					},
 					FuncSize: func() (width int, height int) {
-						return rowLenLimit.TerminalMinWidth, 7
+						return rll.TerminalMinWidth.ToInt(), 7
 					},
 				}),
 			data.Page{
@@ -352,9 +353,9 @@ func TestErrorInsideEventLoop(t *testing.T) {
 
 		var pageView PageView
 		err := pageView.Init(
-			tbDecorMock.NewTermBoxDecoratorMock(
-				tbDecorMock.TermBoxDecoratorMockInit{
-					FuncClear: func() error {
+			tbd.NewTermBoxDecorator(
+				&tbd.Mock{
+					FuncClear: func(_, _ termbox.Attribute) error {
 						return <-clearResChan
 					},
 					FuncClose: func() {
@@ -370,10 +371,10 @@ func TestErrorInsideEventLoop(t *testing.T) {
 					},
 					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
 					},
-					FuncSetRune: func(x, y int, ch rune) {
+					FuncSetChar: func(x, y int, ch rune) {
 					},
 					FuncSize: func() (width int, height int) {
-						return rowLenLimit.TerminalMinWidth, 7
+						return rll.TerminalMinWidth.ToInt(), 7
 					},
 				}),
 			data.Page{
@@ -414,9 +415,9 @@ func TestErrorInsideEventLoop(t *testing.T) {
 
 		var pageView PageView
 		err := pageView.Init(
-			tbDecorMock.NewTermBoxDecoratorMock(
-				tbDecorMock.TermBoxDecoratorMockInit{
-					FuncClear: func() error {
+			tbd.NewTermBoxDecorator(
+				&tbd.Mock{
+					FuncClear: func(_, _ termbox.Attribute) error {
 						return <-clearResChan
 					},
 					FuncClose: func() {
@@ -432,10 +433,10 @@ func TestErrorInsideEventLoop(t *testing.T) {
 					},
 					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
 					},
-					FuncSetRune: func(x, y int, ch rune) {
+					FuncSetChar: func(x, y int, ch rune) {
 					},
 					FuncSize: func() (width int, height int) {
-						return rowLenLimit.TerminalMinWidth, 7
+						return rll.TerminalMinWidth.ToInt(), 7
 					},
 				}),
 			data.Page{
@@ -476,9 +477,9 @@ func TestErrorInsideEventLoop(t *testing.T) {
 
 		var pageView PageView
 		err := pageView.Init(
-			tbDecorMock.NewTermBoxDecoratorMock(
-				tbDecorMock.TermBoxDecoratorMockInit{
-					FuncClear: func() error {
+			tbd.NewTermBoxDecorator(
+				&tbd.Mock{
+					FuncClear: func(_, _ termbox.Attribute) error {
 						return <-clearResChan
 					},
 					FuncClose: func() {
@@ -494,10 +495,10 @@ func TestErrorInsideEventLoop(t *testing.T) {
 					},
 					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
 					},
-					FuncSetRune: func(x, y int, ch rune) {
+					FuncSetChar: func(x, y int, ch rune) {
 					},
 					FuncSize: func() (width int, height int) {
-						return rowLenLimit.TerminalMinWidth, 7
+						return rll.TerminalMinWidth.ToInt(), 7
 					},
 				}),
 			data.Page{
@@ -538,9 +539,9 @@ func TestErrorInsideEventLoop(t *testing.T) {
 
 		var pageView PageView
 		err := pageView.Init(
-			tbDecorMock.NewTermBoxDecoratorMock(
-				tbDecorMock.TermBoxDecoratorMockInit{
-					FuncClear: func() error {
+			tbd.NewTermBoxDecorator(
+				&tbd.Mock{
+					FuncClear: func(_, _ termbox.Attribute) error {
 						return <-clearResChan
 					},
 					FuncClose: func() {
@@ -556,10 +557,10 @@ func TestErrorInsideEventLoop(t *testing.T) {
 					},
 					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
 					},
-					FuncSetRune: func(x, y int, ch rune) {
+					FuncSetChar: func(x, y int, ch rune) {
 					},
 					FuncSize: func() (width int, height int) {
-						return rowLenLimit.TerminalMinWidth, 7
+						return rll.TerminalMinWidth.ToInt(), 7
 					},
 				}),
 			data.Page{
@@ -599,9 +600,9 @@ func TestErrorInsideEventLoop(t *testing.T) {
 
 		var pageView PageView
 		err := pageView.Init(
-			tbDecorMock.NewTermBoxDecoratorMock(
-				tbDecorMock.TermBoxDecoratorMockInit{
-					FuncClear: func() error {
+			tbd.NewTermBoxDecorator(
+				&tbd.Mock{
+					FuncClear: func(_, _ termbox.Attribute) error {
 						return nil
 					},
 					FuncClose: func() {
@@ -617,10 +618,10 @@ func TestErrorInsideEventLoop(t *testing.T) {
 					},
 					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
 					},
-					FuncSetRune: func(x, y int, ch rune) {
+					FuncSetChar: func(x, y int, ch rune) {
 					},
 					FuncSize: func() (width int, height int) {
-						return rowLenLimit.TerminalMinWidth, 7
+						return rll.TerminalMinWidth.ToInt(), 7
 					},
 				}),
 			data.Page{
@@ -636,5 +637,14 @@ func TestErrorInsideEventLoop(t *testing.T) {
 
 		err = pageView.Run()
 		require.NotNil(t, err)
+	})
+
+	t.Run("error_in_render", func(t *testing.T) {
+		require.NotNil(t, render(
+			nil,
+			models.RowIterator{
+				ReverseCounter: 1,
+			},
+		))
 	})
 }

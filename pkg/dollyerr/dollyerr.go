@@ -1,6 +1,9 @@
 package dollyerr
 
-import "github.com/hashicorp/go-multierror"
+import (
+	"fmt"
+	"github.com/hashicorp/go-multierror"
+)
 
 // Code is spec Code of error
 type Code uint
@@ -69,11 +72,14 @@ const (
 	// CodeHelpDisplayTerminalWidthLimitError - invalid calculated terminal len limit
 	CodeHelpDisplayTerminalWidthLimitError
 
-	// CodeHelpDisplayInvalidTerminalHeightArgument - invalid terminal height argument
-	CodeHelpDisplayInvalidTerminalHeightArgument
-
 	// CodeHelpDisplayRenderError - error during help page rendering
 	CodeHelpDisplayRenderError
+
+	// CodeHelpDisplayReceiverIsNilPointer - try to call method with nil receiver pointer
+	CodeHelpDisplayReceiverIsNilPointer
+
+	// CodeHelpDisplayReceiverInvalidIndex - try to get object from a slice by invalid index
+	CodeHelpDisplayReceiverInvalidIndex
 
 	// CodeHelpDisplayRunError - something wrong with help page displaying
 	CodeHelpDisplayRunError
@@ -111,6 +117,9 @@ const (
 	// CodeArgParserUnexpectedFlag - unexpected flag
 	CodeArgParserUnexpectedFlag
 
+	// CodeRowIteratorAttemptToIterateFromEndedIterator - something wrong in some row iterator loop
+	CodeRowIteratorAttemptToIterateFromEndedIterator
+
 	// CodeTermBoxDecoratorInitError - can't init a termbox decorator
 	CodeTermBoxDecoratorInitError
 
@@ -132,11 +141,22 @@ type Error struct {
 	err  error
 }
 
-// NewError creates Error object and returns pointer
+// NewError creates Error object
 func NewError(code Code, err error) *Error {
 	return &Error{
 		code: code,
 		err:  err,
+	}
+}
+
+// NewErrorIfItIs creates Error object if err argument is not a nil pointer
+func NewErrorIfItIs(code Code, prefix string, err error) *Error {
+	if err == nil {
+		return nil
+	}
+	return &Error{
+		code: code,
+		err:  fmt.Errorf("%s: %v", prefix, err),
 	}
 }
 

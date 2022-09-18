@@ -1,8 +1,10 @@
 package models
 
 import (
-	"github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter"
+	"github.com/terryhay/dolly/pkg/helpdisplay/row"
+	rll "github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter"
 	"github.com/terryhay/dolly/pkg/helpdisplay/runes"
+	"github.com/terryhay/dolly/pkg/helpdisplay/size"
 
 	"github.com/nsf/termbox-go"
 )
@@ -12,46 +14,51 @@ type HeaderModel struct {
 	headerCells []termbox.Cell
 	outputCells []termbox.Cell
 
-	usingRowLeLimit row_len_limiter.RowLenLimit
-	shift           int
+	usingRowLeLimit rll.RowLenLimit
+	shift           size.Width
 }
 
-// MakeHeaderModel constructs HeaderModel in a stack
-func MakeHeaderModel(header string, rowLenLimit row_len_limiter.RowLenLimit) HeaderModel {
-	hm := HeaderModel{
+// NewHeaderModel constructs HeaderModel
+func NewHeaderModel(header string, size TerminalSize) *HeaderModel {
+	hm := &HeaderModel{
 		headerCells: textToCells(header),
 	}
-	hm.Update(rowLenLimit)
+	hm.Update(size)
 
 	return hm
 }
 
 // Update processes changed terminal row size data and updates getting header cell slice
-func (hm *HeaderModel) Update(rowLenLimit row_len_limiter.RowLenLimit) {
-	_ = hm
-
-	if hm.usingRowLeLimit == rowLenLimit {
+func (hm *HeaderModel) Update(size TerminalSize) {
+	if hm == nil {
 		return
 	}
 
-	hm.usingRowLeLimit = rowLenLimit
+	if hm.usingRowLeLimit == size.GetWidth() {
+		return
+	}
+
+	hm.usingRowLeLimit = size.GetWidth()
 	hm.updateShift()
 }
 
 // GetHeaderRow returns header cell slice and actionSequence to display text in the page center
-func (hm *HeaderModel) GetHeaderRow() (int, []termbox.Cell) {
-	return hm.shift, hm.outputCells
+func (hm *HeaderModel) GetHeaderRow() row.Row {
+	if hm == nil {
+		return row.Row{}
+	}
+	return row.MakeRow(hm.shift, hm.outputCells)
 }
 
 func (hm *HeaderModel) updateShift() {
 	_ = hm
 
 	hm.outputCells = hm.headerCells
-	hm.shift = (hm.usingRowLeLimit.Optimum().ToInt() - len(hm.outputCells)) / 2
-	if hm.shift < 0 {
+	newShift := (hm.usingRowLeLimit.Optimum().ToInt() - len(hm.outputCells)) / 2
+	if newShift < 0 {
 		// try to use max terminal size
-		hm.shift = (hm.usingRowLeLimit.Max().ToInt() - len(hm.outputCells)) / 2
-		if hm.shift < 0 {
+		newShift = (hm.usingRowLeLimit.Max().ToInt() - len(hm.outputCells)) / 2
+		if newShift < 0 {
 			// cut the output header
 			hm.outputCells = make([]termbox.Cell, hm.usingRowLeLimit.Max())
 			copy(hm.outputCells, hm.headerCells[:hm.usingRowLeLimit.Max().ToInt()])
@@ -63,6 +70,8 @@ func (hm *HeaderModel) updateShift() {
 			}
 		}
 
-		hm.shift = 0
+		newShift = 0
 	}
+
+	hm.shift = size.Width(newShift)
 }

@@ -153,7 +153,7 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 
 	if res.GetCommandID() == CommandIDPrintHelpInfo {
 		var pageView views.PageView
-		err = pageView.Init(tbd.NewTermBoxDecorator(), data.MakePage(appArgConfig))
+		err = pageView.Init(tbd.NewTermBoxDecorator(nil), data.MakePage(appArgConfig))
 		if err != nil {
 			return nil, err
 		}

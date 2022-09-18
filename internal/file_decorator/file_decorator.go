@@ -1,4 +1,4 @@
-package os_decorator
+package file_decorator
 
 import (
 	"fmt"

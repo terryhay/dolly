@@ -1,9 +1,11 @@
 package models
 
 import (
-	data2 "github.com/terryhay/dolly/pkg/helpdisplay/data"
-	"github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter"
+	"github.com/terryhay/dolly/pkg/helpdisplay/data"
+	"github.com/terryhay/dolly/pkg/helpdisplay/row"
+	rll "github.com/terryhay/dolly/pkg/helpdisplay/row_len_limiter"
 	"github.com/terryhay/dolly/pkg/helpdisplay/runes"
+	"github.com/terryhay/dolly/pkg/helpdisplay/size"
 
 	"github.com/nsf/termbox-go"
 )
@@ -23,63 +25,76 @@ type ParagraphModel struct {
 	spaceCellIndexes []int
 
 	// breakLineIndexes contains data for breaking cells slice to some terminal render rows
-	breakLineIndexes []data2.IndexInterval
+	breakLineIndexes []data.IndexInterval
 
 	// tab - actionSequence of paragraph rows
-	tab row_len_limiter.RowSize
+	tab size.Width
 
 	// anchorRowIndex - using for searching begin text row for display after a resize of terminal window
-	anchorRowIndex int
+	anchorRowIndex size.Height
 
 	// usingTerminalWidth - value of using terminal width
-	usingTerminalWidth int
+	usingTerminalWidth size.Width
 }
 
-// Init initializes created ParagraphModel object
-func (prm *ParagraphModel) Init(rowLenLimit row_len_limiter.RowLenLimit, source *data2.Paragraph) int {
-	_ = prm
+// NewParagraphModel constructs a new ParagraphModel object
+func NewParagraphModel(rowLenLimit rll.RowLenLimit, source *data.Paragraph) *ParagraphModel {
+	cells := textToCells(source.Text)
 
-	if len(source.Text) == 0 {
-		return prm.GetRowCount()
+	prm := &ParagraphModel{
+		tmpSource:          source.Text,
+		cells:              cells,
+		tab:                source.TabCount * rll.TabSize,
+		usingTerminalWidth: rowLenLimit.Max(),
+
+		spaceCellIndexes: func(cells []termbox.Cell) []int {
+			spaceCellIndexes := make([]int, 0, len(cells)/averageWordLen)
+
+			for index := 0; index < len(cells); index++ {
+				if cells[index].Ch == runes.RuneSpace {
+					spaceCellIndexes = append(spaceCellIndexes, index)
+				}
+			}
+			return spaceCellIndexes
+		}(cells),
+
+		breakLineIndexes: func(cells []termbox.Cell) []data.IndexInterval {
+			if rowLenLimit.Max() == 0 {
+				return nil
+			}
+			return make([]data.IndexInterval, 0, len(cells)/rowLenLimit.Max().ToInt())
+		}(cells),
 	}
+	prm.Update(rowLenLimit)
 
-	prm.tmpSource = source.Text
-	prm.cells = textToCells(source.Text)
-	prm.initSpaceIndexes()
-	if rowLenLimit.Max() > 0 {
-		prm.breakLineIndexes = make([]data2.IndexInterval, 0, len(prm.cells)/rowLenLimit.Max().ToInt())
-	}
-	prm.tab = source.TabCount * row_len_limiter.TabSize
-	prm.usingTerminalWidth = rowLenLimit.Max().ToInt()
-
-	return prm.Update(rowLenLimit)
+	return prm
 }
 
 // GetAnchorRowIndex - anchorRowIndex field getter
-func (prm *ParagraphModel) GetAnchorRowIndex() int {
+func (prm *ParagraphModel) GetAnchorRowIndex() size.Height {
 	return prm.anchorRowIndex
 }
 
 // GetRowCount returns row count for rendering in a terminal
-func (prm *ParagraphModel) GetRowCount() int {
+func (prm *ParagraphModel) GetRowCount() size.Height {
 	if len(prm.cells) != 0 {
-		return 1 + len(prm.breakLineIndexes)
+		return size.Height(1 + len(prm.breakLineIndexes))
 	}
 	return 1
 }
 
 // GetUsingTab returns using tab size in runes for current terminal width
-func (prm *ParagraphModel) GetUsingTab() int {
-	if prm.usingTerminalWidth <= row_len_limiter.TerminalMinWidth {
+func (prm *ParagraphModel) GetUsingTab() size.Width {
+	if prm.usingTerminalWidth <= rll.TerminalMinWidth {
 		return 0
 	}
-	return prm.tab.ToInt()
+	return prm.tab
 }
 
 // ShiftAnchorRow does a try to actionSequence anchor row and returns if the try is success
 func (prm *ParagraphModel) ShiftAnchorRow(shift int) bool {
-	prm.anchorRowIndex += shift
-	if prm.anchorRowIndex < 0 || prm.anchorRowIndex >= prm.GetRowCount() {
+	prm.anchorRowIndex = size.Height(prm.anchorRowIndex.ToInt() + shift)
+	if prm.anchorRowIndex >= prm.GetRowCount() {
 		prm.anchorRowIndex = 0
 		return false
 	}
@@ -89,15 +104,15 @@ func (prm *ParagraphModel) ShiftAnchorRow(shift int) bool {
 
 // SetBackRowAsAnchor sets index of last row as anchor row
 func (prm *ParagraphModel) SetBackRowAsAnchor() {
-	prm.anchorRowIndex = prm.GetRowCount() - 1
+	prm.anchorRowIndex = size.Height(prm.GetRowCount().ToInt() - 1)
 }
 
 // GetRow returns a row for rendering in a terminal by index
-func (prm *ParagraphModel) GetRow(index int) (int, []termbox.Cell) {
+func (prm *ParagraphModel) GetRow(index size.Height) row.Row {
 	_ = prm
 
 	if index >= prm.GetRowCount() {
-		return 0, nil
+		return row.MakeRow(0, nil)
 	}
 
 	beginBreakLineIndex := 0
@@ -106,25 +121,25 @@ func (prm *ParagraphModel) GetRow(index int) (int, []termbox.Cell) {
 	if index > 0 {
 		beginBreakLineIndex = prm.breakLineIndexes[index-1].GetEndIndex()
 	}
-	if index < len(prm.breakLineIndexes) {
+	if index < size.Height(len(prm.breakLineIndexes)) {
 		endBreakRowIndex = prm.breakLineIndexes[index].GetBeginIndex()
 	}
 
-	return prm.GetUsingTab(), prm.cells[beginBreakLineIndex:endBreakRowIndex]
+	return row.MakeRow(prm.GetUsingTab(), prm.cells[beginBreakLineIndex:endBreakRowIndex])
 }
 
 // Update applies row len limit for rebuilding getting display row window
-func (prm *ParagraphModel) Update(rowLenLimit row_len_limiter.RowLenLimit) int {
+func (prm *ParagraphModel) Update(rowLenLimit rll.RowLenLimit) size.Height {
 	_ = prm
 
-	prm.usingTerminalWidth = rowLenLimit.Max().ToInt()
+	prm.usingTerminalWidth = rowLenLimit.Max()
 
 	anchorSpaceIndex := 0
 	if prm.anchorRowIndex > 0 {
 		anchorSpaceIndex = prm.breakLineIndexes[prm.anchorRowIndex-1].GetBeginIndex()
 	}
 
-	rowLenLimit = rowLenLimit.ApplyTabShift(row_len_limiter.RowSize(prm.GetUsingTab()))
+	rowLenLimit = rowLenLimit.ApplyTabShift(prm.GetUsingTab())
 
 	if len(prm.breakLineIndexes) > 0 {
 		prm.breakLineIndexes = prm.breakLineIndexes[:0]
@@ -137,7 +152,7 @@ func (prm *ParagraphModel) Update(rowLenLimit row_len_limiter.RowLenLimit) int {
 
 	if len(prm.spaceCellIndexes) == 0 {
 		for index := rowLenLimit.Max().ToInt(); index < len(prm.cells); index += rowLenLimit.Max().ToInt() {
-			prm.breakLineIndexes = append(prm.breakLineIndexes, data2.MakeIndexInterval(index, index))
+			prm.breakLineIndexes = append(prm.breakLineIndexes, data.MakeIndexInterval(index, index))
 		}
 
 		return prm.GetRowCount()
@@ -188,7 +203,7 @@ func (prm *ParagraphModel) Update(rowLenLimit row_len_limiter.RowLenLimit) int {
 			}
 
 			prm.breakLineIndexes = append(prm.breakLineIndexes,
-				data2.MakeIndexInterval(optimumCandidateIndex, optimumCandidateIndex+shift))
+				data.MakeIndexInterval(optimumCandidateIndex, optimumCandidateIndex+shift))
 
 			lastBreakRowIndex = optimumCandidateIndex
 			optimumCandidateIndex = 0
@@ -199,31 +214,18 @@ func (prm *ParagraphModel) Update(rowLenLimit row_len_limiter.RowLenLimit) int {
 	}
 
 	if anchorSpaceIndex > 0 {
-		prm.anchorRowIndex = len(prm.breakLineIndexes) - 1
+		prm.anchorRowIndex = size.Height(len(prm.breakLineIndexes) - 1)
 		for index := range prm.breakLineIndexes {
 			if anchorSpaceIndex < prm.breakLineIndexes[index].GetBeginIndex() {
 				continue
 			}
 
-			prm.anchorRowIndex = index
+			prm.anchorRowIndex = size.Height(index)
 			break
 		}
 	}
 
 	return prm.GetRowCount()
-}
-
-// initSpaceIndexes finds space runes and initializes spaceCellIndexes field
-func (prm *ParagraphModel) initSpaceIndexes() {
-	_ = prm
-
-	prm.spaceCellIndexes = make([]int, 0, len(prm.cells)/averageWordLen)
-
-	for index := 0; index < len(prm.cells); index++ {
-		if prm.cells[index].Ch == runes.RuneSpace {
-			prm.spaceCellIndexes = append(prm.spaceCellIndexes, index)
-		}
-	}
 }
 
 // absInt returns absolutely value of v

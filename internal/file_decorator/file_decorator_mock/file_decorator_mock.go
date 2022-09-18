@@ -1,14 +1,14 @@
-package os_decorator_mock
+package file_decorator_mock
 
 import (
-	"github.com/terryhay/dolly/internal/os_decorator"
+	fld "github.com/terryhay/dolly/internal/file_decorator"
 )
 
 // NewMockFileDecorator - mocked file decorator instance constructor
 func NewMockFileDecorator(
 	mockClose func() error,
 	mockWriteString func(s string) error,
-) os_decorator.FileDecorator {
+) fld.FileDecorator {
 
 	return &fileDecoratorMockImpl{
 		mockClose:       mockClose,

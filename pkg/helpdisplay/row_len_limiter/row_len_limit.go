@@ -1,18 +1,12 @@
 package row_len_limiter
 
+import "github.com/terryhay/dolly/pkg/helpdisplay/size"
+
 const (
 	defaultRowLenMin     = 45
 	defaultRowLenOptimum = 66
 	defaultRowLenMax     = 90
 )
-
-// RowSize - size of a terminal display row (not a full terminal)
-type RowSize uint8
-
-// ToInt converts RowSize to int
-func (i RowSize) ToInt() int {
-	return int(i)
-}
 
 // RowLenLimit contains terminal display restrictions
 type RowLenLimit struct {
@@ -22,7 +16,7 @@ type RowLenLimit struct {
 }
 
 // MakeRowLenLimit constructs RowLenLimit object in a stack
-func MakeRowLenLimit(min, optimum, max RowSize) RowLenLimit {
+func MakeRowLenLimit(min, optimum, max size.Width) RowLenLimit {
 	return RowLenLimit{
 		min:     min.ToInt(),
 		optimum: optimum.ToInt(),
@@ -40,31 +34,31 @@ func MakeDefaultRowLenLimit() RowLenLimit {
 }
 
 // Min returns min field
-func (rl *RowLenLimit) Min() RowSize {
+func (rl *RowLenLimit) Min() size.Width {
 	if rl == nil {
 		return 0
 	}
-	return RowSize(rl.min)
+	return size.Width(rl.min)
 }
 
 // Optimum returns optimum field
-func (rl *RowLenLimit) Optimum() RowSize {
+func (rl *RowLenLimit) Optimum() size.Width {
 	if rl == nil {
 		return 0
 	}
-	return RowSize(rl.optimum)
+	return size.Width(rl.optimum)
 }
 
 // Max returns max field
-func (rl *RowLenLimit) Max() RowSize {
+func (rl *RowLenLimit) Max() size.Width {
 	if rl == nil {
 		return 0
 	}
-	return RowSize(rl.max)
+	return size.Width(rl.max)
 }
 
 // ApplyTabShift recalculates limits for new terminal change delta
-func (rl *RowLenLimit) ApplyTabShift(shift RowSize) (res RowLenLimit) {
+func (rl *RowLenLimit) ApplyTabShift(shift size.Width) (res RowLenLimit) {
 	if rl == nil {
 		return RowLenLimit{}
 	}
@@ -84,4 +78,12 @@ func (rl *RowLenLimit) ApplyTabShift(shift RowSize) (res RowLenLimit) {
 
 func (rl *RowLenLimit) IsValid() bool {
 	return rl.Min() != 0 && rl.Optimum() != 0 && rl.Max() != 0
+}
+
+func (rl *RowLenLimit) Clone() RowLenLimit {
+	return RowLenLimit{
+		min:     int(rl.Min()),
+		optimum: int(rl.Optimum()),
+		max:     int(rl.Max()),
+	}
 }

@@ -39,3 +39,14 @@ func TestDollyError(t *testing.T) {
 		require.NotNil(t, dollyErr)
 	})
 }
+
+func TestNewErrorIfItIs(t *testing.T) {
+	t.Parallel()
+
+	prefix := gofakeit.Name()
+	dollyErr := NewErrorIfItIs(CodeUndefinedError, prefix, nil)
+	require.Nil(t, dollyErr)
+
+	err := fmt.Errorf(gofakeit.Name())
+	require.Equal(t, fmt.Sprintf("%s: %s", prefix, err.Error()), NewErrorIfItIs(CodeUndefinedError, prefix, err).Error())
+}

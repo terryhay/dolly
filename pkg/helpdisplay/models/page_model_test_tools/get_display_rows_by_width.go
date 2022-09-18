@@ -1,8 +1,11 @@
 package page_model_test_tools
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/terryhay/dolly/pkg/helpdisplay/size"
+)
 
-func getExpectedRowsByWidth(terminalWidth int) []string {
+func getExpectedRowsByWidth(terminalWidth size.Width) []string {
 	switch terminalWidth {
 	case TerminalWidth100:
 		return []string{
@@ -40,6 +43,7 @@ func getExpectedRowsByWidth(terminalWidth int) []string {
 			"    -s	single string",
 			"",
 			"    -sl	string list",
+			":",
 		}
 	case TerminalWidth20:
 		return []string{
@@ -97,6 +101,7 @@ func getExpectedRowsByWidth(terminalWidth int) []string {
 			"-s	single string",
 			"",
 			"-sl\tstring list",
+			":",
 		}
 	default:
 		panic(fmt.Sprintf("don't know what return for terminal width '%d'", terminalWidth))

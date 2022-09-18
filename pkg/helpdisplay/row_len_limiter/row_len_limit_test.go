@@ -4,6 +4,7 @@ import (
 	"github.com/brianvoe/gofakeit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/terryhay/dolly/pkg/helpdisplay/size"
 	"testing"
 )
 
@@ -25,7 +26,7 @@ func TestRowLenLimitGetters(t *testing.T) {
 		optimum := 30
 		max := 40
 
-		limit := MakeRowLenLimit(RowSize(min), RowSize(optimum), RowSize(max))
+		limit := MakeRowLenLimit(size.Width(min), size.Width(optimum), size.Width(max))
 		require.True(t, limit.IsValid())
 
 		require.Equal(t, min, limit.Min().ToInt())
@@ -39,7 +40,7 @@ func TestRowLenLimitShifting(t *testing.T) {
 
 	t.Run("nil_pointer_shifting", func(t *testing.T) {
 		var limit *RowLenLimit
-		assert.Equal(t, RowLenLimit{}, limit.ApplyTabShift(RowSize(gofakeit.Uint8())))
+		assert.Equal(t, RowLenLimit{}, limit.ApplyTabShift(size.Width(gofakeit.Uint8())))
 	})
 
 	t.Run("shifting", func(t *testing.T) {
@@ -47,7 +48,7 @@ func TestRowLenLimitShifting(t *testing.T) {
 		optimum := min + int(gofakeit.Uint8())
 		max := optimum + int(gofakeit.Uint8())
 
-		limit := MakeRowLenLimit(RowSize(min), RowSize(optimum), RowSize(max))
+		limit := MakeRowLenLimit(size.Width(min), size.Width(optimum), size.Width(max))
 		shifted := limit.ApplyTabShift(1)
 
 		require.Equal(t, limit.Min().ToInt()-1, shifted.Min().ToInt())
@@ -65,4 +66,32 @@ func TestRowLenLimitShifting(t *testing.T) {
 
 		require.Equal(t, limit, shifted)
 	})
+}
+
+func TestClone(t *testing.T) {
+	t.Parallel()
+
+	{
+		var limit *RowLenLimit
+		clone := limit.Clone()
+
+		require.NotNil(t, clone)
+		require.Equal(t, size.Width(0), clone.Min())
+		require.Equal(t, size.Width(0), clone.Optimum())
+		require.Equal(t, size.Width(0), clone.Max())
+	}
+
+	{
+		limit := MakeRowLenLimit(
+			size.Width(gofakeit.Uint8()),
+			size.Width(gofakeit.Uint8()),
+			size.Width(gofakeit.Uint8()),
+		)
+		clone := limit.Clone()
+
+		require.NotNil(t, clone)
+		require.Equal(t, limit.Min(), clone.Min())
+		require.Equal(t, limit.Optimum(), clone.Optimum())
+		require.Equal(t, limit.Max(), clone.Max())
+	}
 }

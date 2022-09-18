@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"github.com/brianvoe/gofakeit"
 	"github.com/stretchr/testify/require"
-	osDec "github.com/terryhay/dolly/internal/os_decorator"
-	osDecMock "github.com/terryhay/dolly/internal/os_decorator/os_decorator_mock"
+	fld "github.com/terryhay/dolly/internal/file_decorator"
+	fldMock "github.com/terryhay/dolly/internal/file_decorator/file_decorator_mock"
+	osd "github.com/terryhay/dolly/internal/os_decorator"
 	"github.com/terryhay/dolly/pkg/dollyerr"
 	"os"
 	"testing"
@@ -14,16 +15,16 @@ import (
 func TestWrite(t *testing.T) {
 	t.Parallel()
 
-	mockCreateFuncErrRes := fmt.Errorf(gofakeit.Name())
+	mockFuncCreateErrRes := fmt.Errorf(gofakeit.Name())
 	mockMkdirAllErrRes := fmt.Errorf(gofakeit.Name())
-	mockStatFuncErrRes := fmt.Errorf(gofakeit.Name())
+	mockFuncStatErrRes := fmt.Errorf(gofakeit.Name())
 
 	dirPath := gofakeit.Color()
 
 	testData := []struct {
 		caseName string
 
-		osd      osDec.OSDecorator
+		osDecor  osd.OSDecorator
 		dirPath  string
 		fileBody string
 
@@ -32,131 +33,137 @@ func TestWrite(t *testing.T) {
 		{
 			caseName: "check_dir_path_error",
 
-			osd: osDecMock.NewOSDecoratorMock(osDecMock.OSDecoratorMockInit{
-				IsNotExistFunc: func(err error) bool {
-					return err != nil
-				},
-				StatFunc: func(path string) (os.FileInfo, error) {
-					return nil, mockStatFuncErrRes
-				},
-			}),
+			osDecor: osd.NewOSDecorator(
+				&osd.Mock{
+					FuncIsNotExist: func(err error) bool {
+						return err != nil
+					},
+					FuncStat: func(path string) (os.FileInfo, error) {
+						return nil, mockFuncStatErrRes
+					},
+				}),
 			dirPath:         dirPath,
 			expectedErrCode: dollyerr.CodeGeneratorInvalidGeneratePath,
 		},
 		{
 			caseName: "check_dir_path_error",
 
-			osd: osDecMock.NewOSDecoratorMock(osDecMock.OSDecoratorMockInit{
-				IsNotExistFunc: func(err error) bool {
-					return err != nil
-				},
-				MkdirAllFunc: func(path string, perm os.FileMode) error {
-					return mockMkdirAllErrRes
-				},
-				StatFunc: func(path string) (os.FileInfo, error) {
-					if path == dirPath {
-						return nil, nil
-					}
-					return nil, mockStatFuncErrRes
-				},
-			}),
+			osDecor: osd.NewOSDecorator(
+				&osd.Mock{
+					FuncIsNotExist: func(err error) bool {
+						return err != nil
+					},
+					FuncMkdirAll: func(path string, perm os.FileMode) error {
+						return mockMkdirAllErrRes
+					},
+					FuncStat: func(path string) (os.FileInfo, error) {
+						if path == dirPath {
+							return nil, nil
+						}
+						return nil, mockFuncStatErrRes
+					},
+				}),
 			dirPath:         dirPath,
 			expectedErrCode: dollyerr.CodeGeneratorCreateDirError,
 		},
 		{
 			caseName: "create_file_error_with_successful_create_dir",
 
-			osd: osDecMock.NewOSDecoratorMock(osDecMock.OSDecoratorMockInit{
-				CreateFunc: func(string) (osDec.FileDecorator, error) {
-					return nil, mockCreateFuncErrRes
-				},
-				IsNotExistFunc: func(err error) bool {
-					return err != nil
-				},
-				MkdirAllFunc: func(path string, perm os.FileMode) error {
-					return nil
-				},
-				StatFunc: func(path string) (os.FileInfo, error) {
-					if path == dirPath {
+			osDecor: osd.NewOSDecorator(
+				&osd.Mock{
+					FuncCreate: func(string) (fld.FileDecorator, error) {
+						return nil, mockFuncCreateErrRes
+					},
+					FuncIsNotExist: func(err error) bool {
+						return err != nil
+					},
+					FuncMkdirAll: func(path string, perm os.FileMode) error {
+						return nil
+					},
+					FuncStat: func(path string) (os.FileInfo, error) {
+						if path == dirPath {
+							return nil, nil
+						}
+						return nil, mockFuncStatErrRes
+					},
+				}),
+			dirPath:         dirPath,
+			expectedErrCode: dollyerr.CodeGeneratorCreateFileError,
+		},
+		{
+			caseName: "file_create_error",
+
+			osDecor: osd.NewOSDecorator(
+				&osd.Mock{
+					FuncCreate: func(path string) (fld.FileDecorator, error) {
+						return nil, mockFuncCreateErrRes
+					},
+					FuncIsNotExist: func(err error) bool {
+						return false
+					},
+					FuncMkdirAll: func(path string, perm os.FileMode) error {
+						return nil
+					},
+					FuncStat: func(path string) (os.FileInfo, error) {
 						return nil, nil
-					}
-					return nil, mockStatFuncErrRes
-				},
-			}),
+					},
+				}),
 			dirPath:         dirPath,
 			expectedErrCode: dollyerr.CodeGeneratorCreateFileError,
 		},
 		{
 			caseName: "file_create_error",
 
-			osd: osDecMock.NewOSDecoratorMock(osDecMock.OSDecoratorMockInit{
-				CreateFunc: func(path string) (osDec.FileDecorator, error) {
-					return nil, mockCreateFuncErrRes
-				},
-				IsNotExistFunc: func(err error) bool {
-					return false
-				},
-				MkdirAllFunc: func(path string, perm os.FileMode) error {
-					return nil
-				},
-				StatFunc: func(path string) (os.FileInfo, error) {
-					return nil, nil
-				},
-			}),
-			dirPath:         dirPath,
-			expectedErrCode: dollyerr.CodeGeneratorCreateFileError,
-		},
-		{
-			caseName: "file_create_error",
-
-			osd: osDecMock.NewOSDecoratorMock(osDecMock.OSDecoratorMockInit{
-				CreateFunc: func(path string) (osDec.FileDecorator, error) {
-					return osDecMock.NewMockFileDecorator(
-							func() error {
-								return nil
-							},
-							func(s string) error {
-								return fmt.Errorf(gofakeit.Color())
-							}),
-						nil
-				},
-				IsNotExistFunc: func(err error) bool {
-					return false
-				},
-				MkdirAllFunc: func(path string, perm os.FileMode) error {
-					return nil
-				},
-				StatFunc: func(path string) (os.FileInfo, error) {
-					return nil, nil
-				},
-			}),
+			osDecor: osd.NewOSDecorator(
+				&osd.Mock{
+					FuncCreate: func(path string) (fld.FileDecorator, error) {
+						return fldMock.NewMockFileDecorator(
+								func() error {
+									return nil
+								},
+								func(s string) error {
+									return fmt.Errorf(gofakeit.Color())
+								}),
+							nil
+					},
+					FuncIsNotExist: func(err error) bool {
+						return false
+					},
+					FuncMkdirAll: func(path string, perm os.FileMode) error {
+						return nil
+					},
+					FuncStat: func(path string) (os.FileInfo, error) {
+						return nil, nil
+					},
+				}),
 			dirPath:         dirPath,
 			expectedErrCode: dollyerr.CodeGeneratorWriteFileError,
 		},
 		{
 			caseName: "file_close_error",
 
-			osd: osDecMock.NewOSDecoratorMock(osDecMock.OSDecoratorMockInit{
-				CreateFunc: func(path string) (osDec.FileDecorator, error) {
-					return osDecMock.NewMockFileDecorator(
-							func() error {
-								return fmt.Errorf(gofakeit.Color())
-							},
-							func(s string) error {
-								return nil
-							}),
-						nil
-				},
-				IsNotExistFunc: func(err error) bool {
-					return false
-				},
-				MkdirAllFunc: func(path string, perm os.FileMode) error {
-					return nil
-				},
-				StatFunc: func(path string) (os.FileInfo, error) {
-					return nil, nil
-				},
-			}),
+			osDecor: osd.NewOSDecorator(
+				&osd.Mock{
+					FuncCreate: func(path string) (fld.FileDecorator, error) {
+						return fldMock.NewMockFileDecorator(
+								func() error {
+									return fmt.Errorf(gofakeit.Color())
+								},
+								func(s string) error {
+									return nil
+								}),
+							nil
+					},
+					FuncIsNotExist: func(err error) bool {
+						return false
+					},
+					FuncMkdirAll: func(path string, perm os.FileMode) error {
+						return nil
+					},
+					FuncStat: func(path string) (os.FileInfo, error) {
+						return nil, nil
+					},
+				}),
 			dirPath:         dirPath,
 			expectedErrCode: dollyerr.CodeGeneratorFileCloseError,
 		},
@@ -164,7 +171,7 @@ func TestWrite(t *testing.T) {
 
 	for _, td := range testData {
 		t.Run(td.caseName, func(t *testing.T) {
-			err := Write(td.osd, td.dirPath, td.fileBody)
+			err := Write(td.osDecor, td.dirPath, td.fileBody)
 			if td.expectedErrCode == dollyerr.CodeNone {
 				require.Nil(t, err)
 				return

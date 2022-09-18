@@ -43,7 +43,7 @@ func TestRowLenLimiter(t *testing.T) {
 
 	defaultLimit := MakeDefaultRowLenLimit()
 	assert.Equal(t, RowLenLimiter{
-		lastTerminalWidth: defaultLimit.Max().ToInt(),
+		lastTerminalWidth: defaultLimit.Max(),
 
 		rowLenLimit:        defaultLimit,
 		defaultRowLenLimit: defaultLimit,
@@ -51,5 +51,5 @@ func TestRowLenLimiter(t *testing.T) {
 
 	assert.Equal(t, RowLenLimit{}, rll.GetRowLenLimit(0))
 	assert.Equal(t, RowLenLimit{}, rll.GetRowLenLimit(0))
-	assert.Equal(t, defaultLimit, rll.GetRowLenLimit(defaultLimit.Max().ToInt()))
+	assert.Equal(t, defaultLimit, rll.GetRowLenLimit(defaultLimit.Max()))
 }
