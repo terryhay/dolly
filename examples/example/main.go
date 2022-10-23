@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/terryhay/dolly/argparser/parsed_data"
 	"github.com/terryhay/dolly/examples/example/dolly"
-	"github.com/terryhay/dolly/internal/os_decorator"
-	"github.com/terryhay/dolly/pkg/parsed_data"
 	"os"
 	"strings"
 )
@@ -16,18 +15,17 @@ const (
 )
 
 func main() {
-	osd := os_decorator.NewOSDecorator(nil)
-
-	pd, err := dolly.Parse(osd.GetArgs())
+	pd, err := dolly.Parse(os.Args[1:])
 	if err != nil {
-		fmt.Printf("example.Argparser error: %v\n", err.Error())
+		fmt.Printf("example.Argparser error: %s\n", err.Error())
 		os.Exit(int(err.Code()))
 	}
 
-	osd.Exit(logic(pd))
+	code, _ := logic(pd)
+	os.Exit(int(code))
 }
 
-func logic(pd *parsed_data.ParsedData) (error, uint) {
+func logic(pd *parsed_data.ParsedData) (uint, error) {
 	switch pd.GetCommandID() {
 	case dolly.CommandIDNamelessCommand:
 		var (
@@ -41,7 +39,7 @@ func logic(pd *parsed_data.ParsedData) (error, uint) {
 		)
 
 		if values, contain = pd.GetFlagArgValues(dolly.FlagSl); contain {
-			builder.WriteString(fmt.Sprintf("flag %v arguments:\n\t", dolly.FlagSl))
+			builder.WriteString(fmt.Sprintf("flag %s arguments:\n\t", dolly.FlagSl))
 
 			for i = range values {
 				builder.WriteString(fmt.Sprintf(fmt.Sprintf("%s ", values[i].ToString())))
@@ -50,12 +48,12 @@ func logic(pd *parsed_data.ParsedData) (error, uint) {
 		}
 
 		if values, contain = pd.GetFlagArgValues(dolly.FlagIl); contain {
-			builder.WriteString(fmt.Sprintf("flag %v arguments:\n\t", dolly.FlagIl))
+			builder.WriteString(fmt.Sprintf("flag %s arguments:\n\t", dolly.FlagIl))
 
 			for i = range values {
 				int64Value, err = values[i].ToInt64()
 				if err != nil {
-					return err, exitCodeConvertInt64Error
+					return exitCodeConvertInt64Error, err
 				}
 				builder.WriteString(fmt.Sprintf(fmt.Sprintf("%d ", int64Value)))
 			}
@@ -63,12 +61,12 @@ func logic(pd *parsed_data.ParsedData) (error, uint) {
 		}
 
 		if values, contain = pd.GetFlagArgValues(dolly.FlagFl); contain {
-			builder.WriteString(fmt.Sprintf("flag %v arguments:\n\t", dolly.FlagFl))
+			builder.WriteString(fmt.Sprintf("flag %s arguments:\n\t", dolly.FlagFl))
 
 			for i = range values {
 				float64Value, err = values[i].ToFloat64()
 				if err != nil {
-					return err, exitCodeConvertFloat64Error
+					return exitCodeConvertFloat64Error, err
 				}
 				builder.WriteString(fmt.Sprintf(fmt.Sprintf("%f ", float64Value)))
 			}
@@ -78,5 +76,5 @@ func logic(pd *parsed_data.ParsedData) (error, uint) {
 		fmt.Printf(builder.String())
 	}
 
-	return nil, exitCodeSuccess
+	return exitCodeSuccess, nil
 }

@@ -3,18 +3,16 @@
 package dolly
 
 import (
-	"github.com/terryhay/dolly/pkg/dollyconf"
-	"github.com/terryhay/dolly/pkg/dollyerr"
-	"github.com/terryhay/dolly/pkg/helpdisplay/data"
-	tbd "github.com/terryhay/dolly/pkg/helpdisplay/termbox_decorator"
-	"github.com/terryhay/dolly/pkg/helpdisplay/views"
-	"github.com/terryhay/dolly/pkg/parsed_data"
-	"github.com/terryhay/dolly/pkg/parser"
+	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
+	"github.com/terryhay/dolly/argparser/parsed_data"
+	"github.com/terryhay/dolly/argparser/parser"
+	helpOut "github.com/terryhay/dolly/argparser/plain_help_out"
+	"github.com/terryhay/dolly/utils/dollyerr"
 )
 
 const (
 	// CommandIDNamelessCommand - checks arguments types
-	CommandIDNamelessCommand dollyconf.CommandID = iota + 1
+	CommandIDNamelessCommand apConf.CommandID = iota + 1
 	// CommandIDPrintHelpInfo - print help info
 	CommandIDPrintHelpInfo
 	// CommandIDPrint - print command line arguments with optional checking
@@ -23,7 +21,7 @@ const (
 
 const (
 	// CommandH - print help info
-	CommandH dollyconf.Command = "-h"
+	CommandH apConf.Command = "-h"
 	// CommandHelp - print help info
 	CommandHelp = "help"
 	// CommandPrint - print command line arguments with optional checking
@@ -32,7 +30,7 @@ const (
 
 const (
 	// FlagCheckargs - do arguments checking
-	FlagCheckargs dollyconf.Flag = "-checkargs"
+	FlagCheckargs apConf.Flag = "-checkargs"
 	// FlagF - single float
 	FlagF = "-f"
 	// FlagFl - float list
@@ -49,9 +47,9 @@ const (
 
 // Parse - processes command line arguments
 func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
-	appArgConfig := dollyconf.NewArgParserConfig(
+	appArgConfig := apConf.NewArgParserConfig(
 		// appDescription
-		dollyconf.ApplicationDescription{
+		apConf.ApplicationDescription{
 			AppName:      "example",
 			NameHelpInfo: "shows how parser generator works",
 			DescriptionHelpInfo: []string{
@@ -60,46 +58,46 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 			},
 		},
 		// flagDescriptions
-		map[dollyconf.Flag]*dollyconf.FlagDescription{
+		map[apConf.Flag]*apConf.FlagDescription{
 			FlagS: {
 				DescriptionHelpInfo: "single string",
-				ArgDescription: &dollyconf.ArgumentsDescription{
-					AmountType:              dollyconf.ArgAmountTypeSingle,
+				ArgDescription: &apConf.ArgumentsDescription{
+					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "str",
 				},
 			},
 			FlagSl: {
 				DescriptionHelpInfo: "string list",
-				ArgDescription: &dollyconf.ArgumentsDescription{
-					AmountType:              dollyconf.ArgAmountTypeList,
+				ArgDescription: &apConf.ArgumentsDescription{
+					AmountType:              apConf.ArgAmountTypeList,
 					SynopsisHelpDescription: "str",
 				},
 			},
 			FlagI: {
 				DescriptionHelpInfo: "int string",
-				ArgDescription: &dollyconf.ArgumentsDescription{
-					AmountType:              dollyconf.ArgAmountTypeSingle,
+				ArgDescription: &apConf.ArgumentsDescription{
+					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "str",
 				},
 			},
 			FlagIl: {
 				DescriptionHelpInfo: "int list",
-				ArgDescription: &dollyconf.ArgumentsDescription{
-					AmountType:              dollyconf.ArgAmountTypeList,
+				ArgDescription: &apConf.ArgumentsDescription{
+					AmountType:              apConf.ArgAmountTypeList,
 					SynopsisHelpDescription: "str",
 				},
 			},
 			FlagF: {
 				DescriptionHelpInfo: "single float",
-				ArgDescription: &dollyconf.ArgumentsDescription{
-					AmountType:              dollyconf.ArgAmountTypeSingle,
+				ArgDescription: &apConf.ArgumentsDescription{
+					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "str",
 				},
 			},
 			FlagFl: {
 				DescriptionHelpInfo: "float list",
-				ArgDescription: &dollyconf.ArgumentsDescription{
-					AmountType:              dollyconf.ArgAmountTypeList,
+				ArgDescription: &apConf.ArgumentsDescription{
+					AmountType:              apConf.ArgAmountTypeList,
 					SynopsisHelpDescription: "str",
 				},
 			},
@@ -108,14 +106,14 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 			},
 		},
 		// commandDescriptions
-		[]*dollyconf.CommandDescription{
+		[]*apConf.CommandDescription{
 			{
 				ID:                  CommandIDPrint,
 				DescriptionHelpInfo: "print command line arguments with optional checking",
-				Commands: map[dollyconf.Command]bool{
+				Commands: map[apConf.Command]bool{
 					CommandPrint: true,
 				},
-				OptionalFlags: map[dollyconf.Flag]bool{
+				OptionalFlags: map[apConf.Flag]bool{
 					FlagS:         true,
 					FlagSl:        true,
 					FlagI:         true,
@@ -127,20 +125,20 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 			},
 		},
 		// helpCommandDescription
-		dollyconf.NewHelpCommandDescription(
+		apConf.NewHelpCommandDescription(
 			CommandIDPrintHelpInfo,
-			map[dollyconf.Command]bool{
+			map[apConf.Command]bool{
 				CommandH:    true,
 				CommandHelp: true,
 			},
 		),
 		// namelessCommandDescription
-		dollyconf.NewNamelessCommandDescription(
+		apConf.NewNamelessCommandDescription(
 			CommandIDNamelessCommand,
 			"checks arguments types",
 			nil,
 			nil,
-			map[dollyconf.Flag]bool{
+			map[apConf.Flag]bool{
 				FlagSl: true,
 				FlagIl: true,
 				FlagFl: true,
@@ -152,16 +150,7 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 	}
 
 	if res.GetCommandID() == CommandIDPrintHelpInfo {
-		var pageView views.PageView
-		err = pageView.Init(tbd.NewTermBoxDecorator(nil), data.MakePage(appArgConfig))
-		if err != nil {
-			return nil, err
-		}
-		err = pageView.Run()
-		if err != nil {
-			return nil, err
-		}
-
+		helpOut.PrintHelpInfo(appArgConfig)
 		return nil, nil
 	}
 

@@ -11,7 +11,7 @@ Import *dolly* module into your project:
 
 Build *dolly* generator into some directory where you are keeping bin files for your project:
 
-`go build -o ./bin/gen_dolly github.com/terryhay/dolly/internal/generator`
+`go build -o ./bin/gen_dolly github.com/terryhay/dolly/generator/generator`
 
 The *dolly* generator will be built into *./bin* directory and will be named *gen_dolly*.
 
@@ -25,7 +25,7 @@ The *dolly* generator will create *./dolly* directory with *arg_tools.go* file. 
 
 Besides you can add strings
 
-`go build -o ./bin/gen_dolly github.com/terryhay/dolly/internal/generator`
+`go build -o ./bin/gen_dolly github.com/terryhay/dolly/generator/generator`
 
 `./bin/gen_dolly -c ./config/arg_tools_config.yaml -o ./`
 

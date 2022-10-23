@@ -3,39 +3,37 @@
 package dolly
 
 import (
-	"github.com/terryhay/dolly/pkg/dollyconf"
-	"github.com/terryhay/dolly/pkg/dollyerr"
-	"github.com/terryhay/dolly/pkg/helpdisplay/data"
-	tbd "github.com/terryhay/dolly/pkg/helpdisplay/termbox_decorator"
-	"github.com/terryhay/dolly/pkg/helpdisplay/views"
-	"github.com/terryhay/dolly/pkg/parsed_data"
-	"github.com/terryhay/dolly/pkg/parser"
+	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
+	"github.com/terryhay/dolly/argparser/parsed_data"
+	"github.com/terryhay/dolly/argparser/parser"
+	helpOut "github.com/terryhay/dolly/argparser/plain_help_out"
+	"github.com/terryhay/dolly/utils/dollyerr"
 )
 
 const (
 	// CommandIDNamelessCommand - checks arguments types
-	CommandIDNamelessCommand dollyconf.CommandID = iota + 1
+	CommandIDNamelessCommand apConf.CommandID = iota + 1
 	// CommandIDPrintHelpInfo - print help info
 	CommandIDPrintHelpInfo
 )
 
 const (
 	// CommandH - print help info
-	CommandH dollyconf.Command = "-h"
+	CommandH apConf.Command = "-h"
 	// CommandHelp - print help info
 	CommandHelp = "help"
 )
 
 const (
 	// FlagCheck - check command arguments types
-	FlagCheck dollyconf.Flag = "-check"
+	FlagCheck apConf.Flag = "-check"
 )
 
 // Parse - processes command line arguments
 func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
-	appArgConfig := dollyconf.NewArgParserConfig(
+	appArgConfig := apConf.NewArgParserConfig(
 		// appDescription
-		dollyconf.ApplicationDescription{
+		apConf.ApplicationDescription{
 			AppName:      "example2",
 			NameHelpInfo: "shows how parser generator works without commands",
 			DescriptionHelpInfo: []string{
@@ -43,11 +41,11 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 			},
 		},
 		// flagDescriptions
-		map[dollyconf.Flag]*dollyconf.FlagDescription{
+		map[apConf.Flag]*apConf.FlagDescription{
 			FlagCheck: {
 				DescriptionHelpInfo: "check command arguments types",
-				ArgDescription: &dollyconf.ArgumentsDescription{
-					AmountType:              dollyconf.ArgAmountTypeSingle,
+				ArgDescription: &apConf.ArgumentsDescription{
+					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "str",
 				},
 			},
@@ -55,22 +53,22 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 		// commandDescriptions
 		nil,
 		// helpCommandDescription
-		dollyconf.NewHelpCommandDescription(
+		apConf.NewHelpCommandDescription(
 			CommandIDPrintHelpInfo,
-			map[dollyconf.Command]bool{
+			map[apConf.Command]bool{
 				CommandH:    true,
 				CommandHelp: true,
 			},
 		),
 		// namelessCommandDescription
-		dollyconf.NewNamelessCommandDescription(
+		apConf.NewNamelessCommandDescription(
 			CommandIDNamelessCommand,
 			"checks arguments types",
-			&dollyconf.ArgumentsDescription{
-				AmountType:              dollyconf.ArgAmountTypeList,
+			&apConf.ArgumentsDescription{
+				AmountType:              apConf.ArgAmountTypeList,
 				SynopsisHelpDescription: "str list",
 			},
-			map[dollyconf.Flag]bool{
+			map[apConf.Flag]bool{
 				FlagCheck: true,
 			},
 			nil,
@@ -81,16 +79,7 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 	}
 
 	if res.GetCommandID() == CommandIDPrintHelpInfo {
-		var pageView views.PageView
-		err = pageView.Init(tbd.NewTermBoxDecorator(nil), data.MakePage(appArgConfig))
-		if err != nil {
-			return nil, err
-		}
-		err = pageView.Run()
-		if err != nil {
-			return nil, err
-		}
-
+		helpOut.PrintHelpInfo(appArgConfig)
 		return nil, nil
 	}
 

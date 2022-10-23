@@ -9,7 +9,7 @@ import (
 func main() {
 	_, err := dolly.Parse(os.Args[1:])
 	if err != nil {
-		fmt.Printf("example3 error: %v", err.Error())
+		fmt.Printf("example3 error: %s", err.Error())
 		os.Exit(int(err.Code()))
 	}
 

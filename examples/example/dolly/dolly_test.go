@@ -4,7 +4,7 @@ import (
 	"github.com/brianvoe/gofakeit"
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
-	"github.com/terryhay/dolly/pkg/parsed_data"
+	"github.com/terryhay/dolly/argparser/parsed_data"
 	"testing"
 )
 
