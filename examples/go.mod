@@ -6,8 +6,8 @@ require (
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/google/go-cmp v0.5.8
 	github.com/stretchr/testify v1.7.1
-	github.com/terryhay/dolly/argparser v0.0.0-20221105123730-4eb1eae5dfa4
-	github.com/terryhay/dolly/utils v0.0.0-20221105123730-4eb1eae5dfa4
+	github.com/terryhay/dolly/argparser v0.0.0-20221106114538-647b2f23c52d
+	github.com/terryhay/dolly/utils v0.0.0-20221106114538-647b2f23c52d
 )
 
 require (

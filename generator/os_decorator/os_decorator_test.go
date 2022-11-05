@@ -94,3 +94,10 @@ func TestMockOSDecorator(t *testing.T) {
 	err = osDecMock.MkdirAll("", 0)
 	require.Equal(t, fmt.Errorf("OSDecorator.MkdirAll: %s", mockMkdirAllErrRes), err.Error())
 }
+
+func TestOSDecoratorIsExist(t *testing.T) {
+	t.Parallel()
+
+	osDecorNotMocked := NewOSDecorator(nil)
+	require.False(t, osDecorNotMocked.IsExist("nonexistent/path"))
+}

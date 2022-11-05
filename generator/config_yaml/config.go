@@ -32,7 +32,7 @@ func (c *Config) GetHelpOutConfig() *HelpOutConfig {
 }
 
 // UnmarshalYAML - custom unmarshal logic with checking required fields
-func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
+func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	_ = c
 
 	proxy := struct {
@@ -40,7 +40,7 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 		ArgParserConfig *ArgParserConfig `yaml:"arg_parser_config"`
 		HelpOutConfig   *HelpOutConfig   `yaml:"help_out_config"`
 	}{}
-	err = unmarshal(&proxy)
+	err := unmarshal(&proxy)
 	if err != nil {
 		return err
 	}

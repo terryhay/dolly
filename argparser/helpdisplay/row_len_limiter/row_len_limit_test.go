@@ -1,6 +1,7 @@
 package row_len_limiter
 
 import (
+	"fmt"
 	"github.com/brianvoe/gofakeit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -19,6 +20,8 @@ func TestRowLenLimitGetters(t *testing.T) {
 		require.Equal(t, 0, limit.Min().ToInt())
 		require.Equal(t, 0, limit.Optimum().ToInt())
 		require.Equal(t, 0, limit.Max().ToInt())
+
+		require.Equal(t, 0, len(limit.String()))
 	})
 
 	t.Run("getters", func(t *testing.T) {
@@ -32,6 +35,8 @@ func TestRowLenLimitGetters(t *testing.T) {
 		require.Equal(t, min, limit.Min().ToInt())
 		require.Equal(t, optimum, limit.Optimum().ToInt())
 		require.Equal(t, max, limit.Max().ToInt())
+
+		require.Equal(t, fmt.Sprintf("[min: %d; optimum: %d; max: %d]", min, optimum, max), limit.String())
 	})
 }
 

@@ -28,6 +28,10 @@ github.com/terryhay/dolly/argparser v0.0.0-20221105105618-9b99665c144d h1:yRUcxw
 github.com/terryhay/dolly/argparser v0.0.0-20221105105618-9b99665c144d/go.mod h1:aUOcQH9rFCRjRKtxDk8Juo4+YnmnbcsvFiA6ysXbMQA=
 github.com/terryhay/dolly/argparser v0.0.0-20221105123730-4eb1eae5dfa4 h1:l/1Bwv7MfIifyFHz1KU5HECCkJ/xjqv7jskYBRBHQyk=
 github.com/terryhay/dolly/argparser v0.0.0-20221105123730-4eb1eae5dfa4/go.mod h1:ih/VGwepP7mggx0xrxdKGUimQcokYkDjbm7WBFcHbbI=
+github.com/terryhay/dolly/argparser v0.0.0-20221105155921-0450e3682bd3 h1:RG62j78JdnXHoCsoQL/KeUBaVHIt3AnvWhzL6btu21E=
+github.com/terryhay/dolly/argparser v0.0.0-20221105155921-0450e3682bd3/go.mod h1:tap+CK/JEGxyxeoh47FpOSB8CCn+wTybll2eDJPkXnU=
+github.com/terryhay/dolly/argparser v0.0.0-20221106114538-647b2f23c52d h1:RqKoGDdwMWwQQuyaVFqYpM0mTfwwHSwHGjXw5f/10n0=
+github.com/terryhay/dolly/argparser v0.0.0-20221106114538-647b2f23c52d/go.mod h1:ja6e+K3pD39N/XBLbZcQSyDfmuDhrSQoBer7gGjACf4=
 github.com/terryhay/dolly/generator v0.0.0-20221030160826-ae948724628b h1:yCSDcIFjNwKcs+Xdjq8tjmoYw4wPANp8/5FJiu1VXBU=
 github.com/terryhay/dolly/generator v0.0.0-20221030160826-ae948724628b/go.mod h1:VZAYtq0Rw5kiAMoCCc146nd8xWLSIIH7t9t0FCAiQNA=
 github.com/terryhay/dolly/generator v0.0.0-20221104190306-a78f2a0054f4 h1:zzqT3R7+Vea1k+ei++cIwNv3maugdufXM7vDae77osQ=
@@ -36,6 +40,10 @@ github.com/terryhay/dolly/generator v0.0.0-20221105105618-9b99665c144d h1:mB1TB/
 github.com/terryhay/dolly/generator v0.0.0-20221105105618-9b99665c144d/go.mod h1:CUyl57/YjOUxQUejSq1jxzaatndN6XzJLRsX+PVMopI=
 github.com/terryhay/dolly/generator v0.0.0-20221105123730-4eb1eae5dfa4 h1:Dr2QlF8cX8JMsGZukoGbcyG9KYMAI7fE809q34aQHKs=
 github.com/terryhay/dolly/generator v0.0.0-20221105123730-4eb1eae5dfa4/go.mod h1:xFC8hBra5OoOrf3bwTKNBMXh+UB95y6h8D4WAQfsWng=
+github.com/terryhay/dolly/generator v0.0.0-20221105155921-0450e3682bd3 h1:fANHsH0x+OH9GKn6tKSSn9ZT/5fEvqSUhBAhVN1Bb5o=
+github.com/terryhay/dolly/generator v0.0.0-20221105155921-0450e3682bd3/go.mod h1:M5ihTn4fwaOhr9xcnS/+xJY9ohZwAF49fqlI7aii+vs=
+github.com/terryhay/dolly/generator v0.0.0-20221106114538-647b2f23c52d h1:omMJT24XQs+9y2Nf4pm+0NZvPSImbqwnH7UxiAO7Kt8=
+github.com/terryhay/dolly/generator v0.0.0-20221106114538-647b2f23c52d/go.mod h1:bjDYlYBPKQrWbml17RiW52u6wc5jUUjbwxEB3DV9stc=
 github.com/terryhay/dolly/utils v0.0.0-20221030105816-b6810a46118b h1:asetWZSYrgXrrP5UcQpxeV7DF3gjCn+qSbQaTdV/Rac=
 github.com/terryhay/dolly/utils v0.0.0-20221030105816-b6810a46118b/go.mod h1:R1VZ4MC8YAklMIJ169QnIoau1yGiFvrx9D5ES0iPljY=
 github.com/terryhay/dolly/utils v0.0.0-20221030170210-b72975a49813 h1:Ws+TqNoTuqQ/aPEeYi1EgkUmQrSMrpAkPZgpPediQ+A=
@@ -46,6 +54,10 @@ github.com/terryhay/dolly/utils v0.0.0-20221105105618-9b99665c144d h1:w0QrAH5i0H
 github.com/terryhay/dolly/utils v0.0.0-20221105105618-9b99665c144d/go.mod h1:cyM/60uf5Y7N8jH4GrZj36ijCmnhQiH9RisKLIUF7AI=
 github.com/terryhay/dolly/utils v0.0.0-20221105123730-4eb1eae5dfa4 h1:0wWE/OgNtuJENVbsJgWtQfhgCjIX60DU1ysQ+LWYzJ4=
 github.com/terryhay/dolly/utils v0.0.0-20221105123730-4eb1eae5dfa4/go.mod h1:cyM/60uf5Y7N8jH4GrZj36ijCmnhQiH9RisKLIUF7AI=
+github.com/terryhay/dolly/utils v0.0.0-20221105155921-0450e3682bd3 h1:HPsDx0+wTAg/BaKcZhYZ19/9s8oeM9NJT5BJ+nWFRvQ=
+github.com/terryhay/dolly/utils v0.0.0-20221105155921-0450e3682bd3/go.mod h1:cyM/60uf5Y7N8jH4GrZj36ijCmnhQiH9RisKLIUF7AI=
+github.com/terryhay/dolly/utils v0.0.0-20221106114538-647b2f23c52d h1:ciOVVKY2JThbMgIdBhZehEmXmVUGCah2b5YdMmxM7z4=
+github.com/terryhay/dolly/utils v0.0.0-20221106114538-647b2f23c52d/go.mod h1:cyM/60uf5Y7N8jH4GrZj36ijCmnhQiH9RisKLIUF7AI=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c h1:dUUwHk2QECo/6vqA44rthZ8ie2QXMNeKRTHCNY2nXvo=

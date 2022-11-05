@@ -188,10 +188,3 @@ func TestWrite(t *testing.T) {
 		})
 	}
 }
-
-func TestCheckDirPath(t *testing.T) {
-	t.Parallel()
-
-	osDecorNotMocked := osd.NewOSDecorator(nil)
-	require.False(t, osDecorNotMocked.IsExist("nonexistent/path"))
-}

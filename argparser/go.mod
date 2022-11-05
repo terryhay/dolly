@@ -13,5 +13,5 @@ require (
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/mattn/go-runewidth v0.0.9 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/terryhay/dolly/utils v0.0.0-20221105123730-4eb1eae5dfa4 // indirect
+	github.com/terryhay/dolly/utils v0.0.0-20221106114538-647b2f23c52d // indirect
 )

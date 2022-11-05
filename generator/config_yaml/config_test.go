@@ -17,16 +17,19 @@ func TestConfigGetters(t *testing.T) {
 	t.Run("nil_pointer", func(t *testing.T) {
 		require.Equal(t, "", pointer.GetVersion())
 		require.Nil(t, pointer.GetArgParserConfig())
+		require.Nil(t, pointer.GetHelpOutConfig())
 	})
 
 	t.Run("initialized_pointer", func(t *testing.T) {
 		pointer = &Config{
 			Version:         gofakeit.Name(),
 			ArgParserConfig: &ArgParserConfig{},
+			HelpOutConfig:   &HelpOutConfig{},
 		}
 
 		require.Equal(t, pointer.Version, pointer.GetVersion())
 		require.Equal(t, pointer.ArgParserConfig, pointer.GetArgParserConfig())
+		require.Equal(t, pointer.HelpOutConfig, pointer.GetHelpOutConfig())
 	})
 }
 

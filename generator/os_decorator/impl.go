@@ -40,9 +40,3 @@ func (osd *osDecoratorImpl) IsExist(path string) bool {
 func (osd *osDecoratorImpl) MkdirAll(path string, perm os.FileMode) *dollyerr.Error {
 	return dollyerr.NewErrorIfItIs(dollyerr.CodeOSDecoratorMkdirAllError, "OSDecorator.MkdirAll", osd.funcMkdirAll(path, perm))
 }
-
-// Stat - returns a FileInfo describing the named file
-func (osd *osDecoratorImpl) Stat(name string) (os.FileInfo, *dollyerr.Error) {
-	fileInfo, err := osd.funcStat(name)
-	return fileInfo, dollyerr.NewErrorIfItIs(dollyerr.CodeOSDecoratorStatError, "OSDecorator.Stat", err)
-}
