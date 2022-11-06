@@ -6,8 +6,8 @@ require (
 	bou.ke/monkey v1.0.2
 	github.com/brianvoe/gofakeit v3.18.0+incompatible
 	github.com/stretchr/testify v1.7.1
-	github.com/terryhay/dolly/argparser v0.0.0-20221106114538-647b2f23c52d
-	github.com/terryhay/dolly/utils v0.0.0-20221106114538-647b2f23c52d
+	github.com/terryhay/dolly/argparser v0.0.0-20221112102944-61bba21eed6a
+	github.com/terryhay/dolly/utils v0.0.0-20221112102944-61bba21eed6a
 	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
 )
 

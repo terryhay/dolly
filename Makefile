@@ -2,6 +2,7 @@ test:
 	go test ./utils/... -cover
 	go test ./argparser/... -cover
 	go test ./generator/... -cover
+	go test ./man_style_help/... -cover
 	go test ./examples/... -cover
 
 test-report:
@@ -14,6 +15,9 @@ test-report:
 	go test ./generator/... -coverprofile cover.out
 	go tool cover -html=cover.out -o cover-generator.html
 
+	go test ./man_style_help/... -coverprofile cover.out
+	go tool cover -html=cover.out -o man-style-help-examples.html
+
 	go test ./examples/... -coverprofile cover.out
 	go tool cover -html=cover.out -o cover-examples.html
 
@@ -21,6 +25,7 @@ lint:
 	golangci-lint run utils/...
 	golangci-lint run argparser/...
 	golangci-lint run generator/...
+	golangci-lint run man-style-help/...
 	golangci-lint run examples/...
 
 update:

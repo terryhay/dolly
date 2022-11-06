@@ -14,11 +14,12 @@ package dolly
 %s
 
 // Parse - processes command line arguments
-func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
+func Parse(args []string) (*parsed.ParsedData, error) {
 	appArgConfig := apConf.NewArgParserConfig(%s,%s,%s,%s,%s)
 
-	if res, err = parser.Parse(appArgConfig, args); err != nil {
-		return nil, err
+	res, err := parser.Parse(appArgConfig, args)
+	if err != nil {
+		return nil, err.Error()
 	}
 
 	if res.GetCommandID() == %s {%s

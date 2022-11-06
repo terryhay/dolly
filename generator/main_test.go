@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	"github.com/terryhay/dolly/argparser/parsed_data"
+	parsed "github.com/terryhay/dolly/argparser/parsed_data"
 	confYML "github.com/terryhay/dolly/generator/config_yaml"
 	"github.com/terryhay/dolly/generator/os_decorator"
 	osd "github.com/terryhay/dolly/generator/os_decorator"
@@ -19,14 +19,14 @@ import (
 
 func TestLogic(t *testing.T) {
 	parsingErr := dollyerr.NewError(dollyerr.CodeUndefinedError, fmt.Errorf(gofakeit.Name()))
-	configPath := parsed_data.ArgValue(gofakeit.Name())
+	configPath := parsed.ArgValue(gofakeit.Name())
 
 	getYAMLConfigErr := dollyerr.NewError(dollyerr.CodeConfigFlagIsNotUsedInCommands, fmt.Errorf(gofakeit.Name()))
 
 	testData := []struct {
 		caseName string
 
-		dollyParseFunc    func(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error)
+		dollyParseFunc    func(args []string) (res *parsed.ParsedData, err *dollyerr.Error)
 		getYAMLConfigFunc func(configPath string) (*confYML.Config, *dollyerr.Error)
 		osd               os_decorator.OSDecorator
 
@@ -35,7 +35,7 @@ func TestLogic(t *testing.T) {
 		{
 			caseName: "parsing_error",
 
-			dollyParseFunc: func(arg []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
+			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
 				return nil, parsingErr
 			},
 			osd: osd.NewOSDecorator(
@@ -50,7 +50,7 @@ func TestLogic(t *testing.T) {
 		{
 			caseName: "get_config_path_arg_error",
 
-			dollyParseFunc: func(arg []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
+			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
 				return nil, nil
 			},
 			osd: osd.NewOSDecorator(
@@ -65,12 +65,12 @@ func TestLogic(t *testing.T) {
 		{
 			caseName: "get_generate_dir_path_arg_error",
 
-			dollyParseFunc: func(arg []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
-				return &parsed_data.ParsedData{
-						FlagDataMap: map[apConf.Flag]*parsed_data.ParsedFlagData{
+			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
+				return &parsed.ParsedData{
+						FlagDataMap: map[apConf.Flag]*parsed.ParsedFlagData{
 							parser.FlagC: {
-								ArgData: &parsed_data.ParsedArgData{
-									ArgValues: []parsed_data.ArgValue{
+								ArgData: &parsed.ParsedArgData{
+									ArgValues: []parsed.ArgValue{
 										configPath,
 									},
 								},
@@ -91,20 +91,20 @@ func TestLogic(t *testing.T) {
 		{
 			caseName: "get_yaml_config_error",
 
-			dollyParseFunc: func(arg []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
-				return &parsed_data.ParsedData{
-						FlagDataMap: map[apConf.Flag]*parsed_data.ParsedFlagData{
+			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
+				return &parsed.ParsedData{
+						FlagDataMap: map[apConf.Flag]*parsed.ParsedFlagData{
 							parser.FlagC: {
-								ArgData: &parsed_data.ParsedArgData{
-									ArgValues: []parsed_data.ArgValue{
+								ArgData: &parsed.ParsedArgData{
+									ArgValues: []parsed.ArgValue{
 										configPath,
 									},
 								},
 							},
 							parser.FlagO: {
-								ArgData: &parsed_data.ParsedArgData{
-									ArgValues: []parsed_data.ArgValue{
-										parsed_data.ArgValue(gofakeit.Name()),
+								ArgData: &parsed.ParsedArgData{
+									ArgValues: []parsed.ArgValue{
+										parsed.ArgValue(gofakeit.Name()),
 									},
 								},
 							},
@@ -127,20 +127,20 @@ func TestLogic(t *testing.T) {
 		{
 			caseName: "extract_flag_descriptions_error",
 
-			dollyParseFunc: func(arg []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
-				return &parsed_data.ParsedData{
-						FlagDataMap: map[apConf.Flag]*parsed_data.ParsedFlagData{
+			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
+				return &parsed.ParsedData{
+						FlagDataMap: map[apConf.Flag]*parsed.ParsedFlagData{
 							parser.FlagC: {
-								ArgData: &parsed_data.ParsedArgData{
-									ArgValues: []parsed_data.ArgValue{
+								ArgData: &parsed.ParsedArgData{
+									ArgValues: []parsed.ArgValue{
 										configPath,
 									},
 								},
 							},
 							parser.FlagO: {
-								ArgData: &parsed_data.ParsedArgData{
-									ArgValues: []parsed_data.ArgValue{
-										parsed_data.ArgValue(gofakeit.Name()),
+								ArgData: &parsed.ParsedArgData{
+									ArgValues: []parsed.ArgValue{
+										parsed.ArgValue(gofakeit.Name()),
 									},
 								},
 							},
@@ -170,20 +170,20 @@ func TestLogic(t *testing.T) {
 		{
 			caseName: "extract_command_descriptions_error",
 
-			dollyParseFunc: func(arg []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
-				return &parsed_data.ParsedData{
-						FlagDataMap: map[apConf.Flag]*parsed_data.ParsedFlagData{
+			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
+				return &parsed.ParsedData{
+						FlagDataMap: map[apConf.Flag]*parsed.ParsedFlagData{
 							parser.FlagC: {
-								ArgData: &parsed_data.ParsedArgData{
-									ArgValues: []parsed_data.ArgValue{
+								ArgData: &parsed.ParsedArgData{
+									ArgValues: []parsed.ArgValue{
 										configPath,
 									},
 								},
 							},
 							parser.FlagO: {
-								ArgData: &parsed_data.ParsedArgData{
-									ArgValues: []parsed_data.ArgValue{
-										parsed_data.ArgValue(gofakeit.Name()),
+								ArgData: &parsed.ParsedArgData{
+									ArgValues: []parsed.ArgValue{
+										parsed.ArgValue(gofakeit.Name()),
 									},
 								},
 							},
@@ -213,20 +213,20 @@ func TestLogic(t *testing.T) {
 		{
 			caseName: "checking_error",
 
-			dollyParseFunc: func(arg []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
-				return &parsed_data.ParsedData{
-						FlagDataMap: map[apConf.Flag]*parsed_data.ParsedFlagData{
+			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
+				return &parsed.ParsedData{
+						FlagDataMap: map[apConf.Flag]*parsed.ParsedFlagData{
 							parser.FlagC: {
-								ArgData: &parsed_data.ParsedArgData{
-									ArgValues: []parsed_data.ArgValue{
+								ArgData: &parsed.ParsedArgData{
+									ArgValues: []parsed.ArgValue{
 										configPath,
 									},
 								},
 							},
 							parser.FlagO: {
-								ArgData: &parsed_data.ParsedArgData{
-									ArgValues: []parsed_data.ArgValue{
-										parsed_data.ArgValue(gofakeit.Name()),
+								ArgData: &parsed.ParsedArgData{
+									ArgValues: []parsed.ArgValue{
+										parsed.ArgValue(gofakeit.Name()),
 									},
 								},
 							},
@@ -261,20 +261,20 @@ func TestLogic(t *testing.T) {
 		{
 			caseName: "file_write_error",
 
-			dollyParseFunc: func(arg []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
-				return &parsed_data.ParsedData{
-						FlagDataMap: map[apConf.Flag]*parsed_data.ParsedFlagData{
+			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
+				return &parsed.ParsedData{
+						FlagDataMap: map[apConf.Flag]*parsed.ParsedFlagData{
 							parser.FlagC: {
-								ArgData: &parsed_data.ParsedArgData{
-									ArgValues: []parsed_data.ArgValue{
+								ArgData: &parsed.ParsedArgData{
+									ArgValues: []parsed.ArgValue{
 										configPath,
 									},
 								},
 							},
 							parser.FlagO: {
-								ArgData: &parsed_data.ParsedArgData{
-									ArgValues: []parsed_data.ArgValue{
-										parsed_data.ArgValue(gofakeit.Name()),
+								ArgData: &parsed.ParsedArgData{
+									ArgValues: []parsed.ArgValue{
+										parsed.ArgValue(gofakeit.Name()),
 									},
 								},
 							},

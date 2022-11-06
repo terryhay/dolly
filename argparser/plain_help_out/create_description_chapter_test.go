@@ -5,7 +5,7 @@ import (
 	"github.com/brianvoe/gofakeit"
 	"github.com/stretchr/testify/require"
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	"github.com/terryhay/dolly/utils/test_tools"
+	tools "github.com/terryhay/dolly/utils/test_tools"
 	"testing"
 )
 
@@ -90,7 +90,7 @@ The flags are as follows:
 				td.commandDescriptions,
 				td.flagDescriptions)
 
-			ok, msg := test_tools.CheckSpaces(actual)
+			ok, msg := tools.CheckSpaces(actual)
 			require.True(t, ok, msg)
 
 			require.Equal(t, td.expected, actual)

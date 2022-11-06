@@ -2,7 +2,7 @@ package config_yaml
 
 import "fmt"
 
-// ArgParserConfig contains argparser configuration
+// ArgParserConfig contains arg parser configuration
 type ArgParserConfig struct {
 	AppHelpDescription     *AppHelpDescription
 	HelpCommandDescription *HelpCommandDescription

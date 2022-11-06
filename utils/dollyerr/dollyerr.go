@@ -120,9 +120,6 @@ const (
 	// CodeOSDecoratorMkdirAllError - directory creation error
 	CodeOSDecoratorMkdirAllError
 
-	// CodeOSDecoratorStatError - stat method call error
-	CodeOSDecoratorStatError
-
 	// CodeTermBoxDecoratorInitError - can't init a termbox decorator
 	CodeTermBoxDecoratorInitError
 

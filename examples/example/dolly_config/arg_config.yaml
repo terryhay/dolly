@@ -98,3 +98,6 @@ arg_parser_config:
         - *flagFloatSingle
         - *flagFloatList
         - *doTypeCheckingFlag
+
+help_out_config:
+  using_tool: "man_style"

@@ -3,7 +3,7 @@ package plain_help_out
 import (
 	"github.com/stretchr/testify/require"
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	"github.com/terryhay/dolly/utils/test_tools"
+	tools "github.com/terryhay/dolly/utils/test_tools"
 	"testing"
 )
 
@@ -11,11 +11,11 @@ func TestPrintHelpInfo(t *testing.T) {
 	t.Parallel()
 
 	t.Run("empty_config", func(t *testing.T) {
-		out := test_tools.CatchStdOut(func() {
+		out := tools.CatchStdOut(func() {
 			PrintHelpInfo(apConf.ArgParserConfig{})
 		})
 
-		ok, msg := test_tools.CheckSpaces(out)
+		ok, msg := tools.CheckSpaces(out)
 		require.True(t, ok, msg)
 
 		require.Equal(t, `[1mNAME[0m
@@ -29,7 +29,7 @@ func TestPrintHelpInfo(t *testing.T) {
 	})
 
 	t.Run("simple_case", func(t *testing.T) {
-		out := test_tools.CatchStdOut(func() {
+		out := tools.CatchStdOut(func() {
 			PrintHelpInfo(apConf.NewArgParserConfig(
 				apConf.ApplicationDescription{
 					AppName:      "appname",
@@ -73,7 +73,7 @@ func TestPrintHelpInfo(t *testing.T) {
 			))
 		})
 
-		ok, msg := test_tools.CheckSpaces(out)
+		ok, msg := tools.CheckSpaces(out)
 		require.True(t, ok, msg)
 
 		require.Equal(t, `[1mNAME[0m

@@ -138,12 +138,11 @@ package dolly
 
 import (
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	"github.com/terryhay/dolly/utils/dollyerr"
-	"github.com/terryhay/dolly/argparser/helpdisplay/page"
-	tbd "github.com/terryhay/dolly/argparser/helpdisplay/termbox_decorator"
-	pgv "github.com/terryhay/dolly/argparser/helpdisplay/page_view"
-	"github.com/terryhay/dolly/argparser/parsed_data"
+	parsed "github.com/terryhay/dolly/argparser/parsed_data"
 	"github.com/terryhay/dolly/argparser/parser"
+	"github.com/terryhay/dolly/man_style_help/page"
+	pgv "github.com/terryhay/dolly/man_style_help/page_view"
+	tbd "github.com/terryhay/dolly/man_style_help/termbox_decorator"
 )
 
 const (
@@ -182,7 +181,7 @@ const (
 )
 
 // Parse - processes command line arguments
-func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
+func Parse(args []string) (*parsed.ParsedData, error) {
 	appArgConfig := apConf.NewArgParserConfig(
 		// appDescription
 		apConf.ApplicationDescription{
@@ -277,19 +276,20 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 			},
 		))
 
-	if res, err = parser.Parse(appArgConfig, args); err != nil {
-		return nil, err
+	res, err := parser.Parse(appArgConfig, args)
+	if err != nil {
+		return nil, err.Error()
 	}
 
 	if res.GetCommandID() == CommandIDPrintHelpInfo {
 		var pageView pgv.PageView
 		err = pageView.Init(tbd.NewTermBoxDecorator(nil), page.MakePage(appArgConfig))
 		if err != nil {
-			return nil, err
+			return nil, err.Error()
 		}
 		err = pageView.Run()
 		if err != nil {
-			return nil, err
+			return nil, err.Error()
 		}
 
 		return nil, nil
@@ -334,12 +334,11 @@ package dolly
 
 import (
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	"github.com/terryhay/dolly/utils/dollyerr"
-	"github.com/terryhay/dolly/argparser/helpdisplay/page"
-	tbd "github.com/terryhay/dolly/argparser/helpdisplay/termbox_decorator"
-	pgv "github.com/terryhay/dolly/argparser/helpdisplay/page_view"
-	"github.com/terryhay/dolly/argparser/parsed_data"
+	parsed "github.com/terryhay/dolly/argparser/parsed_data"
 	"github.com/terryhay/dolly/argparser/parser"
+	"github.com/terryhay/dolly/man_style_help/page"
+	pgv "github.com/terryhay/dolly/man_style_help/page_view"
+	tbd "github.com/terryhay/dolly/man_style_help/termbox_decorator"
 )
 
 const (
@@ -356,7 +355,7 @@ const (
 
 
 // Parse - processes command line arguments
-func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
+func Parse(args []string) (*parsed.ParsedData, error) {
 	appArgConfig := apConf.NewArgParserConfig(
 		// appDescription
 		apConf.ApplicationDescription{
@@ -381,19 +380,20 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 		// namelessCommandDescription
 		nil)
 
-	if res, err = parser.Parse(appArgConfig, args); err != nil {
-		return nil, err
+	res, err := parser.Parse(appArgConfig, args)
+	if err != nil {
+		return nil, err.Error()
 	}
 
 	if res.GetCommandID() == CommandIDPrintHelpInfo {
 		var pageView pgv.PageView
 		err = pageView.Init(tbd.NewTermBoxDecorator(nil), page.MakePage(appArgConfig))
 		if err != nil {
-			return nil, err
+			return nil, err.Error()
 		}
 		err = pageView.Run()
 		if err != nil {
-			return nil, err
+			return nil, err.Error()
 		}
 
 		return nil, nil
@@ -429,12 +429,11 @@ package dolly
 
 import (
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	"github.com/terryhay/dolly/utils/dollyerr"
-	"github.com/terryhay/dolly/argparser/helpdisplay/page"
-	tbd "github.com/terryhay/dolly/argparser/helpdisplay/termbox_decorator"
-	pgv "github.com/terryhay/dolly/argparser/helpdisplay/page_view"
-	"github.com/terryhay/dolly/argparser/parsed_data"
+	parsed "github.com/terryhay/dolly/argparser/parsed_data"
 	"github.com/terryhay/dolly/argparser/parser"
+	"github.com/terryhay/dolly/man_style_help/page"
+	pgv "github.com/terryhay/dolly/man_style_help/page_view"
+	tbd "github.com/terryhay/dolly/man_style_help/termbox_decorator"
 )
 
 const (
@@ -445,7 +444,7 @@ const (
 
 
 // Parse - processes command line arguments
-func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
+func Parse(args []string) (*parsed.ParsedData, error) {
 	appArgConfig := apConf.NewArgParserConfig(
 		// appDescription
 		apConf.ApplicationDescription{
@@ -470,19 +469,20 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 			nil,
 		))
 
-	if res, err = parser.Parse(appArgConfig, args); err != nil {
-		return nil, err
+	res, err := parser.Parse(appArgConfig, args)
+	if err != nil {
+		return nil, err.Error()
 	}
 
 	if res.GetCommandID() ==  {
 		var pageView pgv.PageView
 		err = pageView.Init(tbd.NewTermBoxDecorator(nil), page.MakePage(appArgConfig))
 		if err != nil {
-			return nil, err
+			return nil, err.Error()
 		}
 		err = pageView.Run()
 		if err != nil {
-			return nil, err
+			return nil, err.Error()
 		}
 
 		return nil, nil
@@ -504,17 +504,16 @@ package dolly
 
 import (
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	"github.com/terryhay/dolly/argparser/parsed_data"
+	parsed "github.com/terryhay/dolly/argparser/parsed_data"
 	"github.com/terryhay/dolly/argparser/parser"
 	helpOut "github.com/terryhay/dolly/argparser/plain_help_out"
-	"github.com/terryhay/dolly/utils/dollyerr"
 )
 
 
 
 
 // Parse - processes command line arguments
-func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
+func Parse(args []string) (*parsed.ParsedData, error) {
 	appArgConfig := apConf.NewArgParserConfig(
 		// appDescription
 		apConf.ApplicationDescription{
@@ -531,8 +530,9 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 		// namelessCommandDescription
 		nil)
 
-	if res, err = parser.Parse(appArgConfig, args); err != nil {
-		return nil, err
+	res, err := parser.Parse(appArgConfig, args)
+	if err != nil {
+		return nil, err.Error()
 	}
 
 	if res.GetCommandID() ==  {

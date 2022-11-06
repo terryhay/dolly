@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/require"
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	"github.com/terryhay/dolly/utils/test_tools"
+	tools "github.com/terryhay/dolly/utils/test_tools"
 	"testing"
 )
 
@@ -87,7 +87,7 @@ func TestCreateSynopsisChapter(t *testing.T) {
 
 		chapter = createSynopsisChapter(appName, namelessCommandDescription, commandDescriptions, flagDescriptions)
 
-		ok, msg := test_tools.CheckSpaces(chapter)
+		ok, msg := tools.CheckSpaces(chapter)
 		require.True(t, ok, msg)
 
 		require.Equal(t,
@@ -110,7 +110,7 @@ func TestCreateSynopsisChapter(t *testing.T) {
 `, appName)
 
 		chapter = createSynopsisChapter(appName, nil, commandDescriptions, nil)
-		ok, msg := test_tools.CheckSpaces(chapter)
+		ok, msg := tools.CheckSpaces(chapter)
 		require.True(t, ok, msg)
 
 		require.Equal(t, expectedChapter, chapter)

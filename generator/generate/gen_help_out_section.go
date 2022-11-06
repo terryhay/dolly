@@ -12,11 +12,11 @@ func genHelpOutSection(helpOutTool confYML.HelpOutTool) helpOutSection {
 		var pageView pgv.PageView
 		err = pageView.Init(tbd.NewTermBoxDecorator(nil), page.MakePage(appArgConfig))
 		if err != nil {
-			return nil, err
+			return nil, err.Error()
 		}
 		err = pageView.Run()
 		if err != nil {
-			return nil, err
+			return nil, err.Error()
 		}
 
 		return nil, nil`

@@ -18,7 +18,7 @@ func main() {
 	pd, err := dolly.Parse(os.Args[1:])
 	if err != nil {
 		fmt.Printf("example.Argparser error: %s\n", err.Error())
-		os.Exit(int(err.Code()))
+		os.Exit(1)
 	}
 
 	code, _ := logic(pd)

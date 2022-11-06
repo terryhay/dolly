@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/terryhay/dolly/argparser/parsed_data"
+	parsed "github.com/terryhay/dolly/argparser/parsed_data"
 	"github.com/terryhay/dolly/generator/config_checker"
 	"github.com/terryhay/dolly/generator/config_data_extractor"
 	confYML "github.com/terryhay/dolly/generator/config_yaml"
@@ -19,7 +19,7 @@ func main() {
 }
 
 func logic(
-	dollyParseFunc func(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error),
+	dollyParseFunc func(args []string) (res *parsed.ParsedData, err *dollyerr.Error),
 	getYAMLConfigFunc func(configPath string) (*confYML.Config, *dollyerr.Error),
 	osd os_decorator.OSDecorator,
 ) (error, uint) {
@@ -30,7 +30,7 @@ func logic(
 	}
 
 	var (
-		configYAMLFilePath parsed_data.ArgValue
+		configYAMLFilePath parsed.ArgValue
 		contain            bool
 	)
 	configYAMLFilePath, contain = argData.GetFlagArgValue(parser.FlagC)
@@ -41,7 +41,7 @@ func logic(
 		return err.Error(), err.Code().ToUint()
 	}
 
-	var generateDirPath parsed_data.ArgValue
+	var generateDirPath parsed.ArgValue
 	generateDirPath, contain = argData.GetFlagArgValue(parser.FlagO)
 	if !contain {
 		err = dollyerr.NewError(

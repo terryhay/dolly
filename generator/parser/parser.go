@@ -2,7 +2,7 @@ package parser
 
 import (
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	"github.com/terryhay/dolly/argparser/arg_parser_impl"
+	impl "github.com/terryhay/dolly/argparser/arg_parser_impl"
 	"github.com/terryhay/dolly/argparser/parsed_data"
 	helpOut "github.com/terryhay/dolly/argparser/plain_help_out"
 	"github.com/terryhay/dolly/utils/dollyerr"
@@ -81,7 +81,7 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 		),
 	)
 
-	res, err = arg_parser_impl.NewCmdArgParserImpl(appArgConfig).Parse(args)
+	res, err = impl.NewCmdArgParserImpl(appArgConfig).Parse(args)
 	if err != nil {
 		return nil, err
 	}

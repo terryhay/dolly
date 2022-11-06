@@ -5,4 +5,5 @@ use (
 	./argparser
 	./generator
 	./examples
+	man_style_help
 )
