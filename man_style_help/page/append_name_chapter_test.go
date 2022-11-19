@@ -19,7 +19,7 @@ func TestCreateNameChapter(t *testing.T) {
 		apConf.ApplicationDescriptionSrc{
 			AppName:      randAppName,
 			NameHelpInfo: randNameHelpInfo,
-		}.Cast(),
+		}.ToConst(),
 	)
 
 	paragraphTexts := make([]string, 0, len(paragraphs))

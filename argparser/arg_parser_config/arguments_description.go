@@ -18,8 +18,8 @@ type ArgumentsDescriptionSrc struct {
 	AllowedValues           map[string]bool
 }
 
-// CastPtr converts src to ArgumentsDescription pointer
-func (src ArgumentsDescriptionSrc) CastPtr() *ArgumentsDescription {
+// ToConstPtr converts src to ArgumentsDescription pointer
+func (src ArgumentsDescriptionSrc) ToConstPtr() *ArgumentsDescription {
 	return (*ArgumentsDescription)(unsafe.Pointer(&src))
 }
 

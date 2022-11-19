@@ -1,15 +1,18 @@
 package config_yaml
 
-import "fmt"
+import (
+	"fmt"
+	"unsafe"
+)
 
 // FlagDescription - description of a command line flag
 type FlagDescription struct {
-	Flag                string
-	DescriptionHelpInfo string
-	SynopsisDescription string
+	flag                string
+	descriptionHelpInfo string
+	synopsisDescription string
 
 	// optional
-	ArgumentsDescription *ArgumentsDescription
+	argumentsDescription *ArgumentsDescription
 }
 
 // GetFlag - Flag getter
@@ -17,15 +20,15 @@ func (fd *FlagDescription) GetFlag() string {
 	if fd == nil {
 		return ""
 	}
-	return fd.Flag
+	return fd.flag
 }
 
-// GetDescriptionHelpInfo - DescriptionHelpInfo field getter
+// GetDescriptionHelpInfo - descriptionHelpInfo field getter
 func (fd *FlagDescription) GetDescriptionHelpInfo() string {
 	if fd == nil {
 		return ""
 	}
-	return fd.DescriptionHelpInfo
+	return fd.descriptionHelpInfo
 }
 
 // GetSynopsisDescription - SynopsisDescription field getter
@@ -33,7 +36,7 @@ func (fd *FlagDescription) GetSynopsisDescription() string {
 	if fd == nil {
 		return ""
 	}
-	return fd.SynopsisDescription
+	return fd.synopsisDescription
 }
 
 // GetArgumentsDescription - ArgumentsDescription field getter
@@ -41,33 +44,40 @@ func (fd *FlagDescription) GetArgumentsDescription() *ArgumentsDescription {
 	if fd == nil {
 		return nil
 	}
-	return fd.ArgumentsDescription
+	return fd.argumentsDescription
 }
 
 // UnmarshalYAML - custom unmarshal logic with checking required fields
 func (fd *FlagDescription) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
-	proxy := struct {
-		Flag                string `yaml:"flag"`
-		DescriptionHelpInfo string `yaml:"description_help_info"`
-
-		ArgumentsDescription *ArgumentsDescription `yaml:"arguments_description"`
-	}{}
-	if err = unmarshal(&proxy); err != nil {
+	src := FlagDescriptionSrc{}
+	if err = unmarshal(&src); err != nil {
 		return err
 	}
 
-	if len(proxy.Flag) == 0 {
+	if len(src.Flag) == 0 {
 		return fmt.Errorf(`flagDescription unmarshal error: no required field "flag"`)
 	}
-	fd.Flag = proxy.Flag
 
-	if len(proxy.DescriptionHelpInfo) == 0 {
+	if len(src.DescriptionHelpInfo) == 0 {
 		return fmt.Errorf(`flagDescription unmarshal error: no required field "description_help_info"`)
 	}
-	fd.DescriptionHelpInfo = proxy.DescriptionHelpInfo
 
-	// don't check optional field
-	fd.ArgumentsDescription = proxy.ArgumentsDescription
+	*fd = *src.ToConstPtr()
 
 	return nil
+}
+
+// FlagDescriptionSrc - source description of a command line flag
+type FlagDescriptionSrc struct {
+	Flag                string `yaml:"flag"`
+	DescriptionHelpInfo string `yaml:"description_help_info"`
+	SynopsisDescription string `yaml:"synopsis_description"`
+
+	// optional
+	ArgumentsDescription *ArgumentsDescription `yaml:"arguments_description"`
+}
+
+// ToConstPtr converts src to FlagDescription pointer
+func (m FlagDescriptionSrc) ToConstPtr() *FlagDescription {
+	return (*FlagDescription)(unsafe.Pointer(&m))
 }

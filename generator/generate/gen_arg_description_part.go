@@ -24,9 +24,9 @@ const (
 	argumentsDescriptionMapVariantValue = `
 %[1]s		"%[2]s": true,`
 	argumentsDescriptionVariantValuesPostfix = `
-%[1]s	}.CastPtr(),`
+%[1]s	}.ToConstPtr(),`
 	argumentsDescriptionPostfix = `
-%[1]s}.CastPtr()`
+%[1]s}.ToConstPtr()`
 )
 
 // GenArgDescriptionPart - creates a paste part with argument description

@@ -22,7 +22,7 @@ func TestFlagDescriptionGetters(t *testing.T) {
 			DescriptionHelpInfo: gofakeit.Name(),
 			ArgDescription:      &ArgumentsDescription{},
 		}
-		pointer = src.CastPtr()
+		pointer = src.ToConstPtr()
 
 		require.Equal(t, src.DescriptionHelpInfo, pointer.GetDescriptionHelpInfo())
 		require.Equal(t, src.ArgDescription, pointer.GetArgDescription())

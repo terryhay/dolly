@@ -9,18 +9,16 @@ import (
 
 const (
 	flagDescriptionsNilPart = `
-		// flagDescriptions
-		nil`
+		FlagDescriptions: nil`
 
 	flagDescriptionMapPrefix = `
-		// flagDescriptions
-		map[apConf.Flag]*apConf.FlagDescription{`
+		FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{`
 	flagDescriptionMapElementKeyPart = `
 			%s: apConf.FlagDescriptionSrc{`
 	flagDescriptionMapElementDescriptionHelpInfo = `
 				DescriptionHelpInfo:  "%s",`
 	flagDescriptionMapElementPostfix = `
-			}.CastPtr(),`
+			}.ToConstPtr(),`
 	flagDescriptionMapPostfix = `
 		}`
 )

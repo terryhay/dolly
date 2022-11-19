@@ -16,8 +16,8 @@ type ApplicationDescriptionSrc struct {
 	DescriptionHelpInfo []string
 }
 
-// Cast converts src to ApplicationDescription object
-func (src ApplicationDescriptionSrc) Cast() ApplicationDescription {
+// ToConst converts src to ApplicationDescription object
+func (src ApplicationDescriptionSrc) ToConst() ApplicationDescription {
 	return *(*ApplicationDescription)(unsafe.Pointer(&src))
 }
 

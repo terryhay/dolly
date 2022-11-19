@@ -17,7 +17,7 @@ func TestArgParserConfigGetters(t *testing.T) {
 		CommandDescriptions: []*CommandDescription{
 			{},
 		},
-	}.Cast()
+	}.ToConst()
 
 	require.Equal(t, obj.appDescription, obj.GetAppDescription())
 	require.Equal(t, obj.flagDescriptions, obj.GetFlagDescriptions())

@@ -10,14 +10,14 @@ import (
 
 // GetConfig - loads a config yaml file and unmarshal it into Config object
 func GetConfig(configPath string) (*Config, *dollyerr.Error) {
-	yamlFile, err := os.ReadFile(configPath)
+	configYAML, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, dollyerr.NewError(
 			dollyerr.CodeGetConfigReadFileError,
 			fmt.Errorf("confYML.GetConfig: read config file error: %s", err.Error()))
 	}
 	config := new(Config)
-	err = yaml.Unmarshal(yamlFile, config)
+	err = yaml.Unmarshal(configYAML, config)
 	if err != nil {
 		return nil, dollyerr.NewError(
 			dollyerr.CodeGetConfigUnmarshalError,

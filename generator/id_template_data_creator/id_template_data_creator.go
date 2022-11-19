@@ -35,22 +35,24 @@ func (i IDTemplateDataCreator) RemoveDashes(str string) string {
 }
 
 // CreateID - creates ID string by call name
-func (i IDTemplateDataCreator) CreateID(prefix string, callName string) string {
-	callName = i.RemoveDashes(callName)
+func (i IDTemplateDataCreator) CreateID(prefix string, callNameStr string) string {
+	callNameRunes := []rune(i.RemoveDashes(callNameStr))
 
-	callNameRunes := []rune(callName)
-	callNameRuneCount := len(callNameRunes)
-
-	if callNameRuneCount == 0 {
+	if len(callNameRunes) == 0 {
 		return ""
 	}
-
-	res := prefix + string(unicode.ToUpper(callNameRunes[0]))
-	if callNameRuneCount > 1 {
-		res += string(callNameRunes[1:])
+	if len(callNameRunes) == 1 {
+		const (
+			postfixUp = "Up"
+			postfixLw = "Lw"
+		)
+		if unicode.IsUpper(callNameRunes[0]) {
+			return prefix + string(unicode.ToUpper(callNameRunes[0])) + postfixUp
+		}
+		return prefix + string(unicode.ToUpper(callNameRunes[0])) + postfixLw
 	}
 
-	return res
+	return prefix + string(unicode.ToUpper(callNameRunes[0])) + string(callNameRunes[1:])
 }
 
 // CreateIDTemplateData - creates IDTemplateData slices for commands and flags
@@ -62,7 +64,8 @@ func (i IDTemplateDataCreator) CreateIDTemplateData(
 ) (
 	commandsIDTemplateData map[string]*IDTemplateData,
 	nullCommandIDTemplateData *IDTemplateData,
-	flagsIDTemplateData map[string]*IDTemplateData) {
+	flagsIDTemplateData map[string]*IDTemplateData,
+) {
 
 	var (
 		j, k               int
@@ -85,7 +88,8 @@ func (i IDTemplateDataCreator) CreateIDTemplateData(
 			commandId,
 			i.CreateID(PrefixCommandStringID, callName),
 			callName,
-			commandDescription.GetDescriptionHelpInfo())
+			commandDescription.GetDescriptionHelpInfo(),
+		)
 
 		for k = range commandDescription.GetAdditionalCommands() {
 			callName = commandDescription.GetAdditionalCommands()[k]
@@ -93,7 +97,8 @@ func (i IDTemplateDataCreator) CreateIDTemplateData(
 				commandId,
 				i.CreateID(PrefixCommandStringID, callName),
 				callName,
-				commandDescription.GetDescriptionHelpInfo())
+				commandDescription.GetDescriptionHelpInfo(),
+			)
 		}
 	}
 
@@ -106,7 +111,8 @@ func (i IDTemplateDataCreator) CreateIDTemplateData(
 			commandId,
 			i.CreateID(PrefixCommandStringID, callName),
 			callName,
-			helpCommandComment)
+			helpCommandComment,
+		)
 
 		for k = range helpCommandDescription.GetAdditionalCommands() {
 			callName = helpCommandDescription.GetAdditionalCommands()[k]
@@ -114,7 +120,8 @@ func (i IDTemplateDataCreator) CreateIDTemplateData(
 				commandId,
 				i.CreateID(PrefixCommandStringID, callName),
 				callName,
-				helpCommandComment)
+				helpCommandComment,
+			)
 		}
 	}
 
@@ -124,7 +131,8 @@ func (i IDTemplateDataCreator) CreateIDTemplateData(
 			i.CreateID(PrefixCommandID, NamelessCommandIDPostfix),
 			"",
 			"",
-			nullCommandDescription.GetDescriptionHelpInfo())
+			nullCommandDescription.GetDescriptionHelpInfo(),
+		)
 	}
 
 	// flags
@@ -134,7 +142,8 @@ func (i IDTemplateDataCreator) CreateIDTemplateData(
 			"",
 			i.CreateID(PrefixFlagStringID, callName),
 			callName,
-			flagDescription.GetDescriptionHelpInfo())
+			flagDescription.GetDescriptionHelpInfo(),
+		)
 	}
 
 	return commandsIDTemplateData, nullCommandIDTemplateData, flagsIDTemplateData

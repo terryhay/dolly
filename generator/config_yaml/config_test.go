@@ -22,14 +22,14 @@ func TestConfigGetters(t *testing.T) {
 
 	t.Run("initialized_pointer", func(t *testing.T) {
 		pointer = &Config{
-			Version:         gofakeit.Name(),
-			ArgParserConfig: &ArgParserConfig{},
-			HelpOutConfig:   &HelpOutConfig{},
+			version:         gofakeit.Name(),
+			argParserConfig: &ArgParserConfig{},
+			helpOutConfig:   &HelpOutConfig{},
 		}
 
-		require.Equal(t, pointer.Version, pointer.GetVersion())
-		require.Equal(t, pointer.ArgParserConfig, pointer.GetArgParserConfig())
-		require.Equal(t, pointer.HelpOutConfig, pointer.GetHelpOutConfig())
+		require.Equal(t, pointer.version, pointer.GetVersion())
+		require.Equal(t, pointer.argParserConfig, pointer.GetArgParserConfig())
+		require.Equal(t, pointer.helpOutConfig, pointer.GetHelpOutConfig())
 	})
 }
 

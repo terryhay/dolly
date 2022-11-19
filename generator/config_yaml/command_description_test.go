@@ -25,20 +25,20 @@ func TestCommandDescriptionGetters(t *testing.T) {
 
 	t.Run("initialized_pointer", func(t *testing.T) {
 		pointer = &CommandDescription{
-			Command:              gofakeit.Name(),
-			DescriptionHelpInfo:  gofakeit.Name(),
-			RequiredFlags:        []string{gofakeit.Name()},
-			OptionalFlags:        []string{gofakeit.Name()},
-			AdditionalCommands:   []string{gofakeit.Name()},
-			ArgumentsDescription: &ArgumentsDescription{},
+			command:              gofakeit.Name(),
+			descriptionHelpInfo:  gofakeit.Name(),
+			requiredFlags:        []string{gofakeit.Name()},
+			optionalFlags:        []string{gofakeit.Name()},
+			additionalCommands:   []string{gofakeit.Name()},
+			argumentsDescription: &ArgumentsDescription{},
 		}
 
-		require.Equal(t, pointer.Command, pointer.GetCommand())
-		require.Equal(t, pointer.DescriptionHelpInfo, pointer.GetDescriptionHelpInfo())
-		require.Equal(t, pointer.RequiredFlags, pointer.GetRequiredFlags())
-		require.Equal(t, pointer.OptionalFlags, pointer.GetOptionalFlags())
-		require.Equal(t, pointer.AdditionalCommands, pointer.GetAdditionalCommands())
-		require.Equal(t, pointer.ArgumentsDescription, pointer.GetArgumentsDescription())
+		require.Equal(t, pointer.command, pointer.GetCommand())
+		require.Equal(t, pointer.descriptionHelpInfo, pointer.GetDescriptionHelpInfo())
+		require.Equal(t, pointer.requiredFlags, pointer.GetRequiredFlags())
+		require.Equal(t, pointer.optionalFlags, pointer.GetOptionalFlags())
+		require.Equal(t, pointer.additionalCommands, pointer.GetAdditionalCommands())
+		require.Equal(t, pointer.argumentsDescription, pointer.GetArgumentsDescription())
 	})
 }
 

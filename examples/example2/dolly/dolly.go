@@ -17,8 +17,8 @@ const (
 )
 
 const (
-	// CommandH - print help info
-	CommandH apConf.Command = "-h"
+	// CommandHLw - print help info
+	CommandHLw apConf.Command = "-h"
 	// CommandHelp - print help info
 	CommandHelp = "help"
 )
@@ -31,47 +31,42 @@ const (
 // Parse - processes command line arguments
 func Parse(args []string) (*parsed.ParsedData, error) {
 	appArgConfig := apConf.ArgParserConfigSrc{
-		// appDescription
-		apConf.ApplicationDescriptionSrc{
+		AppDescription: apConf.ApplicationDescriptionSrc{
 			AppName:      "example2",
 			NameHelpInfo: "shows how parser generator works without commands",
 			DescriptionHelpInfo: []string{
 				"you can write more detailed description here",
 			},
-		}.Cast(),
-		// flagDescriptions
-		map[apConf.Flag]*apConf.FlagDescription{
+		}.ToConst(),
+		FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
 			FlagCheck: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo: "check command arguments types",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "str",
-				}.CastPtr(),
-			}.CastPtr(),
+				}.ToConstPtr(),
+			}.ToConstPtr(),
 		},
-		// commandDescriptions
-		nil,
-		// helpCommandDescription
-		apConf.NewHelpCommandDescription(
+		CommandDescriptions: nil,
+		HelpCommandDescription: apConf.NewHelpCommandDescription(
 			CommandIDPrintHelpInfo,
 			map[apConf.Command]bool{
-				CommandH:    true,
+				CommandHLw:  true,
 				CommandHelp: true,
 			},
 		),
-		// namelessCommandDescription
-		apConf.NewNamelessCommandDescription(
+		NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 			CommandIDNamelessCommand,
 			"checks arguments types",
 			apConf.ArgumentsDescriptionSrc{
 				AmountType:              apConf.ArgAmountTypeList,
 				SynopsisHelpDescription: "str list",
-			}.CastPtr(),
+			}.ToConstPtr(),
 			map[apConf.Flag]bool{
 				FlagCheck: true,
 			},
 			nil,
-		)}.Cast()
+		)}.ToConst()
 
 	res, err := parser.Parse(appArgConfig, args)
 	if err != nil {

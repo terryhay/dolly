@@ -61,7 +61,7 @@ func TestCheckParsedData(t *testing.T) {
 				RequiredFlags: map[apConf.Flag]bool{
 					apConf.Flag(gofakeit.Color()): true,
 				},
-			}.CastPtr(),
+			}.ToConstPtr(),
 			expectedErr: fakeError(dollyerr.CodeArgParserRequiredFlagIsNotSet),
 		},
 		{
@@ -69,8 +69,8 @@ func TestCheckParsedData(t *testing.T) {
 			commandDescription: apConf.CommandDescriptionSrc{
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType: apConf.ArgAmountTypeSingle,
-				}.CastPtr(),
-			}.CastPtr(),
+				}.ToConstPtr(),
+			}.ToConstPtr(),
 			expectedErr: fakeError(dollyerr.CodeArgParserCommandDoesNotContainArgs),
 		},
 	}
@@ -110,7 +110,7 @@ func TestIsValueAllowed(t *testing.T) {
 			caseName: "no_allowed_values",
 			argDescription: apConf.ArgumentsDescriptionSrc{
 				AmountType: apConf.ArgAmountTypeNoArgs,
-			}.CastPtr(),
+			}.ToConstPtr(),
 		},
 		{
 			caseName: "value_is_not_allowed",
@@ -119,7 +119,7 @@ func TestIsValueAllowed(t *testing.T) {
 				AllowedValues: map[string]bool{
 					value: true,
 				},
-			}.CastPtr(),
+			}.ToConstPtr(),
 			value:       gofakeit.Color(),
 			expectedErr: fakeError(dollyerr.CodeArgParserArgValueIsNotAllowed),
 		},
@@ -130,7 +130,7 @@ func TestIsValueAllowed(t *testing.T) {
 				AllowedValues: map[string]bool{
 					value: true,
 				},
-			}.CastPtr(),
+			}.ToConstPtr(),
 			value: value,
 		},
 	}

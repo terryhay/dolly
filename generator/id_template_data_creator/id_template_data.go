@@ -9,10 +9,10 @@ type IDTemplateData struct {
 }
 
 // NewIDTemplateData - IDTemplateData object constructor
-func NewIDTemplateData(id, stringID, callName, comment string) *IDTemplateData {
+func NewIDTemplateData(id, nameID, callName, comment string) *IDTemplateData {
 	return &IDTemplateData{
 		id:       id,
-		nameID:   stringID,
+		nameID:   nameID,
 		callName: callName,
 		comment:  comment,
 	}

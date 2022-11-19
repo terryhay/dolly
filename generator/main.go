@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 	parsed "github.com/terryhay/dolly/argparser/parsed_data"
-	"github.com/terryhay/dolly/generator/config_checker"
-	"github.com/terryhay/dolly/generator/config_data_extractor"
+	confCheck "github.com/terryhay/dolly/generator/config_checker"
+	conf "github.com/terryhay/dolly/generator/config_data_extractor"
 	confYML "github.com/terryhay/dolly/generator/config_yaml"
-	"github.com/terryhay/dolly/generator/file_writer"
+	write "github.com/terryhay/dolly/generator/file_writer"
 	"github.com/terryhay/dolly/generator/generate"
 	"github.com/terryhay/dolly/generator/os_decorator"
 	"github.com/terryhay/dolly/generator/parser"
@@ -57,22 +57,29 @@ func logic(
 	}
 
 	var flagDescriptions map[string]*confYML.FlagDescription
-	flagDescriptions, err = config_data_extractor.ExtractFlagDescriptionMap(config.GetArgParserConfig().GetFlagDescriptions())
-	if err != nil {
+	if flagDescriptions, err = conf.ExtractFlagDescriptionMap(
+		config.GetArgParserConfig().GetFlagDescriptions(),
+	); err != nil {
 		return err.Error(), err.Code().ToUint()
 	}
 
 	var commandDescriptions map[string]*confYML.CommandDescription
-	commandDescriptions, err = config_data_extractor.ExtractCommandDescriptionMap(config.GetArgParserConfig().GetCommandDescriptions())
-	if err != nil {
+	if commandDescriptions, err = conf.ExtractCommandDescriptionMap(
+		config.GetArgParserConfig().GetCommandDescriptions(),
+	); err != nil {
 		return err.Error(), err.Code().ToUint()
 	}
 
-	err = config_checker.Check(config.GetArgParserConfig().GetNamelessCommandDescription(), commandDescriptions, flagDescriptions)
-	if err != nil {
+	if err = confCheck.Check(
+		config.GetArgParserConfig().GetNamelessCommandDescription(), commandDescriptions, flagDescriptions,
+	); err != nil {
 		return err.Error(), err.Code().ToUint()
 	}
 
-	err = file_writer.WriteFile(osd, string(generateDirPath), generate.Generate(config.GetArgParserConfig(), config.GetHelpOutConfig(), flagDescriptions))
+	err = write.WriteFile(
+		osd,
+		generateDirPath.ToString(),
+		generate.Generate(config.GetArgParserConfig(), config.GetHelpOutConfig(), flagDescriptions),
+	)
 	return err.Error(), err.Code().ToUint()
 }

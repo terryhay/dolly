@@ -10,11 +10,9 @@ import (
 
 const (
 	helpCommandDescriptionNilPattern = `
-		// helpCommandDescription
-		nil`
+		HelpCommandDescription: nil`
 	helpCommandDescriptionPrefixPart = `
-		// helpCommandDescription
-		apConf.NewHelpCommandDescription(
+		HelpCommandDescription: apConf.NewHelpCommandDescription(
 			CommandIDPrintHelpInfo,
 			map[apConf.Command]bool{`
 	helpCommandDescriptionCommandMapElementPart = `
@@ -37,13 +35,11 @@ func genHelpCommandDescriptionSection(
 		return helpCommandDescriptionNilPattern
 	}
 
-	var i int
-
 	sortedCommandNameIDs := make([]string, 0, len(helpCommandDescription.GetAdditionalCommands())+1)
 	sortedCommandNameIDs = append(sortedCommandNameIDs,
 		commandsIDTemplateData[helpCommandDescription.GetCommand()].GetNameID())
 
-	for i = 0; i < len(helpCommandDescription.GetAdditionalCommands()); i++ {
+	for i := 0; i < len(helpCommandDescription.GetAdditionalCommands()); i++ {
 		sortedCommandNameIDs = append(sortedCommandNameIDs,
 			commandsIDTemplateData[helpCommandDescription.GetAdditionalCommands()[i]].GetNameID())
 	}
@@ -54,7 +50,7 @@ func genHelpCommandDescriptionSection(
 	builder.WriteString(helpCommandDescriptionPrefixPart)
 
 	builder.WriteString(fmt.Sprintf(helpCommandDescriptionCommandMapElementPart, sortedCommandNameIDs[0]))
-	for i = 1; i < len(sortedCommandNameIDs); i++ {
+	for i := 1; i < len(sortedCommandNameIDs); i++ {
 		builder.WriteString(fmt.Sprintf(helpCommandDescriptionCommandMapElementPart, sortedCommandNameIDs[i]))
 	}
 

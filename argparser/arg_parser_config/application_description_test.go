@@ -15,7 +15,7 @@ func TestApplicationDescriptionGetters(t *testing.T) {
 		DescriptionHelpInfo: []string{gofakeit.Name()},
 	}
 
-	obj := src.Cast()
+	obj := src.ToConst()
 
 	require.Equal(t, src.AppName, obj.GetAppName())
 	require.Equal(t, src.NameHelpInfo, obj.GetNameHelpInfo())

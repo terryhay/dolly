@@ -23,16 +23,16 @@ func TestFlagDescriptionGetters(t *testing.T) {
 
 	t.Run("initialized_pointer", func(t *testing.T) {
 		pointer = &FlagDescription{
-			Flag:                 gofakeit.Name(),
-			DescriptionHelpInfo:  gofakeit.Name(),
-			SynopsisDescription:  gofakeit.Name(),
-			ArgumentsDescription: &ArgumentsDescription{},
+			flag:                 gofakeit.Name(),
+			descriptionHelpInfo:  gofakeit.Name(),
+			synopsisDescription:  gofakeit.Name(),
+			argumentsDescription: &ArgumentsDescription{},
 		}
 
-		require.Equal(t, pointer.Flag, pointer.GetFlag())
-		require.Equal(t, pointer.DescriptionHelpInfo, pointer.GetDescriptionHelpInfo())
-		require.Equal(t, pointer.SynopsisDescription, pointer.GetSynopsisDescription())
-		require.Equal(t, pointer.ArgumentsDescription, pointer.GetArgumentsDescription())
+		require.Equal(t, pointer.flag, pointer.GetFlag())
+		require.Equal(t, pointer.descriptionHelpInfo, pointer.GetDescriptionHelpInfo())
+		require.Equal(t, pointer.synopsisDescription, pointer.GetSynopsisDescription())
+		require.Equal(t, pointer.argumentsDescription, pointer.GetArgumentsDescription())
 	})
 }
 

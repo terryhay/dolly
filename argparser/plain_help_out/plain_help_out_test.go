@@ -35,7 +35,7 @@ func TestPrintHelpInfo(t *testing.T) {
 					AppDescription: apConf.ApplicationDescriptionSrc{
 						AppName:      "appname",
 						NameHelpInfo: "name help info",
-					}.Cast(),
+					}.ToConst(),
 					CommandDescriptions: []*apConf.CommandDescription{
 						apConf.CommandDescriptionSrc{
 							ID:                  1,
@@ -46,21 +46,21 @@ func TestPrintHelpInfo(t *testing.T) {
 							ArgDescription: apConf.ArgumentsDescriptionSrc{
 								AmountType:              apConf.ArgAmountTypeSingle,
 								SynopsisHelpDescription: "str",
-							}.CastPtr(),
+							}.ToConstPtr(),
 							RequiredFlags: map[apConf.Flag]bool{
 								"-rf1": true,
 							},
 							OptionalFlags: map[apConf.Flag]bool{
 								"-of1": true,
 							},
-						}.CastPtr(),
+						}.ToConstPtr(),
 						apConf.CommandDescriptionSrc{
 							ID:                  2,
 							DescriptionHelpInfo: "command id 2 description help info",
 							Commands: map[apConf.Command]bool{
 								"longcommand": true,
 							},
-						}.CastPtr(),
+						}.ToConstPtr(),
 					},
 					NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 						0,
@@ -69,7 +69,7 @@ func TestPrintHelpInfo(t *testing.T) {
 						nil,
 						nil,
 					),
-				}.Cast(),
+				}.ToConst(),
 			)
 		})
 

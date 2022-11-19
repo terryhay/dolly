@@ -1,6 +1,9 @@
 package config_yaml
 
-import "fmt"
+import (
+	"fmt"
+	"unsafe"
+)
 
 // HelpOutTool - type of help out tool
 type HelpOutTool uint
@@ -13,17 +16,17 @@ const (
 	HelpOutToolManStyle
 )
 
-// HelpOutConfig contains configuration of
+// HelpOutConfig - configuration of using help info output tool
 type HelpOutConfig struct {
-	UsingTool HelpOutTool
+	usingTool HelpOutTool
 }
 
-// GetUsingTool - UsingTool field getter
+// GetUsingTool - usingTool field getter
 func (hoc *HelpOutConfig) GetUsingTool() HelpOutTool {
 	if hoc == nil {
 		return HelpOutToolPlainText
 	}
-	return hoc.UsingTool
+	return hoc.usingTool
 }
 
 // UnmarshalYAML - custom unmarshal logic with checking required fields
@@ -44,10 +47,10 @@ func (hoc *HelpOutConfig) UnmarshalYAML(unmarshal func(interface{}) error) (err 
 
 	switch proxy.UsingTool {
 	case helpOutToolPlainTextValue:
-		hoc.UsingTool = HelpOutToolPlainText
+		hoc.usingTool = HelpOutToolPlainText
 
 	case helpOutToolManStyleValue:
-		hoc.UsingTool = HelpOutToolManStyle
+		hoc.usingTool = HelpOutToolManStyle
 
 	default:
 		return fmt.Errorf(`help_out_config.using_tool unmarshal error: unexpected value %s (expected: "%s", "%s")`,
@@ -55,4 +58,14 @@ func (hoc *HelpOutConfig) UnmarshalYAML(unmarshal func(interface{}) error) (err 
 	}
 
 	return nil
+}
+
+// HelpOutConfigSrc - source for constuct a configuration of using help info output tool
+type HelpOutConfigSrc struct {
+	UsingTool HelpOutTool
+}
+
+// ToConstPtr converts src to HelpOutConfig pointer
+func (m HelpOutConfigSrc) ToConstPtr() *HelpOutConfig {
+	return (*HelpOutConfig)(unsafe.Pointer(&m))
 }

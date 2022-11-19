@@ -9,12 +9,10 @@ import (
 
 const (
 	namelessCommandDescriptionNilPart = `
-		// namelessCommandDescription
-		nil`
+		NamelessCommandDescription: nil`
 
 	namelessCommandDescriptionPrefixPart = `
-		// namelessCommandDescription
-		apConf.NewNamelessCommandDescription(`
+		NamelessCommandDescription: apConf.NewNamelessCommandDescription(`
 	namelessCommandDescriptionCommandIDPart = `
 			%s,`
 	namelessCommandDescriptionDescriptionHelpInfoPart = `

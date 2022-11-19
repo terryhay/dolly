@@ -20,8 +20,8 @@ type ArgParserConfigSrc struct {
 	NamelessCommandDescription NamelessCommandDescription
 }
 
-// Cast converts src to ArgParserConfig object
-func (src ArgParserConfigSrc) Cast() ArgParserConfig {
+// ToConst converts src to ArgParserConfig object
+func (src ArgParserConfigSrc) ToConst() ArgParserConfig {
 	return *(*ArgParserConfig)(unsafe.Pointer(&src))
 }
 

@@ -22,8 +22,8 @@ type CommandDescriptionSrc struct {
 	OptionalFlags       map[Flag]bool
 }
 
-// CastPtr converts src to CommandDescription pointer
-func (src CommandDescriptionSrc) CastPtr() *CommandDescription {
+// ToConstPtr converts src to CommandDescription pointer
+func (src CommandDescriptionSrc) ToConstPtr() *CommandDescription {
 	return (*CommandDescription)(unsafe.Pointer(&src))
 }
 

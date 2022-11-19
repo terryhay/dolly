@@ -14,8 +14,8 @@ type FlagDescriptionSrc struct {
 	ArgDescription      *ArgumentsDescription
 }
 
-// CastPtr converts src to FlagDescription pointer
-func (src FlagDescriptionSrc) CastPtr() *FlagDescription {
+// ToConstPtr converts src to FlagDescription pointer
+func (src FlagDescriptionSrc) ToConstPtr() *FlagDescription {
 	return (*FlagDescription)(unsafe.Pointer(&src))
 }
 

@@ -28,7 +28,7 @@ func TestArgumentsDescriptionGetters(t *testing.T) {
 			},
 		}
 
-		pointer = src.CastPtr()
+		pointer = src.ToConstPtr()
 
 		require.Equal(t, pointer.GetAmountType(), pointer.GetAmountType())
 		require.Equal(t, pointer.GetSynopsisHelpDescription(), pointer.GetSynopsisHelpDescription())

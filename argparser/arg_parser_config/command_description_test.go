@@ -36,7 +36,7 @@ func TestCommandDescriptionGetters(t *testing.T) {
 			},
 		}
 
-		pointer = src.CastPtr()
+		pointer = src.ToConstPtr()
 
 		require.Equal(t, src.ID, pointer.GetID())
 		require.Equal(t, src.DescriptionHelpInfo, pointer.GetDescriptionHelpInfo())

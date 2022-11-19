@@ -3,48 +3,49 @@ package config_yaml
 import (
 	"fmt"
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
+	"unsafe"
 )
 
 // ArgumentsDescription - description of command line flag arguments
 type ArgumentsDescription struct {
-	AmountType              apConf.ArgAmountType
-	SynopsisHelpDescription string
+	amountType              apConf.ArgAmountType
+	synopsisHelpDescription string
 
 	// optional
-	DefaultValues []string
-	AllowedValues []string
+	defaultValues []string
+	allowedValues []string
 }
 
-// GetAmountType - AmountType field getter
+// GetAmountType - amountType field getter
 func (ad *ArgumentsDescription) GetAmountType() apConf.ArgAmountType {
 	if ad == nil {
 		return apConf.ArgAmountTypeNoArgs
 	}
-	return ad.AmountType
+	return ad.amountType
 }
 
-// GetSynopsisHelpDescription - SynopsisHelpDescription field getter
+// GetSynopsisHelpDescription - synopsisHelpDescription field getter
 func (ad *ArgumentsDescription) GetSynopsisHelpDescription() string {
 	if ad == nil {
 		return ""
 	}
-	return ad.SynopsisHelpDescription
+	return ad.synopsisHelpDescription
 }
 
-// GetDefaultValues - DefaultValues field getter
+// GetDefaultValues - defaultValues field getter
 func (ad *ArgumentsDescription) GetDefaultValues() []string {
 	if ad == nil {
 		return nil
 	}
-	return ad.DefaultValues
+	return ad.defaultValues
 }
 
-// GetAllowedValues - AllowedValues field getter
+// GetAllowedValues - allowedValues field getter
 func (ad *ArgumentsDescription) GetAllowedValues() []string {
 	if ad == nil {
 		return nil
 	}
-	return ad.AllowedValues
+	return ad.allowedValues
 }
 
 // UnmarshalYAML - custom unmarshal logic with checking required fields
@@ -65,7 +66,7 @@ func (ad *ArgumentsDescription) UnmarshalYAML(unmarshal func(interface{}) error)
 	if len(proxy.AmountType) == 0 {
 		return fmt.Errorf(`argumentsDescriptions unmarshal error: no required field "amount_type"`)
 	}
-	ad.AmountType, err = argAmountStrType2argAmountType(proxy.AmountType)
+	ad.amountType, err = argAmountStrType2argAmountType(proxy.AmountType)
 	if err != nil {
 		return fmt.Errorf(`argumentsDescriptions unmarshal error: can't convert string value "amount_type": %s`, err.Error())
 	}
@@ -73,11 +74,11 @@ func (ad *ArgumentsDescription) UnmarshalYAML(unmarshal func(interface{}) error)
 	if len(proxy.SynopsisDescription) == 0 {
 		return fmt.Errorf(`argumentsDescriptions unmarshal error: no required field "synopsis_description"`)
 	}
-	ad.SynopsisHelpDescription = proxy.SynopsisDescription
+	ad.synopsisHelpDescription = proxy.SynopsisDescription
 
 	// don't check optional fields
-	ad.DefaultValues = proxy.DefaultValues
-	ad.AllowedValues = proxy.AllowedValues
+	ad.defaultValues = proxy.DefaultValues
+	ad.allowedValues = proxy.AllowedValues
 
 	return nil
 }
@@ -92,4 +93,19 @@ func argAmountStrType2argAmountType(argAmountStrType string) (apConf.ArgAmountTy
 		return apConf.ArgAmountTypeNoArgs,
 			fmt.Errorf(`unexpected "amount_type" value: %s\nallowed values: "single", "array"`, argAmountStrType)
 	}
+}
+
+// ArgumentsDescriptionSrc - source for construct a description of command line flag arguments
+type ArgumentsDescriptionSrc struct {
+	AmountType              apConf.ArgAmountType
+	SynopsisHelpDescription string
+
+	// optional
+	DefaultValues []string
+	AllowedValues []string
+}
+
+// ToConstPtr converts src to AppHelpDescription pointer
+func (m ArgumentsDescriptionSrc) ToConstPtr() *ArgumentsDescription {
+	return (*ArgumentsDescription)(unsafe.Pointer(&m))
 }

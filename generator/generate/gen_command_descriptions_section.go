@@ -9,12 +9,10 @@ import (
 
 const (
 	commandDescriptionSliceNilPart = `
-		// commandDescriptions
-		nil`
+		CommandDescriptions: nil`
 
 	commandDescriptionSliceElementPrefixPart = `
-		// commandDescriptions
-		[]*apConf.CommandDescription{`
+		CommandDescriptions: []*apConf.CommandDescription{`
 	commandDescriptionSliceElementRequiredPart = `
 			apConf.CommandDescriptionSrc{
 				ID:                  %s,
@@ -29,7 +27,7 @@ const (
 				OptionalFlags: map[apConf.Flag]bool{%s
 				},`
 	commandDescriptionSliceElementPostfix = `
-			}.CastPtr(),`
+			}.ToConstPtr(),`
 	commandDescriptionSlicePostfix = `
 		}`
 )

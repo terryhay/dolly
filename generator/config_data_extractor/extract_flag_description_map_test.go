@@ -43,12 +43,8 @@ func TestExtractFlagDescriptionMapErrors(t *testing.T) {
 		{
 			caseName: "duplicate_flag_descriptions",
 			flagDescriptions: []*confYML.FlagDescription{
-				{
-					Flag: "flag",
-				},
-				{
-					Flag: "flag",
-				},
+				confYML.FlagDescriptionSrc{Flag: "flag"}.ToConstPtr(),
+				confYML.FlagDescriptionSrc{Flag: "flag"}.ToConstPtr(),
 			},
 			expectedErrorCode: dollyerr.CodeConfigContainsDuplicateFlags,
 		},
@@ -80,33 +76,21 @@ func TestExtractFlagDescriptionMap(t *testing.T) {
 		{
 			caseName: "single_flag_description",
 			flagDescriptions: []*confYML.FlagDescription{
-				{
-					Flag: "flag",
-				},
+				confYML.FlagDescriptionSrc{Flag: "flag"}.ToConstPtr(),
 			},
 			expectedMap: map[string]*confYML.FlagDescription{
-				"flag": {
-					Flag: "flag",
-				},
+				"flag": confYML.FlagDescriptionSrc{Flag: "flag"}.ToConstPtr(),
 			},
 		},
 		{
 			caseName: "two_flag_descriptions",
 			flagDescriptions: []*confYML.FlagDescription{
-				{
-					Flag: "flag1",
-				},
-				{
-					Flag: "flag2",
-				},
+				confYML.FlagDescriptionSrc{Flag: "flag1"}.ToConstPtr(),
+				confYML.FlagDescriptionSrc{Flag: "flag2"}.ToConstPtr(),
 			},
 			expectedMap: map[string]*confYML.FlagDescription{
-				"flag1": {
-					Flag: "flag1",
-				},
-				"flag2": {
-					Flag: "flag2",
-				},
+				"flag1": confYML.FlagDescriptionSrc{Flag: "flag1"}.ToConstPtr(),
+				"flag2": confYML.FlagDescriptionSrc{Flag: "flag2"}.ToConstPtr(),
 			},
 		},
 	}
@@ -120,7 +104,7 @@ func TestExtractFlagDescriptionMap(t *testing.T) {
 			for flag, expectedFlagDescription := range td.expectedMap {
 				flagDescription, contain := flagDescriptionMap[flag]
 				require.True(t, contain)
-				require.Equal(t, expectedFlagDescription.Flag, flagDescription.Flag)
+				require.Equal(t, expectedFlagDescription.GetFlag(), flagDescription.GetFlag())
 			}
 		})
 	}

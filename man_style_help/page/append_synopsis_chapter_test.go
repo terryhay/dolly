@@ -19,7 +19,7 @@ func TestCreateSynopsisChapter(t *testing.T) {
 			gofakeit.Name(),
 			gofakeit.Name(),
 		},
-	}.Cast()
+	}.ToConst()
 
 	namelessCmdRequiredFlag := apConf.Flag("-rf")
 	namelessCmdOptionalFlag := apConf.Flag("-of")
@@ -30,8 +30,8 @@ func TestCreateSynopsisChapter(t *testing.T) {
 		ArgDescription: apConf.ArgumentsDescriptionSrc{
 			AmountType:              apConf.ArgAmountTypeSingle,
 			SynopsisHelpDescription: "arg",
-		}.CastPtr(),
-	}.CastPtr()
+		}.ToConstPtr(),
+	}.ToConstPtr()
 	commandFlagDescriptionWithListArgumentDefaultValue := "val1"
 	commandFlagDescriptionWithListArgumentAllowedValue := "val2"
 	commandFlagDescriptionWithListArgument := apConf.FlagDescriptionSrc{
@@ -44,8 +44,8 @@ func TestCreateSynopsisChapter(t *testing.T) {
 			AllowedValues: map[string]bool{
 				commandFlagDescriptionWithListArgumentAllowedValue: true,
 			},
-		}.CastPtr(),
-	}.CastPtr()
+		}.ToConstPtr(),
+	}.ToConstPtr()
 
 	testData := []struct {
 		caseName string
@@ -66,7 +66,7 @@ func TestCreateSynopsisChapter(t *testing.T) {
 				"nameless command description",
 				apConf.ArgumentsDescriptionSrc{
 					SynopsisHelpDescription: "args",
-				}.CastPtr(),
+				}.ToConstPtr(),
 				map[apConf.Flag]bool{
 					namelessCmdRequiredFlag: true,
 				},
@@ -85,14 +85,14 @@ func TestCreateSynopsisChapter(t *testing.T) {
 					OptionalFlags: map[apConf.Flag]bool{
 						commandFlagWithListArgument: true,
 					},
-				}.CastPtr(),
+				}.ToConstPtr(),
 			},
 			flagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
 				namelessCmdRequiredFlag: apConf.FlagDescriptionSrc{
 					ArgDescription: apConf.ArgumentsDescriptionSrc{
 						SynopsisHelpDescription: "arg1",
-					}.CastPtr(),
-				}.CastPtr(),
+					}.ToConstPtr(),
+				}.ToConstPtr(),
 				commandFlagWithSingleArgument: commandFlagDescriptionWithSingleArgument,
 				commandFlagWithListArgument:   commandFlagDescriptionWithListArgument,
 			},

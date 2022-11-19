@@ -28,8 +28,8 @@ func TestCreateSynopsisChapter(t *testing.T) {
 			ArgDescription: apConf.ArgumentsDescriptionSrc{
 				AmountType:              apConf.ArgAmountTypeSingle,
 				SynopsisHelpDescription: "arg",
-			}.CastPtr(),
-		}.CastPtr()
+			}.ToConstPtr(),
+		}.ToConstPtr()
 
 		commandFlagWithListArgument := apConf.Flag("-la")
 		commandFlagDescriptionWithListArgumentDefaultValue := "val1"
@@ -44,8 +44,8 @@ func TestCreateSynopsisChapter(t *testing.T) {
 				AllowedValues: map[string]bool{
 					commandFlagDescriptionWithListArgumentAllowedValue: true,
 				},
-			}.CastPtr(),
-		}.CastPtr()
+			}.ToConstPtr(),
+		}.ToConstPtr()
 
 		command := apConf.Command("command")
 
@@ -54,7 +54,7 @@ func TestCreateSynopsisChapter(t *testing.T) {
 			"nameless command description",
 			apConf.ArgumentsDescriptionSrc{
 				SynopsisHelpDescription: "args",
-			}.CastPtr(),
+			}.ToConstPtr(),
 			map[apConf.Flag]bool{
 				nullCommandRequiredFlag: true,
 			},
@@ -73,14 +73,14 @@ func TestCreateSynopsisChapter(t *testing.T) {
 				OptionalFlags: map[apConf.Flag]bool{
 					commandFlagWithListArgument: true,
 				},
-			}.CastPtr(),
+			}.ToConstPtr(),
 		}
 		flagDescriptions := map[apConf.Flag]*apConf.FlagDescription{
 			nullCommandRequiredFlag: apConf.FlagDescriptionSrc{
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					SynopsisHelpDescription: "arg1",
-				}.CastPtr(),
-			}.CastPtr(),
+				}.ToConstPtr(),
+			}.ToConstPtr(),
 			commandFlagWithSingleArgument: commandFlagDescriptionWithSingleArgument,
 			commandFlagWithListArgument:   commandFlagDescriptionWithListArgument,
 		}

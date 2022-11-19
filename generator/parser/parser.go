@@ -38,22 +38,22 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 			DescriptionHelpInfo: []string{
 				"generate parser package which contains a command line page parser",
 			},
-		}.Cast(),
+		}.ToConst(),
 		FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
 			FlagC: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo: "yaml file config path",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "file",
-				}.CastPtr(),
-			}.CastPtr(),
+				}.ToConstPtr(),
+			}.ToConstPtr(),
 			FlagO: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo: "generate package path",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "dir",
-				}.CastPtr(),
-			}.CastPtr(),
+				}.ToConstPtr(),
+			}.ToConstPtr(),
 			CommandHelp: {},
 		},
 		HelpCommandDescription: apConf.NewHelpCommandDescription(
@@ -73,7 +73,7 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 			},
 			nil,
 		),
-	}.Cast()
+	}.ToConst()
 
 	res, err = impl.NewCmdArgParserImpl(appArgConfig).Parse(args)
 	if err != nil {

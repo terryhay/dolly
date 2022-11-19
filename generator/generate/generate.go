@@ -17,7 +17,8 @@ func Generate(
 		config.GetCommandDescriptions(),
 		config.GetHelpCommandDescription(),
 		config.GetNamelessCommandDescription(),
-		flagDescriptionMap)
+		flagDescriptionMap,
+	)
 
 	return GenArgParserFileBody(
 		genImportSection(helpOutConfig.GetUsingTool()),

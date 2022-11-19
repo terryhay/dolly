@@ -22,5 +22,5 @@ func NewNamelessCommandDescription(
 		ArgDescription:      argDescription,
 		RequiredFlags:       requiredFlags,
 		OptionalFlags:       optionalFlags,
-	}.CastPtr()
+	}.ToConstPtr()
 }

@@ -36,7 +36,9 @@ func Check(
 
 	for flag, flagDescription := range flagDescriptions {
 		if _, contain = allUsingFlags[flag]; !contain {
-			return dollyerr.NewError(dollyerr.CodeConfigFlagIsNotUsedInCommands, fmt.Errorf(`config_checker.Check: flag "%s" is not found in command descriptions`, flag))
+			return dollyerr.NewError(
+				dollyerr.CodeConfigFlagIsNotUsedInCommands,
+				fmt.Errorf(`config_checker.Check: flag "%s" is not found in command descriptions`, flag))
 		}
 		if err = checkArgumentDescription(flagDescription.GetArgumentsDescription()); err != nil {
 			return err
@@ -45,7 +47,9 @@ func Check(
 
 	for flag, command := range allUsingFlags {
 		if _, contain = flagDescriptions[flag]; !contain {
-			return dollyerr.NewError(dollyerr.CodeConfigUndefinedFlag, fmt.Errorf(`config_checker.Check: command "%s" conains undefined flag "%s"`, command, flag))
+			return dollyerr.NewError(
+				dollyerr.CodeConfigUndefinedFlag,
+				fmt.Errorf(`config_checker.Check: command "%s" conains undefined flag "%s"`, command, flag))
 		}
 	}
 
@@ -144,7 +148,11 @@ func getAllFlagsFromCommandDescriptions(
 		}
 
 		if _, contain = checkDuplicateFlagMap[flag]; contain {
-			return nil, dollyerr.NewError(dollyerr.CodeConfigContainsDuplicateFlags, fmt.Errorf(`getAllFlagsFromCommandDescriptions: command "%s" contains duplicate flag "%s"`, namelessCommand, flag))
+			return nil,
+				dollyerr.NewError(
+					dollyerr.CodeConfigContainsDuplicateFlags,
+					fmt.Errorf(`getAllFlagsFromCommandDescriptions: command "%s" contains duplicate flag "%s"`, namelessCommand, flag),
+				)
 		}
 		checkDuplicateFlagMap[flag] = true
 
@@ -156,7 +164,11 @@ func getAllFlagsFromCommandDescriptions(
 			return nil, err
 		}
 		if _, contain = checkDuplicateFlagMap[flag]; contain {
-			return nil, dollyerr.NewError(dollyerr.CodeConfigContainsDuplicateFlags, fmt.Errorf(`getAllFlagsFromCommandDescriptions: command "%s" contains duplicate flag "%s"`, namelessCommand, flag))
+			return nil,
+				dollyerr.NewError(
+					dollyerr.CodeConfigContainsDuplicateFlags,
+					fmt.Errorf(`getAllFlagsFromCommandDescriptions: command "%s" contains duplicate flag "%s"`, namelessCommand, flag),
+				)
 		}
 		checkDuplicateFlagMap[flag] = true
 
@@ -177,7 +189,11 @@ func getAllFlagsFromCommandDescriptions(
 				return nil, err
 			}
 			if _, contain = checkDuplicateFlagMap[flag]; contain {
-				return nil, dollyerr.NewError(dollyerr.CodeConfigContainsDuplicateFlags, fmt.Errorf(`getAllFlagsFromCommandDescriptions: command "%s" contains duplicate flag "%s"`, commandDescription.GetCommand(), flag))
+				return nil,
+					dollyerr.NewError(
+						dollyerr.CodeConfigContainsDuplicateFlags,
+						fmt.Errorf(`getAllFlagsFromCommandDescriptions: command "%s" contains duplicate flag "%s"`, commandDescription.GetCommand(), flag),
+					)
 			}
 			checkDuplicateFlagMap[flag] = true
 
@@ -190,7 +206,11 @@ func getAllFlagsFromCommandDescriptions(
 				return nil, err
 			}
 			if _, contain = checkDuplicateFlagMap[flag]; contain {
-				return nil, dollyerr.NewError(dollyerr.CodeConfigContainsDuplicateFlags, fmt.Errorf(`getAllFlagsFromCommandDescriptions: command "%s" contains duplicate flag "%s"`, commandDescription.GetCommand(), flag))
+				return nil,
+					dollyerr.NewError(
+						dollyerr.CodeConfigContainsDuplicateFlags,
+						fmt.Errorf(`getAllFlagsFromCommandDescriptions: command "%s" contains duplicate flag "%s"`, commandDescription.GetCommand(), flag),
+					)
 			}
 			checkDuplicateFlagMap[flag] = true
 

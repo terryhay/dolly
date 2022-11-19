@@ -15,7 +15,7 @@ package dolly
 
 // Parse - processes command line arguments
 func Parse(args []string) (*parsed.ParsedData, error) {
-	appArgConfig := apConf.ArgParserConfigSrc{%s,%s,%s,%s,%s}.Cast()
+	appArgConfig := apConf.ArgParserConfigSrc{%s,%s,%s,%s,%s}.ToConst()
 
 	res, err := parser.Parse(appArgConfig, args)
 	if err != nil {
@@ -43,7 +43,6 @@ func GenArgParserFileBody(
 	helpCommandID string,
 	helpOutSection helpOutSection,
 ) string {
-
 	return fmt.Sprintf(
 		templateArgParserFileBody,
 
