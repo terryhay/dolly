@@ -22,28 +22,28 @@ func TestIDTemplateDataCreator(t *testing.T) {
 	creator := NewIDTemplateCreator()
 	commandsIDTemplateData, nullCommandIDTemplateData, flagsIDTemplateData := creator.CreateIDTemplateData(
 		[]*confYML.CommandDescription{
-			{
+			confYML.CommandDescriptionSrc{
 				Command: command,
 				AdditionalCommands: []string{
 					additionalCommand,
 				},
 				DescriptionHelpInfo: commandDescriptionHelpInfo,
-			},
+			}.ToConstPtr(),
 			{
 				// fake empty command
 			},
 		},
-		&confYML.HelpCommandDescription{
+		confYML.HelpCommandDescriptionSrc{
 			Command: helpCommand,
 			AdditionalCommands: []string{
 				additionalHelpCommand,
 			},
-		},
+		}.ToConstPtr(),
 		&confYML.NamelessCommandDescription{},
 		map[string]*confYML.FlagDescription{
-			flag: {
+			flag: confYML.FlagDescriptionSrc{
 				Flag: flag,
-			},
+			}.ToConstPtr(),
 		})
 
 	expectedCommandID := creator.CreateID(PrefixCommandID, command)

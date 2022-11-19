@@ -22,16 +22,16 @@ func TestNamelessCommandDescriptionGetters(t *testing.T) {
 
 	t.Run("initialized_pointer", func(t *testing.T) {
 		pointer = &NamelessCommandDescription{
-			DescriptionHelpInfo:  gofakeit.Name(),
-			RequiredFlags:        []string{gofakeit.Name()},
-			OptionalFlags:        []string{gofakeit.Name()},
-			ArgumentsDescription: &ArgumentsDescription{},
+			descriptionHelpInfo:  gofakeit.Name(),
+			requiredFlags:        []string{gofakeit.Name()},
+			optionalFlags:        []string{gofakeit.Name()},
+			argumentsDescription: &ArgumentsDescription{},
 		}
 
-		require.Equal(t, pointer.DescriptionHelpInfo, pointer.GetDescriptionHelpInfo())
-		require.Equal(t, pointer.RequiredFlags, pointer.GetRequiredFlags())
-		require.Equal(t, pointer.OptionalFlags, pointer.GetOptionalFlags())
-		require.Equal(t, pointer.ArgumentsDescription, pointer.GetArgumentsDescription())
+		require.Equal(t, pointer.descriptionHelpInfo, pointer.GetDescriptionHelpInfo())
+		require.Equal(t, pointer.requiredFlags, pointer.GetRequiredFlags())
+		require.Equal(t, pointer.optionalFlags, pointer.GetOptionalFlags())
+		require.Equal(t, pointer.argumentsDescription, pointer.GetArgumentsDescription())
 	})
 }
 

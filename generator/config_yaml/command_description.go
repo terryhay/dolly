@@ -1,41 +1,44 @@
 package config_yaml
 
-import "fmt"
+import (
+	"fmt"
+	"unsafe"
+)
 
 // CommandDescription - description of a command line command (which can contain flags and arguments)
 type CommandDescription struct {
-	Command             string
-	DescriptionHelpInfo string
+	command             string
+	descriptionHelpInfo string
 
 	// optional
-	RequiredFlags        []string
-	OptionalFlags        []string
-	AdditionalCommands   []string
-	ArgumentsDescription *ArgumentsDescription
+	requiredFlags        []string
+	optionalFlags        []string
+	additionalCommands   []string
+	argumentsDescription *ArgumentsDescription
 }
 
-// GetCommand - Command field getter
+// GetCommand - command field getter
 func (cd *CommandDescription) GetCommand() string {
 	if cd == nil {
 		return ""
 	}
-	return cd.Command
+	return cd.command
 }
 
-// GetAdditionalCommands - AdditionalCommands field getter
+// GetAdditionalCommands - additionalCommands field getter
 func (cd *CommandDescription) GetAdditionalCommands() []string {
 	if cd == nil {
 		return nil
 	}
-	return cd.AdditionalCommands
+	return cd.additionalCommands
 }
 
-// GetDescriptionHelpInfo - DescriptionHelpInfo field getter
+// GetDescriptionHelpInfo - descriptionHelpInfo field getter
 func (cd *CommandDescription) GetDescriptionHelpInfo() string {
 	if cd == nil {
 		return ""
 	}
-	return cd.DescriptionHelpInfo
+	return cd.descriptionHelpInfo
 }
 
 // GetArgumentsDescription - ArgumentsDescription field getter
@@ -43,58 +46,61 @@ func (cd *CommandDescription) GetArgumentsDescription() *ArgumentsDescription {
 	if cd == nil {
 		return nil
 	}
-	return cd.ArgumentsDescription
+	return cd.argumentsDescription
 }
 
-// GetRequiredFlags - RequiredFlags field getter
+// GetRequiredFlags - requiredFlags field getter
 func (cd *CommandDescription) GetRequiredFlags() []string {
 	if cd == nil {
 		return nil
 	}
-	return cd.RequiredFlags
+	return cd.requiredFlags
 }
 
-// GetOptionalFlags - OptionalFlags field getter
+// GetOptionalFlags - optionalFlags field getter
 func (cd *CommandDescription) GetOptionalFlags() []string {
 	if cd == nil {
 		return nil
 	}
-	return cd.OptionalFlags
+	return cd.optionalFlags
 }
 
 // UnmarshalYAML - custom unmarshal logic with checking required fields
 func (cd *CommandDescription) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 	_ = cd
 
-	source := struct {
-		Command             string `yaml:"command"`
-		DescriptionHelpInfo string `yaml:"description_help_info"`
-
-		// optional
-		RequiredFlags        []string              `yaml:"required_flags"`
-		OptionalFlags        []string              `yaml:"optional_flags"`
-		AdditionalCommands   []string              `yaml:"additional_names"`
-		ArgumentsDescription *ArgumentsDescription `yaml:"arguments_description"`
-	}{}
-	if err = unmarshal(&source); err != nil {
+	src := CommandDescriptionSrc{}
+	if err = unmarshal(&src); err != nil {
 		return err
 	}
 
-	if len(source.Command) == 0 {
+	if len(src.Command) == 0 {
 		return fmt.Errorf(`commandDescription unmarshal error: no required field "command"`)
 	}
-	cd.Command = source.Command
 
-	if len(source.DescriptionHelpInfo) == 0 {
+	if len(src.DescriptionHelpInfo) == 0 {
 		return fmt.Errorf(`commandDescription unmarshal error: no required field "description_help_info"`)
 	}
-	cd.DescriptionHelpInfo = source.DescriptionHelpInfo
 
-	// don't check optional fields
-	cd.RequiredFlags = source.RequiredFlags
-	cd.OptionalFlags = source.OptionalFlags
-	cd.AdditionalCommands = source.AdditionalCommands
-	cd.ArgumentsDescription = source.ArgumentsDescription
+	*cd = *src.ToConstPtr()
 
 	return nil
+}
+
+// CommandDescriptionSrc - source for construct a description of a command line command
+// (which can contain flags and arguments)
+type CommandDescriptionSrc struct {
+	Command             string `yaml:"command"`
+	DescriptionHelpInfo string `yaml:"description_help_info"`
+
+	// optional
+	RequiredFlags        []string              `yaml:"required_flags"`
+	OptionalFlags        []string              `yaml:"optional_flags"`
+	AdditionalCommands   []string              `yaml:"additional_names"`
+	ArgumentsDescription *ArgumentsDescription `yaml:"arguments_description"`
+}
+
+// ToConstPtr converts src to CommandDescription pointer
+func (m CommandDescriptionSrc) ToConstPtr() *CommandDescription {
+	return (*CommandDescription)(unsafe.Pointer(&m))
 }

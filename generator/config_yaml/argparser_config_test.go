@@ -22,18 +22,18 @@ func TestArgParserConfigGetters(t *testing.T) {
 
 	t.Run("initialized_pointer", func(t *testing.T) {
 		pointer = &ArgParserConfig{
-			AppHelpDescription:         &AppHelpDescription{},
-			HelpCommandDescription:     &HelpCommandDescription{},
-			NamelessCommandDescription: &NamelessCommandDescription{},
-			CommandDescriptions:        []*CommandDescription{{}},
-			FlagDescriptions:           []*FlagDescription{{}},
+			appHelpDescription:         &AppHelpDescription{},
+			helpCommandDescription:     &HelpCommandDescription{},
+			namelessCommandDescription: &NamelessCommandDescription{},
+			commandDescriptions:        []*CommandDescription{{}},
+			flagDescriptions:           []*FlagDescription{{}},
 		}
 
-		require.Equal(t, pointer.AppHelpDescription, pointer.GetAppHelpDescription())
-		require.Equal(t, pointer.HelpCommandDescription, pointer.GetHelpCommandDescription())
-		require.Equal(t, pointer.NamelessCommandDescription, pointer.GetNamelessCommandDescription())
-		require.Equal(t, pointer.CommandDescriptions, pointer.GetCommandDescriptions())
-		require.Equal(t, pointer.FlagDescriptions, pointer.GetFlagDescriptions())
+		require.Equal(t, pointer.appHelpDescription, pointer.GetAppHelpDescription())
+		require.Equal(t, pointer.helpCommandDescription, pointer.GetHelpCommandDescription())
+		require.Equal(t, pointer.namelessCommandDescription, pointer.GetNamelessCommandDescription())
+		require.Equal(t, pointer.commandDescriptions, pointer.GetCommandDescriptions())
+		require.Equal(t, pointer.flagDescriptions, pointer.GetFlagDescriptions())
 	})
 }
 

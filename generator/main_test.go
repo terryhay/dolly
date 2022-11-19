@@ -149,13 +149,13 @@ func TestLogic(t *testing.T) {
 					nil
 			},
 			getYAMLConfigFunc: func(configPath string) (*confYML.Config, *dollyerr.Error) {
-				return &confYML.Config{
-						ArgParserConfig: &confYML.ArgParserConfig{
+				return confYML.ConfigSrc{
+						ArgParserConfig: confYML.ArgParserConfigSrc{
 							FlagDescriptions: []*confYML.FlagDescription{
 								nil,
 							},
-						},
-					},
+						}.ToConstPtr(),
+					}.ToConstPtr(),
 					nil
 			},
 			osd: osd.NewOSDecorator(
@@ -192,13 +192,13 @@ func TestLogic(t *testing.T) {
 					nil
 			},
 			getYAMLConfigFunc: func(configPath string) (*confYML.Config, *dollyerr.Error) {
-				return &confYML.Config{
-						ArgParserConfig: &confYML.ArgParserConfig{
+				return confYML.ConfigSrc{
+						ArgParserConfig: confYML.ArgParserConfigSrc{
 							CommandDescriptions: []*confYML.CommandDescription{
 								nil,
 							},
-						},
-					},
+						}.ToConstPtr(),
+					}.ToConstPtr(),
 					nil
 			},
 			osd: osd.NewOSDecorator(
@@ -235,18 +235,18 @@ func TestLogic(t *testing.T) {
 					nil
 			},
 			getYAMLConfigFunc: func(configPath string) (*confYML.Config, *dollyerr.Error) {
-				return &confYML.Config{
-						ArgParserConfig: &confYML.ArgParserConfig{
+				return confYML.ConfigSrc{
+						ArgParserConfig: confYML.ArgParserConfigSrc{
 							CommandDescriptions: []*confYML.CommandDescription{
-								{
+								confYML.CommandDescriptionSrc{
 									Command: gofakeit.Name(),
 									RequiredFlags: []string{
 										gofakeit.Color(),
 									},
-								},
+								}.ToConstPtr(),
 							},
-						},
-					},
+						}.ToConstPtr(),
+					}.ToConstPtr(),
 					nil
 			},
 			osd: osd.NewOSDecorator(

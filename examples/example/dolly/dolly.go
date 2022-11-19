@@ -21,12 +21,12 @@ const (
 )
 
 const (
-	// CommandH - print help info
-	CommandH apConf.Command = "-h"
-	// CommandHelp - print help info
-	CommandHelp = "help"
-	// CommandPrint - print command line arguments with optional checking
-	CommandPrint = "print"
+	// commandH - print help info
+	commandH apConf.Command = "-h"
+	// commandHelp - print help info
+	commandHelp = "help"
+	// commandPrint - print command line arguments with optional checking
+	commandPrint = "print"
 )
 
 const (
@@ -112,7 +112,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 				ID:                  CommandIDPrint,
 				DescriptionHelpInfo: "print command line arguments with optional checking",
 				Commands: map[apConf.Command]bool{
-					CommandPrint: true,
+					commandPrint: true,
 				},
 				OptionalFlags: map[apConf.Flag]bool{
 					FlagS:         true,
@@ -129,8 +129,8 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 		apConf.NewHelpCommandDescription(
 			CommandIDPrintHelpInfo,
 			map[apConf.Command]bool{
-				CommandH:    true,
-				CommandHelp: true,
+				commandH:    true,
+				commandHelp: true,
 			},
 		),
 		// namelessCommandDescription

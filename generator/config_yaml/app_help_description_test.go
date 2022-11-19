@@ -22,16 +22,16 @@ func TestAppHelpDescriptionGetters(t *testing.T) {
 
 	t.Run("initialized_pointer", func(t *testing.T) {
 		pointer = &AppHelpDescription{
-			ApplicationName: gofakeit.Name(),
-			NameHelpInfo:    gofakeit.Name(),
-			DescriptionHelpInfo: []string{
+			applicationName: gofakeit.Name(),
+			nameHelpInfo:    gofakeit.Name(),
+			descriptionHelpInfo: []string{
 				gofakeit.Name(),
 			},
 		}
 
-		require.Equal(t, pointer.ApplicationName, pointer.GetApplicationName())
-		require.Equal(t, pointer.NameHelpInfo, pointer.GetNameHelpInfo())
-		require.Equal(t, pointer.DescriptionHelpInfo, pointer.GetDescriptionHelpInfo())
+		require.Equal(t, pointer.applicationName, pointer.GetApplicationName())
+		require.Equal(t, pointer.nameHelpInfo, pointer.GetNameHelpInfo())
+		require.Equal(t, pointer.descriptionHelpInfo, pointer.GetDescriptionHelpInfo())
 	})
 }
 

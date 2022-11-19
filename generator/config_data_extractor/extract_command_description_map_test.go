@@ -43,50 +43,50 @@ func TestExtractCommandDescriptionMapErrors(t *testing.T) {
 		{
 			caseName: "duplicate_flag_descriptions_in_additional_commands_case_1",
 			commandDescriptions: []*confYML.CommandDescription{
-				{
+				confYML.CommandDescriptionSrc{
 					Command: "command",
 					AdditionalCommands: []string{
 						"command",
 					},
-				},
+				}.ToConstPtr(),
 			},
 			expectedErrorCode: dollyerr.CodeConfigContainsDuplicateCommands,
 		},
 		{
 			caseName: "duplicate_flag_descriptions_in_additional_commands_case_10",
 			commandDescriptions: []*confYML.CommandDescription{
-				{
+				confYML.CommandDescriptionSrc{
 					Command: "command",
 					AdditionalCommands: []string{
 						"command",
 						"command1",
 					},
-				},
+				}.ToConstPtr(),
 			},
 			expectedErrorCode: dollyerr.CodeConfigContainsDuplicateCommands,
 		},
 		{
 			caseName: "duplicate_flag_descriptions_in_additional_commands_case_01",
 			commandDescriptions: []*confYML.CommandDescription{
-				{
+				confYML.CommandDescriptionSrc{
 					Command: "command",
 					AdditionalCommands: []string{
 						"command1",
 						"command",
 					},
-				},
+				}.ToConstPtr(),
 			},
 			expectedErrorCode: dollyerr.CodeConfigContainsDuplicateCommands,
 		},
 		{
 			caseName: "duplicate_flag_descriptions",
 			commandDescriptions: []*confYML.CommandDescription{
-				{
+				confYML.CommandDescriptionSrc{
 					Command: "command",
-				},
-				{
+				}.ToConstPtr(),
+				confYML.CommandDescriptionSrc{
 					Command: "command",
-				},
+				}.ToConstPtr(),
 			},
 			expectedErrorCode: dollyerr.CodeConfigContainsDuplicateCommands,
 		},
@@ -118,53 +118,53 @@ func TestExtractCommandDescriptionMap(t *testing.T) {
 		{
 			caseName: "single_flag_description",
 			commandDescriptions: []*confYML.CommandDescription{
-				{
+				confYML.CommandDescriptionSrc{
 					Command: "command",
-				},
+				}.ToConstPtr(),
 			},
 			expectedMap: map[string]*confYML.CommandDescription{
-				"command": {
+				"command": confYML.CommandDescriptionSrc{
 					Command: "command",
-				},
+				}.ToConstPtr(),
 			},
 		},
 		{
 			caseName: "single_flag_description_with_additional_command",
 			commandDescriptions: []*confYML.CommandDescription{
-				{
+				confYML.CommandDescriptionSrc{
 					Command: "command",
 					AdditionalCommands: []string{
 						"command1",
 					},
-				},
+				}.ToConstPtr(),
 			},
 			expectedMap: map[string]*confYML.CommandDescription{
-				"command": {
+				"command": confYML.CommandDescriptionSrc{
 					Command: "command",
 					AdditionalCommands: []string{
 						"command1",
 					},
-				},
+				}.ToConstPtr(),
 			},
 		},
 
 		{
 			caseName: "two_flag_descriptions",
 			commandDescriptions: []*confYML.CommandDescription{
-				{
+				confYML.CommandDescriptionSrc{
 					Command: "command1",
-				},
-				{
+				}.ToConstPtr(),
+				confYML.CommandDescriptionSrc{
 					Command: "command2",
-				},
+				}.ToConstPtr(),
 			},
 			expectedMap: map[string]*confYML.CommandDescription{
-				"command1": {
+				"command1": confYML.CommandDescriptionSrc{
 					Command: "command1",
-				},
-				"command2": {
+				}.ToConstPtr(),
+				"command2": confYML.CommandDescriptionSrc{
 					Command: "command2",
-				},
+				}.ToConstPtr(),
 			},
 		},
 	}
@@ -179,7 +179,7 @@ func TestExtractCommandDescriptionMap(t *testing.T) {
 			for command, expectedCommandDescription := range td.expectedMap {
 				flagDescription, contain := flagDescriptionMap[command]
 				require.True(t, contain)
-				require.Equal(t, expectedCommandDescription.Command, flagDescription.Command)
+				require.Equal(t, expectedCommandDescription.GetCommand(), flagDescription.GetCommand())
 			}
 		})
 	}

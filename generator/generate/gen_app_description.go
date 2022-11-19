@@ -28,7 +28,7 @@ func genAppDescriptionSection(appDescription *confYML.AppHelpDescription) sectio
 			AppName: "%s",
 			NameHelpInfo: "%s",
 			DescriptionHelpInfo: %s,
-		}.Cast()`,
+		}.ToConstPtr()`,
 		appDescription.GetApplicationName(),
 		appDescription.GetNameHelpInfo(),
 		descriptionHelpInfo))

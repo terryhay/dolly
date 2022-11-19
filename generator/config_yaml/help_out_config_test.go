@@ -18,10 +18,10 @@ func TestHelpOutConfig(t *testing.T) {
 
 	t.Run("initialized_pointer", func(t *testing.T) {
 		pointer = &HelpOutConfig{
-			UsingTool: HelpOutToolManStyle,
+			usingTool: HelpOutToolManStyle,
 		}
 
-		require.Equal(t, pointer.UsingTool, pointer.GetUsingTool())
+		require.Equal(t, pointer.usingTool, pointer.GetUsingTool())
 	})
 
 	t.Run("fake_unmarshal_error", func(t *testing.T) {

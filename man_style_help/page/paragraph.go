@@ -85,6 +85,8 @@ func getStyle(sourceRunes []rune, indexBeginStyleSeq int) (termbox.Attribute, in
 		return termbox.AttrBold, indexEndStyleSeq
 	case "[0m":
 		return 0, indexEndStyleSeq
+	case "[4m":
+		return termbox.AttrUnderline, indexEndStyleSeq
 	}
 
 	return 0, indexEndStyleSeq

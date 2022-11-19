@@ -18,9 +18,9 @@ func TestGenerate(t *testing.T) {
 	additionalHelpCommand := "addhelp"
 
 	requiredFlag1 := "-" + "-rf1"
-	requiredFlag1Description := &confYML.FlagDescription{
+	requiredFlag1Description := confYML.FlagDescriptionSrc{
 		Flag: requiredFlag1,
-		ArgumentsDescription: &confYML.ArgumentsDescription{
+		ArgumentsDescription: confYML.ArgumentsDescriptionSrc{
 			AmountType: apConf.ArgAmountTypeSingle,
 			DefaultValues: []string{
 				"f1DefValue",
@@ -28,13 +28,13 @@ func TestGenerate(t *testing.T) {
 			AllowedValues: []string{
 				"f1AllValue",
 			},
-		},
-	}
+		}.ToConstPtr(),
+	}.ToConstPtr()
 
 	requiredFlag2 := "-" + "-rf2"
-	requiredFlag2Description := &confYML.FlagDescription{
+	requiredFlag2Description := confYML.FlagDescriptionSrc{
 		Flag: requiredFlag2,
-		ArgumentsDescription: &confYML.ArgumentsDescription{
+		ArgumentsDescription: confYML.ArgumentsDescriptionSrc{
 			AmountType: apConf.ArgAmountTypeList,
 			DefaultValues: []string{
 				"f2DefValue",
@@ -42,28 +42,28 @@ func TestGenerate(t *testing.T) {
 			AllowedValues: []string{
 				"f2AllValue",
 			},
-		},
-	}
+		}.ToConstPtr(),
+	}.ToConstPtr()
 
 	optionalFlag1 := "-" + "-of1"
-	optionalFlag1Description := &confYML.FlagDescription{
+	optionalFlag1Description := confYML.FlagDescriptionSrc{
 		Flag: optionalFlag1,
-	}
+	}.ToConstPtr()
 
 	optionalFlag2 := "-" + "-of2"
-	optionalFlag2Description := &confYML.FlagDescription{
+	optionalFlag2Description := confYML.FlagDescriptionSrc{
 		Flag: optionalFlag2,
-	}
+	}.ToConstPtr()
 
-	config := &confYML.ArgParserConfig{
+	config := confYML.ArgParserConfigSrc{
 		AppHelpDescription: &confYML.AppHelpDescription{},
-		HelpCommandDescription: &confYML.HelpCommandDescription{
+		HelpCommandDescription: confYML.HelpCommandDescriptionSrc{
 			Command: helpCommand,
 			AdditionalCommands: []string{
 				additionalHelpCommand,
 			},
-		},
-		NamelessCommandDescription: &confYML.NamelessCommandDescription{
+		}.ToConstPtr(),
+		NamelessCommandDescription: confYML.NamelessCommandDescriptionSrc{
 			ArgumentsDescription: &confYML.ArgumentsDescription{},
 			RequiredFlags: []string{
 				requiredFlag1,
@@ -73,15 +73,15 @@ func TestGenerate(t *testing.T) {
 				optionalFlag1,
 				optionalFlag2,
 			},
-		},
+		}.ToConstPtr(),
 		CommandDescriptions: []*confYML.CommandDescription{
-			{
+			confYML.CommandDescriptionSrc{
 				Command: command,
 				AdditionalCommands: []string{
 					additionalCommand,
 				},
 				DescriptionHelpInfo: commandDescriptionHelpInfo,
-				ArgumentsDescription: &confYML.ArgumentsDescription{
+				ArgumentsDescription: confYML.ArgumentsDescriptionSrc{
 					AmountType: apConf.ArgAmountTypeSingle,
 					DefaultValues: []string{
 						"cmdDefValue",
@@ -89,7 +89,7 @@ func TestGenerate(t *testing.T) {
 					AllowedValues: []string{
 						"cmdAllValue",
 					},
-				},
+				}.ToConstPtr(),
 				RequiredFlags: []string{
 					requiredFlag1,
 					requiredFlag2,
@@ -98,10 +98,10 @@ func TestGenerate(t *testing.T) {
 					optionalFlag1,
 					optionalFlag2,
 				},
-			},
-			{
+			}.ToConstPtr(),
+			confYML.CommandDescriptionSrc{
 				// fake empty command
-				ArgumentsDescription: &confYML.ArgumentsDescription{
+				ArgumentsDescription: confYML.ArgumentsDescriptionSrc{
 					AmountType: apConf.ArgAmountTypeList,
 					DefaultValues: []string{
 						"fakeEmptyCommandDefValue",
@@ -109,8 +109,8 @@ func TestGenerate(t *testing.T) {
 					AllowedValues: []string{
 						"fakeEmptyCommandAllValue",
 					},
-				},
-			},
+				}.ToConstPtr(),
+			}.ToConstPtr(),
 		},
 		FlagDescriptions: []*confYML.FlagDescription{
 			requiredFlag1Description,
@@ -118,13 +118,13 @@ func TestGenerate(t *testing.T) {
 			optionalFlag1Description,
 			optionalFlag2Description,
 		},
-	}
+	}.ToConstPtr()
 
 	argParserFileText := Generate(
 		config,
-		&confYML.HelpOutConfig{
+		confYML.HelpOutConfigSrc{
 			UsingTool: confYML.HelpOutToolManStyle,
-		},
+		}.ToConstPtr(),
 		map[string]*confYML.FlagDescription{
 			requiredFlag1: requiredFlag1Description,
 			requiredFlag2: requiredFlag2Description,
@@ -188,7 +188,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 			AppName: "",
 			NameHelpInfo: "",
 			DescriptionHelpInfo: nil,
-		}.Cast(),
+		}.ToConstPtr(),
 		// flagDescriptions
 		map[apConf.Flag]*apConf.FlagDescription{
 			FlagRf1: apConf.FlagDescriptionSrc{
@@ -274,7 +274,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 				FlagOf1: true,
 				FlagOf2: true,
 			},
-		)}.Cast()
+		)}.ToConstPtr()
 
 	res, err := parser.Parse(appArgConfig, args)
 	if err != nil {
@@ -310,22 +310,22 @@ func TestGenerateWithoutNamelessCommand(t *testing.T) {
 	additionalHelpCommand := "addhelp"
 
 	argParserFileText := Generate(
-		&confYML.ArgParserConfig{
-			AppHelpDescription: &confYML.AppHelpDescription{
+		confYML.ArgParserConfigSrc{
+			AppHelpDescription: confYML.AppHelpDescriptionSrc{
 				DescriptionHelpInfo: []string{
 					descriptionHelpInfo,
 				},
-			},
-			HelpCommandDescription: &confYML.HelpCommandDescription{
+			}.ToConstPtr(),
+			HelpCommandDescription: confYML.HelpCommandDescriptionSrc{
 				Command: helpCommand,
 				AdditionalCommands: []string{
 					additionalHelpCommand,
 				},
-			},
-		},
-		&confYML.HelpOutConfig{
+			}.ToConstPtr(),
+		}.ToConstPtr(),
+		confYML.HelpOutConfigSrc{
 			UsingTool: confYML.HelpOutToolManStyle,
-		},
+		}.ToConstPtr(),
 		nil)
 
 	require.Equal(t, `// This code was generated by dolly.generator. DO NOT EDIT
@@ -364,7 +364,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 			DescriptionHelpInfo: []string{
 				"command description help info",
 			},
-		}.Cast(),
+		}.ToConstPtr(),
 		// flagDescriptions
 		nil,
 		// commandDescriptions
@@ -378,7 +378,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 			},
 		),
 		// namelessCommandDescription
-		nil}.Cast()
+		nil}.ToConstPtr()
 
 	res, err := parser.Parse(appArgConfig, args)
 	if err != nil {
@@ -408,19 +408,19 @@ func TestGenerateWithoutHelpCommandDescription(t *testing.T) {
 	t.Parallel()
 
 	argParserFileText := Generate(
-		&confYML.ArgParserConfig{
-			AppHelpDescription: &confYML.AppHelpDescription{
+		confYML.ArgParserConfigSrc{
+			AppHelpDescription: confYML.AppHelpDescriptionSrc{
 				DescriptionHelpInfo: []string{
 					"command description help info",
 				},
-			},
-			NamelessCommandDescription: &confYML.NamelessCommandDescription{
+			}.ToConstPtr(),
+			NamelessCommandDescription: confYML.NamelessCommandDescriptionSrc{
 				DescriptionHelpInfo: "nameless command description help info",
-			},
-		},
-		&confYML.HelpOutConfig{
+			}.ToConstPtr(),
+		}.ToConstPtr(),
+		confYML.HelpOutConfigSrc{
 			UsingTool: confYML.HelpOutToolManStyle,
-		},
+		}.ToConstPtr(),
 		nil)
 
 	require.Equal(t, `// This code was generated by dolly.generator. DO NOT EDIT
@@ -453,7 +453,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 			DescriptionHelpInfo: []string{
 				"command description help info",
 			},
-		}.Cast(),
+		}.ToConstPtr(),
 		// flagDescriptions
 		nil,
 		// commandDescriptions
@@ -467,7 +467,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 			 nil,
 			nil,
 			nil,
-		)}.Cast()
+		)}.ToConstPtr()
 
 	res, err := parser.Parse(appArgConfig, args)
 	if err != nil {
@@ -520,7 +520,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 			AppName: "",
 			NameHelpInfo: "",
 			DescriptionHelpInfo: nil,
-		}.Cast(),
+		}.ToConstPtr(),
 		// flagDescriptions
 		nil,
 		// commandDescriptions
@@ -528,7 +528,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 		// helpCommandDescription
 		nil,
 		// namelessCommandDescription
-		nil}.Cast()
+		nil}.ToConstPtr()
 
 	res, err := parser.Parse(appArgConfig, args)
 	if err != nil {

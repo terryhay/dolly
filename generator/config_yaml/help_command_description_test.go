@@ -21,12 +21,12 @@ func TestHelpCommandDescriptionGetters(t *testing.T) {
 
 	t.Run("initialized_pointer", func(t *testing.T) {
 		pointer = &HelpCommandDescription{
-			Command:            gofakeit.Name(),
-			AdditionalCommands: []string{gofakeit.Name()},
+			command:            gofakeit.Name(),
+			additionalCommands: []string{gofakeit.Name()},
 		}
 
-		require.Equal(t, pointer.Command, pointer.GetCommand())
-		require.Equal(t, pointer.AdditionalCommands, pointer.GetAdditionalCommands())
+		require.Equal(t, pointer.command, pointer.GetCommand())
+		require.Equal(t, pointer.additionalCommands, pointer.GetAdditionalCommands())
 	})
 }
 

@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// PrintHelpInfo prints help information by ArgParserConfig object
+// PrintHelpInfo prints help information by argParserConfig object
 func PrintHelpInfo(config apConf.ArgParserConfig) {
 	builder := strings.Builder{}
 

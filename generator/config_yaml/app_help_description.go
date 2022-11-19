@@ -1,65 +1,75 @@
 package config_yaml
 
-import "fmt"
+import (
+	"fmt"
+	"unsafe"
+)
 
 // AppHelpDescription - application help info page
 type AppHelpDescription struct {
-	ApplicationName     string
-	NameHelpInfo        string
-	DescriptionHelpInfo []string
+	applicationName     string
+	nameHelpInfo        string
+	descriptionHelpInfo []string
 }
 
-// GetApplicationName - ApplicationName field getter
+// GetApplicationName - applicationName field getter
 func (ahd *AppHelpDescription) GetApplicationName() string {
 	if ahd == nil {
 		return ""
 	}
-	return ahd.ApplicationName
+	return ahd.applicationName
 }
 
-// GetNameHelpInfo - NameHelpInfo field getter
+// GetNameHelpInfo - nameHelpInfo field getter
 func (ahd *AppHelpDescription) GetNameHelpInfo() string {
 	if ahd == nil {
 		return ""
 	}
-	return ahd.NameHelpInfo
+	return ahd.nameHelpInfo
 }
 
-// GetDescriptionHelpInfo - DescriptionHelpInfo field getter
+// GetDescriptionHelpInfo - descriptionHelpInfo field getter
 func (ahd *AppHelpDescription) GetDescriptionHelpInfo() []string {
 	if ahd == nil {
 		return nil
 	}
-	return ahd.DescriptionHelpInfo
+	return ahd.descriptionHelpInfo
 }
 
 // UnmarshalYAML - custom unmarshal logic with checking required fields
 func (ahd *AppHelpDescription) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
 	_ = ahd
 
-	proxy := struct {
-		ApplicationName     string   `yaml:"app_name"`
-		NameHelpInfo        string   `yaml:"name_help_info"`
-		DescriptionHelpInfo []string `yaml:"description_help_info"`
-	}{}
-	if err = unmarshal(&proxy); err != nil {
+	src := AppHelpDescriptionSrc{}
+	if err = unmarshal(&src); err != nil {
 		return err
 	}
 
-	if len(proxy.ApplicationName) == 0 {
+	if len(src.ApplicationName) == 0 {
 		return fmt.Errorf(`appHelpDescription unmarshal error: no required field "app_name"`)
 	}
-	ahd.ApplicationName = proxy.ApplicationName
 
-	if len(proxy.NameHelpInfo) == 0 {
+	if len(src.NameHelpInfo) == 0 {
 		return fmt.Errorf(`appHelpDescription unmarshal error: no required field "name_help_info"`)
 	}
-	ahd.NameHelpInfo = proxy.NameHelpInfo
 
-	if len(proxy.DescriptionHelpInfo) == 0 {
+	if len(src.DescriptionHelpInfo) == 0 {
 		return fmt.Errorf(`appHelpDescription unmarshal error: no required field "description_help_info"`)
 	}
-	ahd.DescriptionHelpInfo = proxy.DescriptionHelpInfo
+
+	*ahd = *src.ToConstPtr()
 
 	return nil
+}
+
+// AppHelpDescriptionSrc - source for construct an application help info page
+type AppHelpDescriptionSrc struct {
+	ApplicationName     string   `yaml:"app_name"`
+	NameHelpInfo        string   `yaml:"name_help_info"`
+	DescriptionHelpInfo []string `yaml:"description_help_info"`
+}
+
+// ToConstPtr converts src to AppHelpDescription pointer
+func (m AppHelpDescriptionSrc) ToConstPtr() *AppHelpDescription {
+	return (*AppHelpDescription)(unsafe.Pointer(&m))
 }

@@ -52,7 +52,7 @@ func (pgm *PageModel) GetAnchorRowAbsolutelyIndex() index.Index {
 }
 
 // Update applies terminal size and display actionSequence to the models and rebuild getting display dynamic_row window
-func (pgm *PageModel) Update(sizeTerm ts.TerminalSize, shift int) *dollyerr.Error {
+func (pgm *PageModel) Update(sizeTerm ts.TerminalSize, shiftVertical int) *dollyerr.Error {
 	if pgm == nil {
 		return dollyerr.NewError(
 			dollyerr.CodeHelpDisplayReceiverIsNilPointer,
@@ -66,8 +66,12 @@ func (pgm *PageModel) Update(sizeTerm ts.TerminalSize, shift int) *dollyerr.Erro
 		return dollyerr.Append(err, fmt.Errorf("PageModel.update: modelHeader updating error"))
 	}
 
-	err = pgm.modelBody.Update(sizeTerm.CloneWithNewHeight(sizeTerm.GetHeight().AddInt(-2)), shift)
-	return dollyerr.NewErrorIfItIs(dollyerr.CodeHelpDisplayRunError, "PageModel.update: modelBody updating error", err.Error())
+	const countHeaderAndFooterRows = 2
+	err = pgm.modelBody.Update(
+		sizeTerm.CloneWithNewHeight(sizeTerm.GetHeight().AddInt(-countHeaderAndFooterRows)),
+		shiftVertical,
+	)
+	return dollyerr.Append(err, fmt.Errorf("PageModel.update: modelBody updating error"))
 }
 
 // Shift applies a shift to display dynamic_row window

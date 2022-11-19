@@ -24,16 +24,16 @@ func TestArgumentsDescriptionGetters(t *testing.T) {
 
 	t.Run("initialized_pointer", func(t *testing.T) {
 		pointer = &ArgumentsDescription{
-			AmountType:              apConf.ArgAmountTypeSingle,
-			SynopsisHelpDescription: gofakeit.Name(),
-			DefaultValues:           []string{gofakeit.Name()},
-			AllowedValues:           []string{gofakeit.Name()},
+			amountType:              apConf.ArgAmountTypeSingle,
+			synopsisHelpDescription: gofakeit.Name(),
+			defaultValues:           []string{gofakeit.Name()},
+			allowedValues:           []string{gofakeit.Name()},
 		}
 
-		require.Equal(t, pointer.AmountType, pointer.GetAmountType())
-		require.Equal(t, pointer.SynopsisHelpDescription, pointer.GetSynopsisHelpDescription())
-		require.Equal(t, pointer.DefaultValues, pointer.GetDefaultValues())
-		require.Equal(t, pointer.AllowedValues, pointer.GetAllowedValues())
+		require.Equal(t, pointer.amountType, pointer.GetAmountType())
+		require.Equal(t, pointer.synopsisHelpDescription, pointer.GetSynopsisHelpDescription())
+		require.Equal(t, pointer.defaultValues, pointer.GetDefaultValues())
+		require.Equal(t, pointer.allowedValues, pointer.GetAllowedValues())
 	})
 }
 
