@@ -10,7 +10,7 @@ func main() {
 	parsedData, err := dolly.Parse(os.Args[1:])
 	if err != nil {
 		fmt.Printf("example.Argparser error: %s", err.Error())
-		os.Exit(int(err.Code()))
+		os.Exit(1) // todo: resolve this problem
 	}
 
 	switch parsedData.GetCommandID() {

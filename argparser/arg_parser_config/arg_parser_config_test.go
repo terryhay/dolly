@@ -9,21 +9,19 @@ import (
 func TestArgParserConfigGetters(t *testing.T) {
 	t.Parallel()
 
-	obj := NewArgParserConfig(
-		ApplicationDescription{},
-		map[Flag]*FlagDescription{
+	obj := ArgParserConfigSrc{
+		AppDescription: ApplicationDescription{},
+		FlagDescriptions: map[Flag]*FlagDescription{
 			Flag(gofakeit.Name()): {},
 		},
-		[]*CommandDescription{
+		CommandDescriptions: []*CommandDescription{
 			{},
 		},
-		nil,
-		nil,
-	)
+	}.Cast()
 
-	require.Equal(t, obj.AppDescription, obj.GetAppDescription())
-	require.Equal(t, obj.FlagDescriptions, obj.GetFlagDescriptions())
-	require.Equal(t, obj.CommandDescriptions, obj.GetCommandDescriptions())
-	require.Equal(t, obj.HelpCommandDescription, obj.GetHelpCommandDescription())
-	require.Equal(t, obj.NamelessCommandDescription, obj.GetNamelessCommandDescription())
+	require.Equal(t, obj.appDescription, obj.GetAppDescription())
+	require.Equal(t, obj.flagDescriptions, obj.GetFlagDescriptions())
+	require.Equal(t, obj.commandDescriptions, obj.GetCommandDescriptions())
+	require.Equal(t, obj.helpCommandDescription, obj.GetHelpCommandDescription())
+	require.Equal(t, obj.namelessCommandDescription, obj.GetNamelessCommandDescription())
 }

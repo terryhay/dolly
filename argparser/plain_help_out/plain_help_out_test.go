@@ -30,47 +30,47 @@ func TestPrintHelpInfo(t *testing.T) {
 
 	t.Run("simple_case", func(t *testing.T) {
 		out := tools.CatchStdOut(func() {
-			PrintHelpInfo(apConf.NewArgParserConfig(
-				apConf.ApplicationDescription{
-					AppName:      "appname",
-					NameHelpInfo: "name help info",
-				},
-				nil,
-				[]*apConf.CommandDescription{
-					{
-						ID:                  1,
-						DescriptionHelpInfo: "command id 1 description help info",
-						Commands: map[apConf.Command]bool{
-							"command": true,
-						},
-						ArgDescription: &apConf.ArgumentsDescription{
-							AmountType:              apConf.ArgAmountTypeSingle,
-							SynopsisHelpDescription: "str",
-						},
-						RequiredFlags: map[apConf.Flag]bool{
-							"-rf1": true,
-						},
-						OptionalFlags: map[apConf.Flag]bool{
-							"-of1": true,
-						},
+			PrintHelpInfo(
+				apConf.ArgParserConfigSrc{
+					AppDescription: apConf.ApplicationDescriptionSrc{
+						AppName:      "appname",
+						NameHelpInfo: "name help info",
+					}.Cast(),
+					CommandDescriptions: []*apConf.CommandDescription{
+						apConf.CommandDescriptionSrc{
+							ID:                  1,
+							DescriptionHelpInfo: "command id 1 description help info",
+							Commands: map[apConf.Command]bool{
+								"command": true,
+							},
+							ArgDescription: apConf.ArgumentsDescriptionSrc{
+								AmountType:              apConf.ArgAmountTypeSingle,
+								SynopsisHelpDescription: "str",
+							}.CastPtr(),
+							RequiredFlags: map[apConf.Flag]bool{
+								"-rf1": true,
+							},
+							OptionalFlags: map[apConf.Flag]bool{
+								"-of1": true,
+							},
+						}.CastPtr(),
+						apConf.CommandDescriptionSrc{
+							ID:                  2,
+							DescriptionHelpInfo: "command id 2 description help info",
+							Commands: map[apConf.Command]bool{
+								"longcommand": true,
+							},
+						}.CastPtr(),
 					},
-					{
-						ID:                  2,
-						DescriptionHelpInfo: "command id 2 description help info",
-						Commands: map[apConf.Command]bool{
-							"longcommand": true,
-						},
-					},
-				},
-				nil,
-				apConf.NewNamelessCommandDescription(
-					0,
-					"nameless command description",
-					nil,
-					nil,
-					nil,
-				),
-			))
+					NamelessCommandDescription: apConf.NewNamelessCommandDescription(
+						0,
+						"nameless command description",
+						nil,
+						nil,
+						nil,
+					),
+				}.Cast(),
+			)
 		})
 
 		ok, msg := tools.CheckSpaces(out)

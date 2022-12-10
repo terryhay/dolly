@@ -16,12 +16,11 @@ func NewNamelessCommandDescription(
 	requiredFlags map[Flag]bool,
 	optionalFlags map[Flag]bool,
 ) NamelessCommandDescription {
-
-	return &CommandDescription{
+	return CommandDescriptionSrc{
 		ID:                  id,
 		DescriptionHelpInfo: descriptionHelpInfo,
 		ArgDescription:      argDescription,
 		RequiredFlags:       requiredFlags,
 		OptionalFlags:       optionalFlags,
-	}
+	}.CastPtr()
 }

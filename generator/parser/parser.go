@@ -31,45 +31,39 @@ const (
 
 // Parse - processes command line arguments
 func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
-	appArgConfig := apConf.NewArgParserConfig(
-		// appDescription
-		apConf.ApplicationDescription{
+	appArgConfig := apConf.ArgParserConfigSrc{
+		AppDescription: apConf.ApplicationDescriptionSrc{
 			AppName:      "gen_dolly",
 			NameHelpInfo: "code generator",
 			DescriptionHelpInfo: []string{
 				"generate parser package which contains a command line page parser",
 			},
-		},
-		// flagDescriptions
-		map[apConf.Flag]*apConf.FlagDescription{
-			FlagC: {
+		}.Cast(),
+		FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
+			FlagC: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo: "yaml file config path",
-				ArgDescription: &apConf.ArgumentsDescription{
+				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "file",
-				},
-			},
-			FlagO: {
+				}.CastPtr(),
+			}.CastPtr(),
+			FlagO: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo: "generate package path",
-				ArgDescription: &apConf.ArgumentsDescription{
+				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "dir",
-				},
-			},
+				}.CastPtr(),
+			}.CastPtr(),
 			CommandHelp: {},
 		},
-		// commandDescriptions
-		nil,
-		// helpCommandDescription
-		apConf.NewHelpCommandDescription(
+		HelpCommandDescription: apConf.NewHelpCommandDescription(
 			CommandIDHelp,
 			map[apConf.Command]bool{
 				CommandHelp: true,
 				CommandH:    true,
 			},
 		),
-		// namelessCommandDescription
-		apConf.NewNamelessCommandDescription(
+		NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 			CommandIDNullCommand,
 			"generate parser package",
 			nil,
@@ -79,7 +73,7 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 			},
 			nil,
 		),
-	)
+	}.Cast()
 
 	res, err = impl.NewCmdArgParserImpl(appArgConfig).Parse(args)
 	if err != nil {

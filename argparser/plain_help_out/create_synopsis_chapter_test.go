@@ -24,18 +24,18 @@ func TestCreateSynopsisChapter(t *testing.T) {
 		nullCommandOptionalFlag := apConf.Flag("-of")
 
 		commandFlagWithSingleArgument := apConf.Flag("-sa")
-		commandFlagDescriptionWithSingleArgument := &apConf.FlagDescription{
-			ArgDescription: &apConf.ArgumentsDescription{
+		commandFlagDescriptionWithSingleArgument := apConf.FlagDescriptionSrc{
+			ArgDescription: apConf.ArgumentsDescriptionSrc{
 				AmountType:              apConf.ArgAmountTypeSingle,
 				SynopsisHelpDescription: "arg",
-			},
-		}
+			}.CastPtr(),
+		}.CastPtr()
 
 		commandFlagWithListArgument := apConf.Flag("-la")
 		commandFlagDescriptionWithListArgumentDefaultValue := "val1"
 		commandFlagDescriptionWithListArgumentAllowedValue := "val2"
-		commandFlagDescriptionWithListArgument := &apConf.FlagDescription{
-			ArgDescription: &apConf.ArgumentsDescription{
+		commandFlagDescriptionWithListArgument := apConf.FlagDescriptionSrc{
+			ArgDescription: apConf.ArgumentsDescriptionSrc{
 				AmountType:              apConf.ArgAmountTypeList,
 				SynopsisHelpDescription: "str",
 				DefaultValues: []string{
@@ -44,17 +44,17 @@ func TestCreateSynopsisChapter(t *testing.T) {
 				AllowedValues: map[string]bool{
 					commandFlagDescriptionWithListArgumentAllowedValue: true,
 				},
-			},
-		}
+			}.CastPtr(),
+		}.CastPtr()
 
 		command := apConf.Command("command")
 
 		namelessCommandDescription := apConf.NewNamelessCommandDescription(
 			0,
 			"nameless command description",
-			&apConf.ArgumentsDescription{
+			apConf.ArgumentsDescriptionSrc{
 				SynopsisHelpDescription: "args",
-			},
+			}.CastPtr(),
 			map[apConf.Flag]bool{
 				nullCommandRequiredFlag: true,
 			},
@@ -63,7 +63,7 @@ func TestCreateSynopsisChapter(t *testing.T) {
 			},
 		)
 		commandDescriptions := []*apConf.CommandDescription{
-			{
+			apConf.CommandDescriptionSrc{
 				Commands: map[apConf.Command]bool{
 					command: true,
 				},
@@ -73,14 +73,14 @@ func TestCreateSynopsisChapter(t *testing.T) {
 				OptionalFlags: map[apConf.Flag]bool{
 					commandFlagWithListArgument: true,
 				},
-			},
+			}.CastPtr(),
 		}
 		flagDescriptions := map[apConf.Flag]*apConf.FlagDescription{
-			nullCommandRequiredFlag: {
-				ArgDescription: &apConf.ArgumentsDescription{
+			nullCommandRequiredFlag: apConf.FlagDescriptionSrc{
+				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					SynopsisHelpDescription: "arg1",
-				},
-			},
+				}.CastPtr(),
+			}.CastPtr(),
 			commandFlagWithSingleArgument: commandFlagDescriptionWithSingleArgument,
 			commandFlagWithListArgument:   commandFlagDescriptionWithListArgument,
 		}

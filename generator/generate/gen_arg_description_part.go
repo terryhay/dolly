@@ -12,7 +12,7 @@ const (
 %[1]s%[2]s nil`
 
 	argumentsDescriptionPrefix = `
-%[1]s%[2]s&apConf.ArgumentsDescription{
+%[1]s%[2]sapConf.ArgumentsDescriptionSrc{
 %[1]s	AmountType:              %[3]s,
 %[1]s	SynopsisHelpDescription: "%[4]s",`
 	argumentsDescriptionDefaultValuesPrefix = `
@@ -24,9 +24,9 @@ const (
 	argumentsDescriptionMapVariantValue = `
 %[1]s		"%[2]s": true,`
 	argumentsDescriptionVariantValuesPostfix = `
-%[1]s	},`
+%[1]s	}.CastPtr(),`
 	argumentsDescriptionPostfix = `
-%[1]s}`
+%[1]s}.CastPtr()`
 )
 
 // GenArgDescriptionPart - creates a paste part with argument description

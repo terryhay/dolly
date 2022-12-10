@@ -12,30 +12,30 @@ import (
 func TestCreateSynopsisChapter(t *testing.T) {
 	t.Parallel()
 
-	appDescription := apConf.ApplicationDescription{
+	appDescription := apConf.ApplicationDescriptionSrc{
 		AppName:      gofakeit.Color(),
 		NameHelpInfo: gofakeit.Name(),
 		DescriptionHelpInfo: []string{
 			gofakeit.Name(),
 			gofakeit.Name(),
 		},
-	}
+	}.Cast()
 
 	namelessCmdRequiredFlag := apConf.Flag("-rf")
 	namelessCmdOptionalFlag := apConf.Flag("-of")
 	command := apConf.Command(gofakeit.Color())
 	commandFlagWithSingleArgument := apConf.Flag("-sa")
 	commandFlagWithListArgument := apConf.Flag("-la")
-	commandFlagDescriptionWithSingleArgument := &apConf.FlagDescription{
-		ArgDescription: &apConf.ArgumentsDescription{
+	commandFlagDescriptionWithSingleArgument := apConf.FlagDescriptionSrc{
+		ArgDescription: apConf.ArgumentsDescriptionSrc{
 			AmountType:              apConf.ArgAmountTypeSingle,
 			SynopsisHelpDescription: "arg",
-		},
-	}
+		}.CastPtr(),
+	}.CastPtr()
 	commandFlagDescriptionWithListArgumentDefaultValue := "val1"
 	commandFlagDescriptionWithListArgumentAllowedValue := "val2"
-	commandFlagDescriptionWithListArgument := &apConf.FlagDescription{
-		ArgDescription: &apConf.ArgumentsDescription{
+	commandFlagDescriptionWithListArgument := apConf.FlagDescriptionSrc{
+		ArgDescription: apConf.ArgumentsDescriptionSrc{
 			AmountType:              apConf.ArgAmountTypeList,
 			SynopsisHelpDescription: "str",
 			DefaultValues: []string{
@@ -44,8 +44,8 @@ func TestCreateSynopsisChapter(t *testing.T) {
 			AllowedValues: map[string]bool{
 				commandFlagDescriptionWithListArgumentAllowedValue: true,
 			},
-		},
-	}
+		}.CastPtr(),
+	}.CastPtr()
 
 	testData := []struct {
 		caseName string
@@ -64,9 +64,9 @@ func TestCreateSynopsisChapter(t *testing.T) {
 			namelessCommandDescription: apConf.NewNamelessCommandDescription(
 				0,
 				"nameless command description",
-				&apConf.ArgumentsDescription{
+				apConf.ArgumentsDescriptionSrc{
 					SynopsisHelpDescription: "args",
-				},
+				}.CastPtr(),
 				map[apConf.Flag]bool{
 					namelessCmdRequiredFlag: true,
 				},
@@ -75,7 +75,7 @@ func TestCreateSynopsisChapter(t *testing.T) {
 				},
 			),
 			commandDescriptions: []*apConf.CommandDescription{
-				{
+				apConf.CommandDescriptionSrc{
 					Commands: map[apConf.Command]bool{
 						command: true,
 					},
@@ -85,14 +85,14 @@ func TestCreateSynopsisChapter(t *testing.T) {
 					OptionalFlags: map[apConf.Flag]bool{
 						commandFlagWithListArgument: true,
 					},
-				},
+				}.CastPtr(),
 			},
 			flagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-				namelessCmdRequiredFlag: {
-					ArgDescription: &apConf.ArgumentsDescription{
+				namelessCmdRequiredFlag: apConf.FlagDescriptionSrc{
+					ArgDescription: apConf.ArgumentsDescriptionSrc{
 						SynopsisHelpDescription: "arg1",
-					},
-				},
+					}.CastPtr(),
+				}.CastPtr(),
 				commandFlagWithSingleArgument: commandFlagDescriptionWithSingleArgument,
 				commandFlagWithListArgument:   commandFlagDescriptionWithListArgument,
 			},

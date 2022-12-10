@@ -8,7 +8,7 @@ type HelpCommandDescription interface {
 
 func NewHelpCommandDescription(id CommandID, commands map[Command]bool) HelpCommandDescription {
 	return &CommandDescription{
-		ID:       id,
-		Commands: commands,
+		id:       id,
+		commands: commands,
 	}
 }

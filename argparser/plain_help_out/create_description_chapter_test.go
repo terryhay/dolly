@@ -38,9 +38,9 @@ func TestCreateDescriptionChapter(t *testing.T) {
 			caseName:            "two_flags",
 			descriptionHelpInfo: []string{randDescriptionHelpInfo},
 			flagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-				randFlag: {
+				randFlag: apConf.FlagDescriptionSrc{
 					DescriptionHelpInfo: randFlagDescriptionHelpInfo,
-				},
+				}.CastPtr(),
 			},
 
 			expected: fmt.Sprintf(`[1mDESCRIPTION[0m
@@ -59,14 +59,14 @@ The flags are as follows:
 			caseName:            "command_and_flag_descriptions",
 			descriptionHelpInfo: []string{randDescriptionHelpInfo},
 			commandDescriptions: []*apConf.CommandDescription{
-				{
+				apConf.CommandDescriptionSrc{
 					Commands: map[apConf.Command]bool{randCommand: true},
-				},
+				}.CastPtr(),
 			},
 			flagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-				randFlag: {
+				randFlag: apConf.FlagDescriptionSrc{
 					DescriptionHelpInfo: randFlagDescriptionHelpInfo,
-				},
+				}.CastPtr(),
 			},
 
 			expected: fmt.Sprintf(`[1mDESCRIPTION[0m

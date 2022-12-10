@@ -24,11 +24,11 @@ func genAppDescriptionSection(appDescription *confYML.AppHelpDescription) sectio
 
 	return sectionAppDescription(fmt.Sprintf(`
 		// appDescription
-		apConf.ApplicationDescription{
+		apConf.ApplicationDescriptionSrc{
 			AppName: "%s",
 			NameHelpInfo: "%s",
 			DescriptionHelpInfo: %s,
-		}`,
+		}.Cast()`,
 		appDescription.GetApplicationName(),
 		appDescription.GetNameHelpInfo(),
 		descriptionHelpInfo))

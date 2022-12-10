@@ -48,67 +48,67 @@ const (
 
 // Parse - processes command line arguments
 func Parse(args []string) (*parsed.ParsedData, error) {
-	appArgConfig := apConf.NewArgParserConfig(
+	appArgConfig := apConf.ArgParserConfigSrc{
 		// appDescription
-		apConf.ApplicationDescription{
+		apConf.ApplicationDescriptionSrc{
 			AppName:      "example",
 			NameHelpInfo: "shows how parser generator works",
 			DescriptionHelpInfo: []string{
 				"you can write more detailed description here",
 				"and use several paragraphs",
 			},
-		},
+		}.Cast(),
 		// flagDescriptions
 		map[apConf.Flag]*apConf.FlagDescription{
-			FlagS: {
+			FlagS: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo: "single string",
-				ArgDescription: &apConf.ArgumentsDescription{
+				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "str",
-				},
-			},
-			FlagSl: {
+				}.CastPtr(),
+			}.CastPtr(),
+			FlagSl: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo: "string list",
-				ArgDescription: &apConf.ArgumentsDescription{
+				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeList,
 					SynopsisHelpDescription: "str",
-				},
-			},
-			FlagI: {
+				}.CastPtr(),
+			}.CastPtr(),
+			FlagI: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo: "int string",
-				ArgDescription: &apConf.ArgumentsDescription{
+				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "str",
-				},
-			},
-			FlagIl: {
+				}.CastPtr(),
+			}.CastPtr(),
+			FlagIl: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo: "int list",
-				ArgDescription: &apConf.ArgumentsDescription{
+				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeList,
 					SynopsisHelpDescription: "str",
-				},
-			},
-			FlagF: {
+				}.CastPtr(),
+			}.CastPtr(),
+			FlagF: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo: "single float",
-				ArgDescription: &apConf.ArgumentsDescription{
+				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "str",
-				},
-			},
-			FlagFl: {
+				}.CastPtr(),
+			}.CastPtr(),
+			FlagFl: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo: "float list",
-				ArgDescription: &apConf.ArgumentsDescription{
+				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeList,
 					SynopsisHelpDescription: "str",
-				},
-			},
-			FlagCheckargs: {
+				}.CastPtr(),
+			}.CastPtr(),
+			FlagCheckargs: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo: "do arguments checking",
-			},
+			}.CastPtr(),
 		},
 		// commandDescriptions
 		[]*apConf.CommandDescription{
-			{
+			apConf.CommandDescriptionSrc{
 				ID:                  CommandIDPrint,
 				DescriptionHelpInfo: "print command line arguments with optional checking",
 				Commands: map[apConf.Command]bool{
@@ -123,7 +123,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 					FlagFl:        true,
 					FlagCheckargs: true,
 				},
-			},
+			}.CastPtr(),
 		},
 		// helpCommandDescription
 		apConf.NewHelpCommandDescription(
@@ -144,7 +144,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 				FlagIl: true,
 				FlagFl: true,
 			},
-		))
+		)}.Cast()
 
 	res, err := parser.Parse(appArgConfig, args)
 	if err != nil {

@@ -43,34 +43,34 @@ func TestParse(t *testing.T) {
 			args: []string{
 				gofakeit.Color(),
 			},
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				CommandDescriptions: []*apConf.CommandDescription{
-					{
+					apConf.CommandDescriptionSrc{
 						Commands: map[apConf.Command]bool{
 							apConf.Command(gofakeit.Color()): true,
 						},
-					},
+					}.CastPtr(),
 				},
-			},
+			}.Cast(),
 			expectedErr: fakeError(dollyerr.CodeCantFindFlagNameInGroupSpec),
 		},
 		{
 			caseName: "no_args_for_nameless_command",
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
 					nil,
 					nil,
 					nil),
-			},
+			}.Cast(),
 			expectedParsedData: &parsed_data.ParsedData{
 				CommandID: namelessCommandID,
 			},
 		},
 		{
 			caseName: "no_args_for_nameless_command_with_required_flag",
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
@@ -79,49 +79,49 @@ func TestParse(t *testing.T) {
 						requiredFlag: true,
 					},
 					nil),
-			},
+			}.Cast(),
 			expectedErr: fakeError(dollyerr.CodeArgParserRequiredFlagIsNotSet),
 		},
 		{
 			caseName: "no_args_for_nameless_command_with_required_argument",
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
-					&apConf.ArgumentsDescription{
+					apConf.ArgumentsDescriptionSrc{
 						AmountType: apConf.ArgAmountTypeSingle,
-					},
+					}.CastPtr(),
 					nil,
 					nil),
-			},
+			}.Cast(),
 			expectedErr: fakeError(dollyerr.CodeArgParserCommandDoesNotContainArgs),
 		},
 		{
 			caseName: "waste_arg_for_nameless_command",
 			args:     []string{arg},
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
 					nil,
 					nil,
 					nil),
-			},
+			}.Cast(),
 			expectedErr: fakeError(dollyerr.CodeArgParserUnexpectedArg),
 		},
 		{
 			caseName: "arg_for_nameless_command_with_required_arg",
 			args:     []string{arg},
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
-					&apConf.ArgumentsDescription{
+					apConf.ArgumentsDescriptionSrc{
 						AmountType: apConf.ArgAmountTypeSingle,
-					},
+					}.CastPtr(),
 					nil,
 					nil),
-			},
+			}.Cast(),
 			expectedParsedData: &parsed_data.ParsedData{
 				CommandID: namelessCommandID,
 				ArgData: &parsed_data.ParsedArgData{
@@ -135,7 +135,7 @@ func TestParse(t *testing.T) {
 				string(requiredFlag),
 				string(requiredFlag),
 			},
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
@@ -147,7 +147,7 @@ func TestParse(t *testing.T) {
 				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
 					requiredFlag: {},
 				},
-			},
+			}.Cast(),
 			expectedErr: fakeError(dollyerr.CodeArgParserDuplicateFlags),
 		},
 		{
@@ -156,7 +156,7 @@ func TestParse(t *testing.T) {
 				string(requiredFlag),
 				"-" + gofakeit.Color(),
 			},
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
@@ -166,13 +166,13 @@ func TestParse(t *testing.T) {
 					},
 					nil),
 				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: {
-						ArgDescription: &apConf.ArgumentsDescription{
+					requiredFlag: apConf.FlagDescriptionSrc{
+						ArgDescription: apConf.ArgumentsDescriptionSrc{
 							AmountType: apConf.ArgAmountTypeSingle,
-						},
-					},
+						}.CastPtr(),
+					}.CastPtr(),
 				},
-			},
+			}.Cast(),
 			expectedErr: fakeError(dollyerr.CodeArgParserDashInFrontOfArg),
 		},
 		{
@@ -181,7 +181,7 @@ func TestParse(t *testing.T) {
 				string(requiredFlag),
 				"-" + gofakeit.Color(),
 			},
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
@@ -191,13 +191,13 @@ func TestParse(t *testing.T) {
 					},
 					nil),
 				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: {
-						ArgDescription: &apConf.ArgumentsDescription{
+					requiredFlag: apConf.FlagDescriptionSrc{
+						ArgDescription: apConf.ArgumentsDescriptionSrc{
 							AmountType: apConf.ArgAmountTypeList,
-						},
-					},
+						}.CastPtr(),
+					}.CastPtr(),
 				},
-			},
+			}.Cast(),
 			expectedErr: fakeError(dollyerr.CodeArgParserDashInFrontOfArg),
 		},
 		{
@@ -207,7 +207,7 @@ func TestParse(t *testing.T) {
 				gofakeit.Color(),
 				"-" + gofakeit.Color(),
 			},
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
@@ -217,18 +217,18 @@ func TestParse(t *testing.T) {
 					},
 					nil),
 				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: {
-						ArgDescription: &apConf.ArgumentsDescription{
+					requiredFlag: apConf.FlagDescriptionSrc{
+						ArgDescription: apConf.ArgumentsDescriptionSrc{
 							AmountType: apConf.ArgAmountTypeList,
-						},
-					},
+						}.CastPtr(),
+					}.CastPtr(),
 				},
 				HelpCommandDescription: apConf.NewHelpCommandDescription(
 					apConf.CommandID(gofakeit.Uint32()),
 					map[apConf.Command]bool{
 						apConf.Command(gofakeit.Color()): true,
 					}),
-			},
+			}.Cast(),
 			expectedErr: fakeError(dollyerr.CodeArgParserUnexpectedFlag),
 		},
 		{
@@ -238,7 +238,7 @@ func TestParse(t *testing.T) {
 				arg,
 				string(requiredFlag),
 			},
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
@@ -248,13 +248,13 @@ func TestParse(t *testing.T) {
 					},
 					nil),
 				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: {
-						ArgDescription: &apConf.ArgumentsDescription{
+					requiredFlag: apConf.FlagDescriptionSrc{
+						ArgDescription: apConf.ArgumentsDescriptionSrc{
 							AmountType: apConf.ArgAmountTypeList,
-						},
-					},
+						}.CastPtr(),
+					}.CastPtr(),
 				},
-			},
+			}.Cast(),
 			expectedErr: fakeError(dollyerr.CodeArgParserDuplicateFlags),
 		},
 		{
@@ -264,7 +264,7 @@ func TestParse(t *testing.T) {
 				arg,
 				string(optionalFlag),
 			},
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
@@ -276,14 +276,14 @@ func TestParse(t *testing.T) {
 						optionalFlag: true,
 					}),
 				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: {
-						ArgDescription: &apConf.ArgumentsDescription{
+					requiredFlag: apConf.FlagDescriptionSrc{
+						ArgDescription: apConf.ArgumentsDescriptionSrc{
 							AmountType: apConf.ArgAmountTypeList,
-						},
-					},
+						}.CastPtr(),
+					}.CastPtr(),
 					optionalFlag: {},
 				},
-			},
+			}.Cast(),
 			expectedParsedData: &parsed_data.ParsedData{
 				CommandID: namelessCommandID,
 				FlagDataMap: map[apConf.Flag]*parsed_data.ParsedFlagData{
@@ -304,30 +304,30 @@ func TestParse(t *testing.T) {
 		{
 			caseName: "failed_final_parsed_data_checking",
 			args:     []string{arg},
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
-					&apConf.ArgumentsDescription{
+					apConf.ArgumentsDescriptionSrc{
 						AmountType: apConf.ArgAmountTypeSingle,
-					},
+					}.CastPtr(),
 					map[apConf.Flag]bool{
 						requiredFlag: true,
 					},
 					nil),
-			},
+			}.Cast(),
 			expectedErr: fakeError(dollyerr.CodeArgParserRequiredFlagIsNotSet),
 		},
 		{
 			caseName: "arg_and_no_default_value",
 			args:     []string{string(requiredFlag)},
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
-					&apConf.ArgumentsDescription{
+					apConf.ArgumentsDescriptionSrc{
 						AmountType: apConf.ArgAmountTypeSingle,
-					},
+					}.CastPtr(),
 					map[apConf.Flag]bool{
 						requiredFlag: true,
 					},
@@ -335,17 +335,17 @@ func TestParse(t *testing.T) {
 				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
 					requiredFlag: {},
 				},
-			},
+			}.Cast(),
 			expectedErr: fakeError(dollyerr.CodeArgParserFlagMustHaveArg),
 		},
 		{
 			caseName: "success_using_default_value",
 			args:     []string{string(requiredFlag)},
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
-					&apConf.ArgumentsDescription{
+					apConf.ArgumentsDescriptionSrc{
 						AmountType: apConf.ArgAmountTypeSingle,
 						DefaultValues: []string{
 							arg,
@@ -353,7 +353,7 @@ func TestParse(t *testing.T) {
 						AllowedValues: map[string]bool{
 							gofakeit.Color(): true,
 						},
-					},
+					}.CastPtr(),
 					map[apConf.Flag]bool{
 						requiredFlag: true,
 					},
@@ -361,7 +361,7 @@ func TestParse(t *testing.T) {
 				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
 					requiredFlag: {},
 				},
-			},
+			}.Cast(),
 			expectedParsedData: &parsed_data.ParsedData{
 				CommandID: namelessCommandID,
 				ArgData: &parsed_data.ParsedArgData{
@@ -379,16 +379,16 @@ func TestParse(t *testing.T) {
 		{
 			caseName: "not_allowed_value",
 			args:     []string{gofakeit.Color(), string(requiredFlag)},
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
-					&apConf.ArgumentsDescription{
+					apConf.ArgumentsDescriptionSrc{
 						AmountType: apConf.ArgAmountTypeSingle,
 						AllowedValues: map[string]bool{
 							gofakeit.Color(): true,
 						},
-					},
+					}.CastPtr(),
 					map[apConf.Flag]bool{
 						requiredFlag: true,
 					},
@@ -396,22 +396,22 @@ func TestParse(t *testing.T) {
 				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
 					requiredFlag: {},
 				},
-			},
+			}.Cast(),
 			expectedErr: fakeError(dollyerr.CodeArgParserArgValueIsNotAllowed),
 		},
 		{
 			caseName: "success_allowed_value_checking",
 			args:     []string{arg, string(requiredFlag)},
-			config: apConf.ArgParserConfig{
+			config: apConf.ArgParserConfigSrc{
 				NamelessCommandDescription: apConf.NewNamelessCommandDescription(
 					namelessCommandID,
 					"",
-					&apConf.ArgumentsDescription{
+					apConf.ArgumentsDescriptionSrc{
 						AmountType: apConf.ArgAmountTypeSingle,
 						AllowedValues: map[string]bool{
 							arg: true,
 						},
-					},
+					}.CastPtr(),
 					map[apConf.Flag]bool{
 						requiredFlag: true,
 					},
@@ -419,7 +419,7 @@ func TestParse(t *testing.T) {
 				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
 					requiredFlag: {},
 				},
-			},
+			}.Cast(),
 			expectedParsedData: &parsed_data.ParsedData{
 				CommandID: namelessCommandID,
 				ArgData: &parsed_data.ParsedArgData{

@@ -37,16 +37,16 @@ func TestAppendDescriptionChapter(t *testing.T) {
 		},
 		{
 			caseName: "two_flags",
-			appDescription: apConf.ApplicationDescription{
+			appDescription: apConf.ApplicationDescriptionSrc{
 				DescriptionHelpInfo: []string{
 					randDescriptionHelpInfo,
 					randDescriptionHelpInfoSecond,
 				},
-			},
+			}.Cast(),
 			flagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-				randFlag: {
+				randFlag: apConf.FlagDescriptionSrc{
 					DescriptionHelpInfo: randFlagDescriptionHelpInfo,
-				},
+				}.CastPtr(),
 			},
 
 			expected: fmt.Sprintf(`
@@ -67,22 +67,22 @@ The flags are as follows:
 		{
 			caseName: "command_and_flag_descriptions",
 
-			appDescription: apConf.ApplicationDescription{
+			appDescription: apConf.ApplicationDescriptionSrc{
 				DescriptionHelpInfo: []string{randDescriptionHelpInfo},
-			},
+			}.Cast(),
 			namelessCommandDescription: apConf.NewNamelessCommandDescription(0, randNamelessCommandDescription, nil, nil, nil),
 			commandDescriptions: []*apConf.CommandDescription{
-				{
+				apConf.CommandDescriptionSrc{
 					Commands: map[apConf.Command]bool{randCommand: true},
-				},
-				{
+				}.CastPtr(),
+				apConf.CommandDescriptionSrc{
 					Commands: map[apConf.Command]bool{randCommandSecond: true},
-				},
+				}.CastPtr(),
 			},
 			flagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-				randFlag: {
+				randFlag: apConf.FlagDescriptionSrc{
 					DescriptionHelpInfo: randFlagDescriptionHelpInfo,
-				},
+				}.CastPtr(),
 				randFlagSecond: {},
 			},
 

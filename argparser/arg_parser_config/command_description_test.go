@@ -21,7 +21,7 @@ func TestCommandDescriptionGetters(t *testing.T) {
 	})
 
 	t.Run("initialized_pointer", func(t *testing.T) {
-		pointer = &CommandDescription{
+		src := CommandDescriptionSrc{
 			ID:                  CommandID(gofakeit.Uint32()),
 			DescriptionHelpInfo: gofakeit.Name(),
 			Commands: map[Command]bool{
@@ -36,11 +36,13 @@ func TestCommandDescriptionGetters(t *testing.T) {
 			},
 		}
 
-		require.Equal(t, pointer.ID, pointer.GetID())
-		require.Equal(t, pointer.DescriptionHelpInfo, pointer.GetDescriptionHelpInfo())
-		require.Equal(t, pointer.Commands, pointer.GetCommands())
-		require.Equal(t, pointer.ArgDescription, pointer.GetArgDescription())
-		require.Equal(t, pointer.RequiredFlags, pointer.GetRequiredFlags())
-		require.Equal(t, pointer.OptionalFlags, pointer.GetOptionalFlags())
+		pointer = src.CastPtr()
+
+		require.Equal(t, src.ID, pointer.GetID())
+		require.Equal(t, src.DescriptionHelpInfo, pointer.GetDescriptionHelpInfo())
+		require.Equal(t, src.Commands, pointer.GetCommands())
+		require.Equal(t, src.ArgDescription, pointer.GetArgDescription())
+		require.Equal(t, src.RequiredFlags, pointer.GetRequiredFlags())
+		require.Equal(t, src.OptionalFlags, pointer.GetOptionalFlags())
 	})
 }

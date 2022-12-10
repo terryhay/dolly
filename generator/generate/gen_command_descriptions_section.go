@@ -16,7 +16,7 @@ const (
 		// commandDescriptions
 		[]*apConf.CommandDescription{`
 	commandDescriptionSliceElementRequiredPart = `
-			{
+			apConf.CommandDescriptionSrc{
 				ID:                  %s,
 				DescriptionHelpInfo: "%s",`
 	commandDescriptionSliceElementCommandsPart = `
@@ -29,7 +29,7 @@ const (
 				OptionalFlags: map[apConf.Flag]bool{%s
 				},`
 	commandDescriptionSliceElementPostfix = `
-			},`
+			}.CastPtr(),`
 	commandDescriptionSlicePostfix = `
 		}`
 )

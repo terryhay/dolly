@@ -18,12 +18,13 @@ func TestFlagDescriptionGetters(t *testing.T) {
 	})
 
 	t.Run("initialized_pointer", func(t *testing.T) {
-		pointer = &FlagDescription{
+		src := FlagDescriptionSrc{
 			DescriptionHelpInfo: gofakeit.Name(),
 			ArgDescription:      &ArgumentsDescription{},
 		}
+		pointer = src.CastPtr()
 
-		require.Equal(t, pointer.DescriptionHelpInfo, pointer.GetDescriptionHelpInfo())
-		require.Equal(t, pointer.ArgDescription, pointer.GetArgDescription())
+		require.Equal(t, src.DescriptionHelpInfo, pointer.GetDescriptionHelpInfo())
+		require.Equal(t, src.ArgDescription, pointer.GetArgDescription())
 	})
 }

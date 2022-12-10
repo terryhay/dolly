@@ -182,51 +182,51 @@ const (
 
 // Parse - processes command line arguments
 func Parse(args []string) (*parsed.ParsedData, error) {
-	appArgConfig := apConf.NewArgParserConfig(
+	appArgConfig := apConf.ArgParserConfigSrc{
 		// appDescription
-		apConf.ApplicationDescription{
+		apConf.ApplicationDescriptionSrc{
 			AppName: "",
 			NameHelpInfo: "",
 			DescriptionHelpInfo: nil,
-		},
+		}.Cast(),
 		// flagDescriptions
 		map[apConf.Flag]*apConf.FlagDescription{
-			FlagRf1: {
+			FlagRf1: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo:  "",
-				ArgDescription: &apConf.ArgumentsDescription{
+				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "",
 					DefaultValues: []string{
 						"f1DefValue",
-					},
+					}.CastPtr(),
 					AllowedValues: map[string]bool{
 						"f1AllValue": true,
-					},
-				},
-			},
-			FlagRf2: {
+					}.CastPtr(),
+				}.CastPtr(),
+			}.CastPtr(),
+			FlagRf2: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo:  "",
-				ArgDescription: &apConf.ArgumentsDescription{
+				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeList,
 					SynopsisHelpDescription: "",
 					DefaultValues: []string{
 						"f2DefValue",
-					},
+					}.CastPtr(),
 					AllowedValues: map[string]bool{
 						"f2AllValue": true,
-					},
-				},
-			},
-			FlagOf1: {
+					}.CastPtr(),
+				}.CastPtr(),
+			}.CastPtr(),
+			FlagOf1: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo:  "",
-			},
-			FlagOf2: {
+			}.CastPtr(),
+			FlagOf2: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo:  "",
-			},
+			}.CastPtr(),
 		},
 		// commandDescriptions
 		[]*apConf.CommandDescription{
-			{
+			apConf.CommandDescriptionSrc{
 				ID:                  CommandIDCmd,
 				DescriptionHelpInfo: "command description help info",
 				Commands: map[apConf.Command]bool{
@@ -241,14 +241,14 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 					FlagOf1: true,
 					FlagOf2: true,
 				},
-			},
-			{
+			}.CastPtr(),
+			apConf.CommandDescriptionSrc{
 				ID:                  ,
 				DescriptionHelpInfo: "",
 				Commands: map[apConf.Command]bool{
 					: true,
 				},
-			},
+			}.CastPtr(),
 		},
 		// helpCommandDescription
 		apConf.NewHelpCommandDescription(
@@ -262,10 +262,10 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 		apConf.NewNamelessCommandDescription(
 			CommandIDNamelessCommand,
 			"",
-			&apConf.ArgumentsDescription{
+			apConf.ArgumentsDescriptionSrc{
 				AmountType:              apConf.ArgAmountTypeNoArgs,
 				SynopsisHelpDescription: "",
-			},
+			}.CastPtr(),
 			map[apConf.Flag]bool{
 				FlagRf1: true,
 				FlagRf2: true,
@@ -274,7 +274,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 				FlagOf1: true,
 				FlagOf2: true,
 			},
-		))
+		)}.Cast()
 
 	res, err := parser.Parse(appArgConfig, args)
 	if err != nil {
@@ -356,15 +356,15 @@ const (
 
 // Parse - processes command line arguments
 func Parse(args []string) (*parsed.ParsedData, error) {
-	appArgConfig := apConf.NewArgParserConfig(
+	appArgConfig := apConf.ArgParserConfigSrc{
 		// appDescription
-		apConf.ApplicationDescription{
+		apConf.ApplicationDescriptionSrc{
 			AppName: "",
 			NameHelpInfo: "",
 			DescriptionHelpInfo: []string{
 				"command description help info",
 			},
-		},
+		}.Cast(),
 		// flagDescriptions
 		nil,
 		// commandDescriptions
@@ -378,7 +378,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 			},
 		),
 		// namelessCommandDescription
-		nil)
+		nil}.Cast()
 
 	res, err := parser.Parse(appArgConfig, args)
 	if err != nil {
@@ -445,15 +445,15 @@ const (
 
 // Parse - processes command line arguments
 func Parse(args []string) (*parsed.ParsedData, error) {
-	appArgConfig := apConf.NewArgParserConfig(
+	appArgConfig := apConf.ArgParserConfigSrc{
 		// appDescription
-		apConf.ApplicationDescription{
+		apConf.ApplicationDescriptionSrc{
 			AppName: "",
 			NameHelpInfo: "",
 			DescriptionHelpInfo: []string{
 				"command description help info",
 			},
-		},
+		}.Cast(),
 		// flagDescriptions
 		nil,
 		// commandDescriptions
@@ -467,7 +467,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 			 nil,
 			nil,
 			nil,
-		))
+		)}.Cast()
 
 	res, err := parser.Parse(appArgConfig, args)
 	if err != nil {
@@ -514,13 +514,13 @@ import (
 
 // Parse - processes command line arguments
 func Parse(args []string) (*parsed.ParsedData, error) {
-	appArgConfig := apConf.NewArgParserConfig(
+	appArgConfig := apConf.ArgParserConfigSrc{
 		// appDescription
-		apConf.ApplicationDescription{
+		apConf.ApplicationDescriptionSrc{
 			AppName: "",
 			NameHelpInfo: "",
 			DescriptionHelpInfo: nil,
-		},
+		}.Cast(),
 		// flagDescriptions
 		nil,
 		// commandDescriptions
@@ -528,7 +528,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 		// helpCommandDescription
 		nil,
 		// namelessCommandDescription
-		nil)
+		nil}.Cast()
 
 	res, err := parser.Parse(appArgConfig, args)
 	if err != nil {

@@ -9,15 +9,13 @@ import (
 func TestHelpCommandDescriptionGetters(t *testing.T) {
 	t.Parallel()
 
-	helpCommandDescription := NewHelpCommandDescription(
-		CommandID(gofakeit.Uint32()),
-		map[Command]bool{
-			Command(gofakeit.Color()): true,
-		},
-	)
+	id := CommandID(gofakeit.Uint32())
+	commands := map[Command]bool{
+		Command(gofakeit.Color()): true,
+	}
 
-	commandDescription := helpCommandDescription.(*CommandDescription)
+	helpCommandDescription := NewHelpCommandDescription(id, commands)
 
-	require.Equal(t, commandDescription.ID, helpCommandDescription.GetID())
-	require.Equal(t, commandDescription.Commands, helpCommandDescription.GetCommands())
+	require.Equal(t, id, helpCommandDescription.GetID())
+	require.Equal(t, commands, helpCommandDescription.GetCommands())
 }

@@ -4,10 +4,9 @@ package dolly
 
 import (
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	"github.com/terryhay/dolly/argparser/parsed_data"
+	parsed "github.com/terryhay/dolly/argparser/parsed_data"
 	"github.com/terryhay/dolly/argparser/parser"
 	helpOut "github.com/terryhay/dolly/argparser/plain_help_out"
-	"github.com/terryhay/dolly/utils/dollyerr"
 )
 
 const (
@@ -30,25 +29,25 @@ const (
 )
 
 // Parse - processes command line arguments
-func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
-	appArgConfig := apConf.NewArgParserConfig(
+func Parse(args []string) (*parsed.ParsedData, error) {
+	appArgConfig := apConf.ArgParserConfigSrc{
 		// appDescription
-		apConf.ApplicationDescription{
+		apConf.ApplicationDescriptionSrc{
 			AppName:      "example2",
 			NameHelpInfo: "shows how parser generator works without commands",
 			DescriptionHelpInfo: []string{
 				"you can write more detailed description here",
 			},
-		},
+		}.Cast(),
 		// flagDescriptions
 		map[apConf.Flag]*apConf.FlagDescription{
-			FlagCheck: {
+			FlagCheck: apConf.FlagDescriptionSrc{
 				DescriptionHelpInfo: "check command arguments types",
-				ArgDescription: &apConf.ArgumentsDescription{
+				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "str",
-				},
-			},
+				}.CastPtr(),
+			}.CastPtr(),
 		},
 		// commandDescriptions
 		nil,
@@ -64,18 +63,19 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 		apConf.NewNamelessCommandDescription(
 			CommandIDNamelessCommand,
 			"checks arguments types",
-			&apConf.ArgumentsDescription{
+			apConf.ArgumentsDescriptionSrc{
 				AmountType:              apConf.ArgAmountTypeList,
 				SynopsisHelpDescription: "str list",
-			},
+			}.CastPtr(),
 			map[apConf.Flag]bool{
 				FlagCheck: true,
 			},
 			nil,
-		))
+		)}.Cast()
 
-	if res, err = parser.Parse(appArgConfig, args); err != nil {
-		return nil, err
+	res, err := parser.Parse(appArgConfig, args)
+	if err != nil {
+		return nil, err.Error()
 	}
 
 	if res.GetCommandID() == CommandIDPrintHelpInfo {

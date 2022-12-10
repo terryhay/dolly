@@ -57,20 +57,20 @@ func TestCheckParsedData(t *testing.T) {
 		},
 		{
 			caseName: "required flag is not set",
-			commandDescription: &apConf.CommandDescription{
+			commandDescription: apConf.CommandDescriptionSrc{
 				RequiredFlags: map[apConf.Flag]bool{
 					apConf.Flag(gofakeit.Color()): true,
 				},
-			},
+			}.CastPtr(),
 			expectedErr: fakeError(dollyerr.CodeArgParserRequiredFlagIsNotSet),
 		},
 		{
 			caseName: "command arg is not set",
-			commandDescription: &apConf.CommandDescription{
-				ArgDescription: &apConf.ArgumentsDescription{
+			commandDescription: apConf.CommandDescriptionSrc{
+				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType: apConf.ArgAmountTypeSingle,
-				},
-			},
+				}.CastPtr(),
+			}.CastPtr(),
 			expectedErr: fakeError(dollyerr.CodeArgParserCommandDoesNotContainArgs),
 		},
 	}
@@ -108,29 +108,29 @@ func TestIsValueAllowed(t *testing.T) {
 		},
 		{
 			caseName: "no_allowed_values",
-			argDescription: &apConf.ArgumentsDescription{
+			argDescription: apConf.ArgumentsDescriptionSrc{
 				AmountType: apConf.ArgAmountTypeNoArgs,
-			},
+			}.CastPtr(),
 		},
 		{
 			caseName: "value_is_not_allowed",
-			argDescription: &apConf.ArgumentsDescription{
+			argDescription: apConf.ArgumentsDescriptionSrc{
 				AmountType: apConf.ArgAmountTypeNoArgs,
 				AllowedValues: map[string]bool{
 					value: true,
 				},
-			},
+			}.CastPtr(),
 			value:       gofakeit.Color(),
 			expectedErr: fakeError(dollyerr.CodeArgParserArgValueIsNotAllowed),
 		},
 		{
 			caseName: "value_is_allowed",
-			argDescription: &apConf.ArgumentsDescription{
+			argDescription: apConf.ArgumentsDescriptionSrc{
 				AmountType: apConf.ArgAmountTypeNoArgs,
 				AllowedValues: map[string]bool{
 					value: true,
 				},
-			},
+			}.CastPtr(),
 			value: value,
 		},
 	}

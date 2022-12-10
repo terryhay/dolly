@@ -15,10 +15,12 @@ func TestCreateNameChapter(t *testing.T) {
 	randAppName := gofakeit.Name()
 	randNameHelpInfo := gofakeit.Name()
 
-	paragraphs := appendNameChapterParagraphs(make([]Paragraph, 0), apConf.ApplicationDescription{
-		AppName:      randAppName,
-		NameHelpInfo: randNameHelpInfo,
-	})
+	paragraphs := appendNameChapterParagraphs(make([]Paragraph, 0),
+		apConf.ApplicationDescriptionSrc{
+			AppName:      randAppName,
+			NameHelpInfo: randNameHelpInfo,
+		}.Cast(),
+	)
 
 	paragraphTexts := make([]string, 0, len(paragraphs))
 	for i := range paragraphs {

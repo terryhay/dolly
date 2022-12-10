@@ -16,11 +16,11 @@ const (
 		// flagDescriptions
 		map[apConf.Flag]*apConf.FlagDescription{`
 	flagDescriptionMapElementKeyPart = `
-			%s: {`
+			%s: apConf.FlagDescriptionSrc{`
 	flagDescriptionMapElementDescriptionHelpInfo = `
 				DescriptionHelpInfo:  "%s",`
 	flagDescriptionMapElementPostfix = `
-			},`
+			}.CastPtr(),`
 	flagDescriptionMapPostfix = `
 		}`
 )

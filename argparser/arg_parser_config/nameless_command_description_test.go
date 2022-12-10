@@ -4,6 +4,7 @@ import (
 	"github.com/brianvoe/gofakeit"
 	"github.com/stretchr/testify/require"
 	"testing"
+	"unsafe"
 )
 
 func TestNamelessCommandDescriptionGetters(t *testing.T) {
@@ -17,7 +18,7 @@ func TestNamelessCommandDescriptionGetters(t *testing.T) {
 		map[Flag]bool{Flag(gofakeit.Name()): true},
 	)
 
-	commandDescription := namelessCommandDescription.(*CommandDescription)
+	commandDescription := (*CommandDescriptionSrc)(unsafe.Pointer(namelessCommandDescription.(*CommandDescription)))
 
 	require.Equal(t, commandDescription.ID, namelessCommandDescription.GetID())
 	require.Equal(t, commandDescription.DescriptionHelpInfo, namelessCommandDescription.GetDescriptionHelpInfo())

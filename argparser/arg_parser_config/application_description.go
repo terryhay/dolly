@@ -1,23 +1,37 @@
 package arg_parser_config
 
+import "unsafe"
+
 // ApplicationDescription contains specification of application for help output
 type ApplicationDescription struct {
+	appName             string
+	nameHelpInfo        string
+	descriptionHelpInfo []string
+}
+
+// ApplicationDescriptionSrc contains source data for cast to ApplicationDescription
+type ApplicationDescriptionSrc struct {
 	AppName             string
 	NameHelpInfo        string
 	DescriptionHelpInfo []string
 }
 
-// GetAppName - AppName field getter
+// Cast converts src to ApplicationDescription object
+func (src ApplicationDescriptionSrc) Cast() ApplicationDescription {
+	return *(*ApplicationDescription)(unsafe.Pointer(&src))
+}
+
+// GetAppName - appName field getter
 func (i ApplicationDescription) GetAppName() string {
-	return i.AppName
+	return i.appName
 }
 
-// GetNameHelpInfo - NameHelpInfo field getter
+// GetNameHelpInfo - nameHelpInfo field getter
 func (i ApplicationDescription) GetNameHelpInfo() string {
-	return i.NameHelpInfo
+	return i.nameHelpInfo
 }
 
-// GetDescriptionHelpInfo - NameHelpInfo field getter
+// GetDescriptionHelpInfo - nameHelpInfo field getter
 func (i ApplicationDescription) GetDescriptionHelpInfo() []string {
-	return i.DescriptionHelpInfo
+	return i.descriptionHelpInfo
 }

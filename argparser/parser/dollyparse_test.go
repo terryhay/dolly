@@ -8,12 +8,7 @@ import (
 
 func TestArgParser(t *testing.T) {
 	res, err := Parse(
-		apConf.NewArgParserConfig(
-			apConf.ApplicationDescription{},
-			nil,
-			nil,
-			nil,
-			nil),
+		apConf.ArgParserConfigSrc{}.Cast(),
 		nil)
 
 	require.Nil(t, res)

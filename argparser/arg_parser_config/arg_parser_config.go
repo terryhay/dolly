@@ -1,7 +1,18 @@
 package arg_parser_config
 
+import "unsafe"
+
 // ArgParserConfig contains specifications of flags, arguments and command groups of application
 type ArgParserConfig struct {
+	appDescription             ApplicationDescription
+	flagDescriptions           map[Flag]*FlagDescription
+	commandDescriptions        []*CommandDescription
+	helpCommandDescription     HelpCommandDescription
+	namelessCommandDescription NamelessCommandDescription
+}
+
+// ArgParserConfigSrc contains source data for cast to ArgParserConfig
+type ArgParserConfigSrc struct {
 	AppDescription             ApplicationDescription
 	FlagDescriptions           map[Flag]*FlagDescription
 	CommandDescriptions        []*CommandDescription
@@ -9,45 +20,32 @@ type ArgParserConfig struct {
 	NamelessCommandDescription NamelessCommandDescription
 }
 
-// NewArgParserConfig - ArgParserConfig constructor
-func NewArgParserConfig(
-	appDescription ApplicationDescription,
-	flagDescriptions map[Flag]*FlagDescription,
-	commandDescriptions []*CommandDescription,
-	helpCommandDescription HelpCommandDescription,
-	namelessCommandDescription NamelessCommandDescription,
-) ArgParserConfig {
-
-	return ArgParserConfig{
-		AppDescription:             appDescription,
-		FlagDescriptions:           flagDescriptions,
-		CommandDescriptions:        commandDescriptions,
-		HelpCommandDescription:     helpCommandDescription,
-		NamelessCommandDescription: namelessCommandDescription,
-	}
+// Cast converts src to ArgParserConfig object
+func (src ArgParserConfigSrc) Cast() ArgParserConfig {
+	return *(*ArgParserConfig)(unsafe.Pointer(&src))
 }
 
-// GetAppDescription - AppDescription field getter
+// GetAppDescription - appDescription field getter
 func (i ArgParserConfig) GetAppDescription() ApplicationDescription {
-	return i.AppDescription
+	return i.appDescription
 }
 
-// GetCommandDescriptions - CommandDescriptions field getter
+// GetCommandDescriptions - commandDescriptions field getter
 func (i ArgParserConfig) GetCommandDescriptions() []*CommandDescription {
-	return i.CommandDescriptions
+	return i.commandDescriptions
 }
 
-// GetFlagDescriptions - FlagDescriptions field getter
+// GetFlagDescriptions - flagDescriptions field getter
 func (i ArgParserConfig) GetFlagDescriptions() map[Flag]*FlagDescription {
-	return i.FlagDescriptions
+	return i.flagDescriptions
 }
 
-// GetHelpCommandDescription i.HelpCommandDescription
+// GetHelpCommandDescription i.helpCommandDescription
 func (i ArgParserConfig) GetHelpCommandDescription() HelpCommandDescription {
-	return i.HelpCommandDescription
+	return i.helpCommandDescription
 }
 
 // GetNamelessCommandDescription - NamelessCommandDescription field getter
 func (i ArgParserConfig) GetNamelessCommandDescription() NamelessCommandDescription {
-	return i.NamelessCommandDescription
+	return i.namelessCommandDescription
 }
