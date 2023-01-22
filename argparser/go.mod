@@ -11,5 +11,5 @@ require (
 	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/terryhay/dolly/utils v0.0.0-20221112102944-61bba21eed6a // indirect
+	github.com/terryhay/dolly/utils v0.0.0-20230204144134-d144ceb1299c // indirect
 )

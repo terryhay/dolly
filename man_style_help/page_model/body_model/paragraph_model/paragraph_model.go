@@ -2,12 +2,12 @@ package paragraph_model
 
 import (
 	"github.com/nsf/termbox-go"
-	"github.com/terryhay/dolly/man_style_help/index"
 	"github.com/terryhay/dolly/man_style_help/page"
 	"github.com/terryhay/dolly/man_style_help/row"
 	rll "github.com/terryhay/dolly/man_style_help/row_len_limiter"
 	"github.com/terryhay/dolly/man_style_help/runes"
 	"github.com/terryhay/dolly/man_style_help/size"
+	"github.com/terryhay/dolly/utils/index"
 )
 
 // averageWordLen to be precise the average english word length is 5.2

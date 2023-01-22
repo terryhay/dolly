@@ -25,7 +25,7 @@ func TestArgValueToFloat64(t *testing.T) {
 		randNegativeValue *= -1.
 	}
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 		argValue ArgValue
 
@@ -54,18 +54,18 @@ func TestArgValueToFloat64(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			res, err := td.argValue.ToFloat64()
-			if td.expectedErr {
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			res, err := tc.argValue.ToFloat64()
+			if tc.expectedErr {
 				require.NotNil(t, err)
-				require.Equal(t, td.expectedRes, res)
+				require.Equal(t, tc.expectedRes, res)
 
 				return
 			}
 
 			require.Nil(t, err)
-			require.Equal(t, td.expectedRes, res)
+			require.Equal(t, tc.expectedRes, res)
 		})
 	}
 }

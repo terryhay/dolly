@@ -1,10 +1,10 @@
 package row_iterator
 
 import (
-	"github.com/terryhay/dolly/man_style_help/index"
 	pgm "github.com/terryhay/dolly/man_style_help/page_model"
 	"github.com/terryhay/dolly/man_style_help/row"
 	"github.com/terryhay/dolly/man_style_help/size"
+	"github.com/terryhay/dolly/utils/index"
 )
 
 // RowIterator contains some temp page for iterating by model rows

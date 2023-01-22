@@ -9,17 +9,21 @@ import (
 
 const (
 	flagDescriptionsNilPart = `
-		FlagDescriptions: nil`
+		FlagDescriptionSlice: nil`
 
-	flagDescriptionMapPrefix = `
-		FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{`
-	flagDescriptionMapElementKeyPart = `
-			%s: apConf.FlagDescriptionSrc{`
-	flagDescriptionMapElementDescriptionHelpInfo = `
+	flagDescriptionSlicePrefix = `
+		FlagDescriptionSlice: []*apConf.FlagDescription{`
+	flagDescriptionSliceFlagsPart = `
+				Flags: []apConf.Flag{
+					%s,
+				},`
+	flagDescriptionSliceElementKeyPart = `
+			apConf.FlagDescriptionSrc{`
+	flagDescriptionSliceElementDescriptionHelpInfo = `
 				DescriptionHelpInfo:  "%s",`
-	flagDescriptionMapElementPostfix = `
+	flagDescriptionSliceElementPostfix = `
 			}.ToConstPtr(),`
-	flagDescriptionMapPostfix = `
+	flagDescriptionSlicePostfix = `
 		}`
 )
 
@@ -36,29 +40,31 @@ func genFlagDescriptionsSection(
 	}
 
 	builder := new(strings.Builder)
-	builder.WriteString(flagDescriptionMapPrefix)
+	builder.WriteString(flagDescriptionSlicePrefix)
 
-	var (
-		flagDescription      *confYML.FlagDescription
-		argumentsDescription *confYML.ArgumentsDescription
-	)
+	for _, descFlag := range flagDescriptions {
+		builder.WriteString(flagDescriptionSliceElementKeyPart)
 
-	for i := 0; i < len(flagDescriptions); i++ {
-		flagDescription = flagDescriptions[i]
+		flags := descFlag.ExtractSortedFlags()
+		flagIDs := make([]string, 0, len(flags))
+		for _, flag := range flags {
+			if templateData, contain := flagsIDTemplateData[flag]; contain {
+				flagIDs = append(flagIDs, templateData.GetNameID())
+			}
+		}
+		builder.WriteString(fmt.Sprintf(flagDescriptionSliceFlagsPart, strings.Join(flagIDs, ",\t\t\t")))
 
-		builder.WriteString(fmt.Sprintf(flagDescriptionMapElementKeyPart,
-			flagsIDTemplateData[flagDescription.GetFlag()].GetNameID()))
-		builder.WriteString(fmt.Sprintf(flagDescriptionMapElementDescriptionHelpInfo,
-			flagDescription.GetDescriptionHelpInfo()))
+		builder.WriteString(fmt.Sprintf(flagDescriptionSliceElementDescriptionHelpInfo,
+			descFlag.GetDescriptionHelpInfo()))
 
-		if argumentsDescription = flagDescription.GetArgumentsDescription(); argumentsDescription != nil {
-			builder.WriteString(GenArgDescriptionPart(argumentsDescription, "\t\t\t\t", true))
+		if descArg := descFlag.GetArgumentsDescription(); descArg != nil {
+			builder.WriteString(GenArgDescriptionPart(descArg, "\t\t\t\t", true))
 			builder.WriteString(",")
 		}
 
-		builder.WriteString(flagDescriptionMapElementPostfix)
+		builder.WriteString(flagDescriptionSliceElementPostfix)
 	}
-	builder.WriteString(flagDescriptionMapPostfix)
+	builder.WriteString(flagDescriptionSlicePostfix)
 
 	return sectionFlagDescriptions(builder.String())
 }

@@ -12,18 +12,19 @@ import (
 func TestHelpCommandDescriptionGetters(t *testing.T) {
 	t.Parallel()
 
-	var pointer *HelpCommandDescription
-
 	t.Run("nil_pointer", func(t *testing.T) {
+		var pointer *HelpCommandDescription
+
 		require.Equal(t, "", pointer.GetCommand())
 		require.Nil(t, pointer.GetAdditionalCommands())
 	})
 
 	t.Run("initialized_pointer", func(t *testing.T) {
-		pointer = &HelpCommandDescription{
-			command:            gofakeit.Name(),
-			additionalCommands: []string{gofakeit.Name()},
+		src := &HelpCommandDescriptionSrc{
+			Command:            gofakeit.Name(),
+			AdditionalCommands: []string{gofakeit.Name()},
 		}
+		pointer := src.ToConstPtr()
 
 		require.Equal(t, pointer.command, pointer.GetCommand())
 		require.Equal(t, pointer.additionalCommands, pointer.GetAdditionalCommands())
@@ -33,7 +34,7 @@ func TestHelpCommandDescriptionGetters(t *testing.T) {
 func TestHelpCommandDescriptionUnmarshalErrors(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		yamlFileName      string
 		expectedErrorText string
 	}{
@@ -43,13 +44,13 @@ func TestHelpCommandDescriptionUnmarshalErrors(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.yamlFileName, func(t *testing.T) {
-			config, err := GetConfig(fmt.Sprintf("./test_cases/help_command_description_cases/%s", td.yamlFileName))
+	for _, tc := range testCases {
+		t.Run(tc.yamlFileName, func(t *testing.T) {
+			config, err := GetConfig(fmt.Sprintf("./test_cases/help_command_description_cases/%s", tc.yamlFileName))
 			require.Nil(t, config)
 			require.NotNil(t, err)
 			require.Equal(t, dollyerr.CodeGetConfigUnmarshalError, err.Code())
-			require.Equal(t, td.expectedErrorText, err.Error().Error())
+			require.Equal(t, tc.expectedErrorText, err.Error().Error())
 		})
 	}
 
@@ -66,7 +67,7 @@ func TestHelpCommandDescriptionUnmarshalErrors(t *testing.T) {
 func TestHelpCommandDescriptionUnmarshalNoErrorWhenNoOptionalFields(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		yamlFileName string
 	}{
 		{
@@ -74,9 +75,9 @@ func TestHelpCommandDescriptionUnmarshalNoErrorWhenNoOptionalFields(t *testing.T
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.yamlFileName, func(t *testing.T) {
-			config, err := GetConfig(fmt.Sprintf("./test_cases/help_command_description_cases/%s", td.yamlFileName))
+	for _, tc := range testCases {
+		t.Run(tc.yamlFileName, func(t *testing.T) {
+			config, err := GetConfig(fmt.Sprintf("./test_cases/help_command_description_cases/%s", tc.yamlFileName))
 			require.NotNil(t, config)
 			require.Nil(t, err)
 		})

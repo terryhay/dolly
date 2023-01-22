@@ -9,7 +9,7 @@ import (
 func TestGetConfigErrors(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName          string
 		configYamlPath    string
 		expectedErrorCode dollyerr.Code
@@ -31,13 +31,13 @@ func TestGetConfigErrors(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			config, err := GetConfig(td.configYamlPath)
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			config, err := GetConfig(tc.configYamlPath)
 			require.Nil(t, config)
 
 			require.NotNil(t, err)
-			require.Equal(t, td.expectedErrorCode, err.Code())
+			require.Equal(t, tc.expectedErrorCode, err.Code())
 		})
 	}
 

@@ -17,7 +17,8 @@ func TestIDTemplateDataCreator(t *testing.T) {
 	helpCommand := gofakeit.Color()
 	additionalHelpCommand := gofakeit.Color()
 
-	flag := gofakeit.Color()
+	flag1 := gofakeit.Color()
+	flag2 := "F"
 
 	creator := NewIDTemplateCreator()
 	commandsIDTemplateData, nullCommandIDTemplateData, flagsIDTemplateData := creator.CreateIDTemplateData(
@@ -41,8 +42,11 @@ func TestIDTemplateDataCreator(t *testing.T) {
 		}.ToConstPtr(),
 		&confYML.NamelessCommandDescription{},
 		map[string]*confYML.FlagDescription{
-			flag: confYML.FlagDescriptionSrc{
-				Flag: flag,
+			flag1: confYML.FlagDescriptionSrc{
+				Flag: flag1,
+			}.ToConstPtr(),
+			flag2: confYML.FlagDescriptionSrc{
+				Flag: flag2,
 			}.ToConstPtr(),
 		})
 
@@ -86,11 +90,22 @@ func TestIDTemplateDataCreator(t *testing.T) {
 
 	require.Equal(t, &IDTemplateData{id: "CommandIDNamelessCommand"}, nullCommandIDTemplateData)
 
-	flagIDTemplateData, ok := flagsIDTemplateData[flag]
-	require.True(t, ok)
-	require.Equal(t, &IDTemplateData{
-		id:       "",
-		nameID:   creator.CreateID(PrefixFlagStringID, flag),
-		callName: flag,
-	}, flagIDTemplateData)
+	{
+		flagIDTemplateData, ok := flagsIDTemplateData[flag1]
+		require.True(t, ok)
+		require.Equal(t, &IDTemplateData{
+			id:       "",
+			nameID:   creator.CreateID(PrefixFlagStringID, flag1),
+			callName: flag1,
+		}, flagIDTemplateData)
+	}
+	{
+		flagIDTemplateData, ok := flagsIDTemplateData[flag2]
+		require.True(t, ok)
+		require.Equal(t, &IDTemplateData{
+			id:       "",
+			nameID:   creator.CreateID(PrefixFlagStringID, flag2),
+			callName: flag2,
+		}, flagIDTemplateData)
+	}
 }

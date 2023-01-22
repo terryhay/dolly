@@ -10,9 +10,9 @@ import (
 func TestArgParserConfigGetters(t *testing.T) {
 	t.Parallel()
 
-	var pointer *ArgParserConfig
-
 	t.Run("nil_pointer", func(t *testing.T) {
+		var pointer *ArgParserConfig
+
 		require.Nil(t, pointer.GetAppHelpDescription())
 		require.Nil(t, pointer.GetHelpCommandDescription())
 		require.Nil(t, pointer.GetNamelessCommandDescription())
@@ -21,26 +21,27 @@ func TestArgParserConfigGetters(t *testing.T) {
 	})
 
 	t.Run("initialized_pointer", func(t *testing.T) {
-		pointer = &ArgParserConfig{
-			appHelpDescription:         &AppHelpDescription{},
-			helpCommandDescription:     &HelpCommandDescription{},
-			namelessCommandDescription: &NamelessCommandDescription{},
-			commandDescriptions:        []*CommandDescription{{}},
-			flagDescriptions:           []*FlagDescription{{}},
+		src := ArgParserConfigSrc{
+			AppHelpDescription:         &AppHelpDescription{},
+			HelpCommandDescription:     &HelpCommandDescription{},
+			NamelessCommandDescription: &NamelessCommandDescription{},
+			CommandDescriptions:        []*CommandDescription{{}},
+			FlagDescriptions:           []*FlagDescription{{}},
 		}
+		pointer := src.ToConstPtr()
 
-		require.Equal(t, pointer.appHelpDescription, pointer.GetAppHelpDescription())
-		require.Equal(t, pointer.helpCommandDescription, pointer.GetHelpCommandDescription())
-		require.Equal(t, pointer.namelessCommandDescription, pointer.GetNamelessCommandDescription())
-		require.Equal(t, pointer.commandDescriptions, pointer.GetCommandDescriptions())
-		require.Equal(t, pointer.flagDescriptions, pointer.GetFlagDescriptions())
+		require.Equal(t, src.AppHelpDescription, pointer.GetAppHelpDescription())
+		require.Equal(t, src.HelpCommandDescription, pointer.GetHelpCommandDescription())
+		require.Equal(t, src.NamelessCommandDescription, pointer.GetNamelessCommandDescription())
+		require.Equal(t, src.CommandDescriptions, pointer.GetCommandDescriptions())
+		require.Equal(t, src.FlagDescriptions, pointer.GetFlagDescriptions())
 	})
 }
 
 func TestArgParserConfigUnmarshalErrors(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		yamlFileName      string
 		expectedErrorText string
 	}{
@@ -62,13 +63,13 @@ func TestArgParserConfigUnmarshalErrors(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.yamlFileName, func(t *testing.T) {
-			config, err := GetConfig(fmt.Sprintf("./test_cases/arg_parser_config_cases/%s", td.yamlFileName))
+	for _, tc := range testCases {
+		t.Run(tc.yamlFileName, func(t *testing.T) {
+			config, err := GetConfig(fmt.Sprintf("./test_cases/arg_parser_config_cases/%s", tc.yamlFileName))
 			require.Nil(t, config)
 			require.NotNil(t, err)
 			require.Equal(t, dollyerr.CodeGetConfigUnmarshalError, err.Code())
-			require.Equal(t, td.expectedErrorText, err.Error().Error())
+			require.Equal(t, tc.expectedErrorText, err.Error().Error())
 		})
 	}
 
@@ -85,7 +86,7 @@ func TestArgParserConfigUnmarshalErrors(t *testing.T) {
 func TestConfigUnmarshalNoErrorWhenNoOptionalFields(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		yamlFileName string
 	}{
 		{
@@ -96,9 +97,9 @@ func TestConfigUnmarshalNoErrorWhenNoOptionalFields(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.yamlFileName, func(t *testing.T) {
-			config, err := GetConfig(fmt.Sprintf("./test_cases/arg_parser_config_cases/%s", td.yamlFileName))
+	for _, tc := range testCases {
+		t.Run(tc.yamlFileName, func(t *testing.T) {
+			config, err := GetConfig(fmt.Sprintf("./test_cases/arg_parser_config_cases/%s", tc.yamlFileName))
 			require.NotNil(t, config)
 			require.Nil(t, err)
 		})

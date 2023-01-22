@@ -3,6 +3,7 @@ package plain_help_out
 import (
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
 	"sort"
+	"strings"
 )
 
 func getSortedCommands(commands map[apConf.Command]bool) (res []string) {
@@ -44,12 +45,43 @@ func getSortedStrings(strings map[string]bool) (res []string) {
 	return res
 }
 
-func getSortedFlagsForDescription(flagDescriptions map[apConf.Flag]*apConf.FlagDescription) (res []string) {
-	res = make([]string, 0, len(flagDescriptions))
-	for flag := range flagDescriptions {
-		res = append(res, string(flag))
+type flagHelpOutData struct {
+	NamePart        string
+	DescriptionPart string
+}
+
+type byNamePart []flagHelpOutData
+
+// Len implements Len sort interface method
+func (i byNamePart) Len() int {
+	return len(i)
+}
+
+// Less implements Less sort interface method
+func (i byNamePart) Less(left, right int) bool {
+	return i[left].NamePart < i[right].NamePart
+}
+
+// Swap implements Swap sort interface method
+func (i byNamePart) Swap(left, right int) {
+	i[left], i[right] = i[right], i[left]
+}
+
+func getSortedFlagsForDescription(flagDescriptions []*apConf.FlagDescription) (res []flagHelpOutData) {
+	res = make([]flagHelpOutData, 0, len(flagDescriptions))
+	for _, desc := range flagDescriptions {
+		flags := make([]string, 0, len(desc.GetFlags()))
+		for _, flag := range desc.GetFlags() {
+			flags = append(flags, flag.ToString())
+		}
+
+		res = append(res, flagHelpOutData{
+			NamePart:        strings.Join(flags, ", "),
+			DescriptionPart: desc.GetDescriptionHelpInfo(),
+		})
+
 	}
-	sort.Strings(res)
+	sort.Sort(byNamePart(res))
 
 	return res
 }

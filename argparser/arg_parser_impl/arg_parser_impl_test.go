@@ -5,6 +5,7 @@ import (
 	"github.com/brianvoe/gofakeit"
 	"github.com/stretchr/testify/require"
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
+	cmdArg "github.com/terryhay/dolly/argparser/cmd_arg"
 	"github.com/terryhay/dolly/argparser/parsed_data"
 	"github.com/terryhay/dolly/utils/dollyerr"
 	"testing"
@@ -14,13 +15,16 @@ func TestParse(t *testing.T) {
 	t.Parallel()
 
 	var (
+		command   = apConf.Command(gofakeit.Name())
+		commandID = apConf.CommandID(gofakeit.Uint32())
+
 		namelessCommandID = apConf.CommandID(gofakeit.Uint32())
 		requiredFlag      = apConf.Flag("-" + gofakeit.Color())
 		optionalFlag      = apConf.Flag("-" + gofakeit.Color())
 		arg               = gofakeit.Color()
 	)
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		config apConf.ArgParserConfig
@@ -144,8 +148,12 @@ func TestParse(t *testing.T) {
 						apConf.Flag(arg): true,
 					},
 					nil),
-				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: {},
+				FlagDescriptionSlice: []*apConf.FlagDescription{
+					apConf.FlagDescriptionSrc{
+						Flags: []apConf.Flag{
+							requiredFlag,
+						},
+					}.ToConstPtr(),
 				},
 			}.ToConst(),
 			expectedErr: fakeError(dollyerr.CodeArgParserDuplicateFlags),
@@ -165,8 +173,11 @@ func TestParse(t *testing.T) {
 						apConf.Flag(arg): true,
 					},
 					nil),
-				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: apConf.FlagDescriptionSrc{
+				FlagDescriptionSlice: []*apConf.FlagDescription{
+					apConf.FlagDescriptionSrc{
+						Flags: []apConf.Flag{
+							requiredFlag,
+						},
 						ArgDescription: apConf.ArgumentsDescriptionSrc{
 							AmountType: apConf.ArgAmountTypeSingle,
 						}.ToConstPtr(),
@@ -190,8 +201,11 @@ func TestParse(t *testing.T) {
 						apConf.Flag(arg): true,
 					},
 					nil),
-				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: apConf.FlagDescriptionSrc{
+				FlagDescriptionSlice: []*apConf.FlagDescription{
+					apConf.FlagDescriptionSrc{
+						Flags: []apConf.Flag{
+							requiredFlag,
+						},
 						ArgDescription: apConf.ArgumentsDescriptionSrc{
 							AmountType: apConf.ArgAmountTypeList,
 						}.ToConstPtr(),
@@ -216,8 +230,11 @@ func TestParse(t *testing.T) {
 						apConf.Flag(arg): true,
 					},
 					nil),
-				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: apConf.FlagDescriptionSrc{
+				FlagDescriptionSlice: []*apConf.FlagDescription{
+					apConf.FlagDescriptionSrc{
+						Flags: []apConf.Flag{
+							requiredFlag,
+						},
 						ArgDescription: apConf.ArgumentsDescriptionSrc{
 							AmountType: apConf.ArgAmountTypeList,
 						}.ToConstPtr(),
@@ -247,8 +264,11 @@ func TestParse(t *testing.T) {
 						requiredFlag: true,
 					},
 					nil),
-				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: apConf.FlagDescriptionSrc{
+				FlagDescriptionSlice: []*apConf.FlagDescription{
+					apConf.FlagDescriptionSrc{
+						Flags: []apConf.Flag{
+							requiredFlag,
+						},
 						ArgDescription: apConf.ArgumentsDescriptionSrc{
 							AmountType: apConf.ArgAmountTypeList,
 						}.ToConstPtr(),
@@ -275,13 +295,20 @@ func TestParse(t *testing.T) {
 					map[apConf.Flag]bool{
 						optionalFlag: true,
 					}),
-				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: apConf.FlagDescriptionSrc{
+				FlagDescriptionSlice: []*apConf.FlagDescription{
+					apConf.FlagDescriptionSrc{
+						Flags: []apConf.Flag{
+							requiredFlag,
+						},
 						ArgDescription: apConf.ArgumentsDescriptionSrc{
 							AmountType: apConf.ArgAmountTypeList,
 						}.ToConstPtr(),
 					}.ToConstPtr(),
-					optionalFlag: {},
+					apConf.FlagDescriptionSrc{
+						Flags: []apConf.Flag{
+							optionalFlag,
+						},
+					}.ToConstPtr(),
 				},
 			}.ToConst(),
 			expectedParsedData: &parsed_data.ParsedData{
@@ -332,8 +359,12 @@ func TestParse(t *testing.T) {
 						requiredFlag: true,
 					},
 					nil),
-				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: {},
+				FlagDescriptionSlice: []*apConf.FlagDescription{
+					apConf.FlagDescriptionSrc{
+						Flags: []apConf.Flag{
+							requiredFlag,
+						},
+					}.ToConstPtr(),
 				},
 			}.ToConst(),
 			expectedErr: fakeError(dollyerr.CodeArgParserFlagMustHaveArg),
@@ -358,8 +389,12 @@ func TestParse(t *testing.T) {
 						requiredFlag: true,
 					},
 					nil),
-				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: {},
+				FlagDescriptionSlice: []*apConf.FlagDescription{
+					apConf.FlagDescriptionSrc{
+						Flags: []apConf.Flag{
+							requiredFlag,
+						},
+					}.ToConstPtr(),
 				},
 			}.ToConst(),
 			expectedParsedData: &parsed_data.ParsedData{
@@ -393,8 +428,12 @@ func TestParse(t *testing.T) {
 						requiredFlag: true,
 					},
 					nil),
-				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: {},
+				FlagDescriptionSlice: []*apConf.FlagDescription{
+					apConf.FlagDescriptionSrc{
+						Flags: []apConf.Flag{
+							requiredFlag,
+						},
+					}.ToConstPtr(),
 				},
 			}.ToConst(),
 			expectedErr: fakeError(dollyerr.CodeArgParserArgValueIsNotAllowed),
@@ -416,8 +455,12 @@ func TestParse(t *testing.T) {
 						requiredFlag: true,
 					},
 					nil),
-				FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-					requiredFlag: {},
+				FlagDescriptionSlice: []*apConf.FlagDescription{
+					apConf.FlagDescriptionSrc{
+						Flags: []apConf.Flag{
+							requiredFlag,
+						},
+					}.ToConstPtr(),
 				},
 			}.ToConst(),
 			expectedParsedData: &parsed_data.ParsedData{
@@ -434,23 +477,42 @@ func TestParse(t *testing.T) {
 				},
 			},
 		},
+
+		{
+			caseName: "command_without_flags_and_arguments",
+			args:     []string{string(command)},
+			config: apConf.ArgParserConfigSrc{
+				CommandDescriptions: []*apConf.CommandDescription{
+					apConf.CommandDescriptionSrc{
+						ID: commandID,
+						Commands: map[apConf.Command]bool{
+							command: true,
+						},
+					}.ToConstPtr(),
+				},
+			}.ToConst(),
+			expectedParsedData: &parsed_data.ParsedData{
+				CommandID: commandID,
+				Command:   command,
+			},
+		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			impl := NewCmdArgParserImpl(td.config)
-			data, err := impl.Parse(td.args)
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			impl := NewCmdArgParserImpl(tc.config)
+			data, err := impl.Parse(cmdArg.MakeCmdArgIterator(tc.args))
 
-			if td.expectedErr != nil {
+			if tc.expectedErr != nil {
 				require.Nil(t, data)
 				require.NotNil(t, err)
 
-				require.Equal(t, td.expectedErr.Code(), err.Code())
+				require.Equal(t, tc.expectedErr.Code(), err.Code())
 				return
 			}
 
 			require.Nil(t, err)
-			require.Equal(t, td.expectedParsedData, data)
+			require.Equal(t, tc.expectedParsedData, data)
 		})
 	}
 }

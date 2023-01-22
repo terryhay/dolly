@@ -17,7 +17,7 @@ import (
 func TestPageViewShifting(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		defaultWidth   size.Width
@@ -292,16 +292,16 @@ func TestPageViewShifting(t *testing.T) {
 		absShift     int
 	)
 
-	for _, td := range testData {
-		t.Run(td.caseName+"_step_by_step_updating", func(t *testing.T) {
-			terminalWidth := td.defaultWidth
-			terminalHeight := td.defaultHeight
+	for _, tc := range testCases {
+		t.Run(tc.caseName+"_step_by_step_updating", func(t *testing.T) {
+			terminalWidth := tc.defaultWidth
+			terminalHeight := tc.defaultHeight
 
 			rowLenLimiter := rll.MakeRowLenLimiter()
 			pageModel := getPageModel(rowLenLimiter.GetRowLenLimit(terminalWidth), terminalHeight)
 			absShift = 0
 
-			for actionIndex, action := range td.actionSequence {
+			for actionIndex, action := range tc.actionSequence {
 				shift = 0
 
 				oldTerminalWidth, _ := terminalWidth, terminalHeight
@@ -338,15 +338,15 @@ func TestPageViewShifting(t *testing.T) {
 			}
 		})
 
-		t.Run(td.caseName+"_fast_updating", func(t *testing.T) {
-			terminalWidth := td.defaultWidth
-			terminalHeight := td.defaultHeight
+		t.Run(tc.caseName+"_fast_updating", func(t *testing.T) {
+			terminalWidth := tc.defaultWidth
+			terminalHeight := tc.defaultHeight
 
 			rowLenLimiter := rll.MakeRowLenLimiter()
 			pageModel := getPageModel(rowLenLimiter.GetRowLenLimit(terminalWidth), terminalHeight)
 			absShift = 0
 
-			for actionIndex, action := range td.actionSequence {
+			for actionIndex, action := range tc.actionSequence {
 				shift = 0
 
 				expectedRows, terminalWidth, terminalHeight, absShift = tt.GetExpectedData(action, terminalWidth, terminalHeight, absShift)

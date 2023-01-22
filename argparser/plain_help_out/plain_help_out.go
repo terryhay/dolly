@@ -12,19 +12,22 @@ func PrintHelpInfo(config apConf.ArgParserConfig) {
 
 	builder.WriteString(createNameChapter(
 		config.GetAppDescription().GetAppName(),
-		config.GetAppDescription().GetNameHelpInfo()))
+		config.GetAppDescription().GetNameHelpInfo()),
+	)
 
 	builder.WriteString(createSynopsisChapter(
 		config.GetAppDescription().GetAppName(),
 		config.GetNamelessCommandDescription(),
 		config.GetCommandDescriptions(),
-		config.GetFlagDescriptions()))
+		config.ExtractFlagDescriptionMap()),
+	)
 
 	builder.WriteString(createDescriptionChapter(
 		config.GetAppDescription().GetDescriptionHelpInfo(),
 		config.GetNamelessCommandDescription(),
 		config.GetCommandDescriptions(),
-		config.GetFlagDescriptions()))
+		config.GetFlagDescriptionSlice()),
+	)
 
 	fmt.Println(builder.String())
 }

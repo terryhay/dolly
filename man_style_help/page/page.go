@@ -16,7 +16,7 @@ func MakePage(config apConf.ArgParserConfig) Page {
 	appDescription := config.GetAppDescription()
 	namelessCmdDescription := config.GetNamelessCommandDescription()
 	cmdDescriptions := config.GetCommandDescriptions()
-	flagDescriptions := config.GetFlagDescriptions()
+	flagDescriptions := config.ExtractFlagDescriptionMap()
 
 	paragraphs := make([]Paragraph, 0, paragraphDefaultCount)
 

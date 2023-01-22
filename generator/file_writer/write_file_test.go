@@ -19,7 +19,7 @@ func TestWrite(t *testing.T) {
 
 	dirPath := gofakeit.Color()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		osDecor  osd.OSDecorator
@@ -177,14 +177,14 @@ func TestWrite(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			err := WriteFile(td.osDecor, td.dirPath, td.fileBody)
-			if td.expectedErrCode == dollyerr.CodeNone {
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			err := WriteFile(tc.osDecor, tc.dirPath, tc.fileBody)
+			if tc.expectedErrCode == dollyerr.CodeNone {
 				require.Nil(t, err)
 				return
 			}
-			require.Equal(t, td.expectedErrCode, err.Code())
+			require.Equal(t, tc.expectedErrCode, err.Code())
 		})
 	}
 }

@@ -27,16 +27,10 @@ func createDescriptionChapter(
 	descriptionHelpInfo []string,
 	namelessCommandDescription apConf.NamelessCommandDescription,
 	commandDescriptions []*apConf.CommandDescription,
-	flagDescriptions map[apConf.Flag]*apConf.FlagDescription,
+	flagDescriptions []*apConf.FlagDescription,
 ) string {
 
-	var (
-		builder         strings.Builder
-		callNames       string
-		flagDescription *apConf.FlagDescription
-		usingPattern    string
-	)
-
+	builder := strings.Builder{}
 	builder.WriteString(descriptionChapterTitle)
 	if len(descriptionHelpInfo) == 0 &&
 		namelessCommandDescription == nil &&
@@ -62,9 +56,9 @@ func createDescriptionChapter(
 		}
 
 		for i := range commandDescriptions {
-			callNames = strings.Join(getSortedCommands(commandDescriptions[i].GetCommands()), ", ")
+			callNames := strings.Join(getSortedCommands(commandDescriptions[i].GetCommands()), ", ")
 
-			usingPattern = descriptionLine
+			usingPattern := descriptionLine
 			if len(callNames) > tabLen {
 				usingPattern = descriptionTwoLines
 			}
@@ -78,14 +72,13 @@ func createDescriptionChapter(
 	if len(flagDescriptions) > 0 {
 		builder.WriteString(flagDescriptionsSubtitle)
 
-		for _, callNames = range getSortedFlagsForDescription(flagDescriptions) {
-			usingPattern = descriptionLine
-			if len(callNames) > tabLen {
+		for _, flagData := range getSortedFlagsForDescription(flagDescriptions) {
+			usingPattern := descriptionLine
+			if len(flagData.NamePart) > tabLen {
 				usingPattern = descriptionTwoLines
 			}
 
-			flagDescription = flagDescriptions[apConf.Flag(callNames)]
-			builder.WriteString(fmt.Sprintf(usingPattern, callNames, flagDescription.GetDescriptionHelpInfo()))
+			builder.WriteString(fmt.Sprintf(usingPattern, flagData.NamePart, flagData.DescriptionPart))
 		}
 	}
 

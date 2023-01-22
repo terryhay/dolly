@@ -11,9 +11,9 @@ import (
 func TestNamelessCommandDescriptionGetters(t *testing.T) {
 	t.Parallel()
 
-	var pointer *NamelessCommandDescription
-
 	t.Run("nil_pointer", func(t *testing.T) {
+		var pointer *NamelessCommandDescription
+
 		require.Equal(t, "", pointer.GetDescriptionHelpInfo())
 		require.Nil(t, pointer.GetRequiredFlags())
 		require.Nil(t, pointer.GetOptionalFlags())
@@ -21,12 +21,13 @@ func TestNamelessCommandDescriptionGetters(t *testing.T) {
 	})
 
 	t.Run("initialized_pointer", func(t *testing.T) {
-		pointer = &NamelessCommandDescription{
-			descriptionHelpInfo:  gofakeit.Name(),
-			requiredFlags:        []string{gofakeit.Name()},
-			optionalFlags:        []string{gofakeit.Name()},
-			argumentsDescription: &ArgumentsDescription{},
+		src := NamelessCommandDescriptionSrc{
+			DescriptionHelpInfo:  gofakeit.Name(),
+			RequiredFlags:        []string{gofakeit.Name()},
+			OptionalFlags:        []string{gofakeit.Name()},
+			ArgumentsDescription: &ArgumentsDescription{},
 		}
+		pointer := src.ToConstPtr()
 
 		require.Equal(t, pointer.descriptionHelpInfo, pointer.GetDescriptionHelpInfo())
 		require.Equal(t, pointer.requiredFlags, pointer.GetRequiredFlags())
@@ -38,7 +39,7 @@ func TestNamelessCommandDescriptionGetters(t *testing.T) {
 func TestNamelessCommandDescriptionErrors(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		yamlFileName      string
 		expectedErrorText string
 	}{
@@ -48,13 +49,13 @@ func TestNamelessCommandDescriptionErrors(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.yamlFileName, func(t *testing.T) {
-			config, err := GetConfig(fmt.Sprintf("./test_cases/nameless_command_description_cases/%s", td.yamlFileName))
+	for _, tc := range testCases {
+		t.Run(tc.yamlFileName, func(t *testing.T) {
+			config, err := GetConfig(fmt.Sprintf("./test_cases/nameless_command_description_cases/%s", tc.yamlFileName))
 			require.Nil(t, config)
 			require.NotNil(t, err)
 			require.Equal(t, dollyerr.CodeGetConfigUnmarshalError, err.Code())
-			require.Equal(t, td.expectedErrorText, err.Error().Error())
+			require.Equal(t, tc.expectedErrorText, err.Error().Error())
 		})
 	}
 
@@ -71,7 +72,7 @@ func TestNamelessCommandDescriptionErrors(t *testing.T) {
 func TestNamelessCommandDescriptionNoErrorWhenNoOptionalFields(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		yamlFileName string
 	}{
 		{
@@ -85,9 +86,9 @@ func TestNamelessCommandDescriptionNoErrorWhenNoOptionalFields(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.yamlFileName, func(t *testing.T) {
-			config, err := GetConfig(fmt.Sprintf("./test_cases/nameless_command_description_cases/%s", td.yamlFileName))
+	for _, tc := range testCases {
+		t.Run(tc.yamlFileName, func(t *testing.T) {
+			config, err := GetConfig(fmt.Sprintf("./test_cases/nameless_command_description_cases/%s", tc.yamlFileName))
 			require.NotNil(t, config)
 			require.Nil(t, err)
 		})

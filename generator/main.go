@@ -22,18 +22,16 @@ func logic(
 	dollyParseFunc func(args []string) (res *parsed.ParsedData, err *dollyerr.Error),
 	getYAMLConfigFunc func(configPath string) (*confYML.Config, *dollyerr.Error),
 	osd os_decorator.OSDecorator,
-) (error, uint) {
+) (
+	error, uint,
+) {
 
 	argData, err := dollyParseFunc(osd.GetArgs())
 	if err != nil {
 		return err.Error(), err.Code().ToUint()
 	}
 
-	var (
-		configYAMLFilePath parsed.ArgValue
-		contain            bool
-	)
-	configYAMLFilePath, contain = argData.GetFlagArgValue(parser.FlagC)
+	configYAMLFilePath, contain := argData.GetFlagArgValue(parser.FlagC)
 	if !contain {
 		err = dollyerr.NewError(
 			dollyerr.CodeGeneratorNoRequiredFlag,

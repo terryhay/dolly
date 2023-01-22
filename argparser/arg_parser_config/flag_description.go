@@ -4,12 +4,16 @@ import "unsafe"
 
 // FlagDescription contains specification of flag with flag's arguments
 type FlagDescription struct {
+	id                  FlagID
+	flags               []Flag
 	descriptionHelpInfo string
 	argDescription      *ArgumentsDescription
 }
 
 // FlagDescriptionSrc contains source data for cast to FlagDescription
 type FlagDescriptionSrc struct {
+	ID                  FlagID
+	Flags               []Flag
 	DescriptionHelpInfo string
 	ArgDescription      *ArgumentsDescription
 }
@@ -19,18 +23,34 @@ func (src FlagDescriptionSrc) ToConstPtr() *FlagDescription {
 	return (*FlagDescription)(unsafe.Pointer(&src))
 }
 
-// GetDescriptionHelpInfo - DescriptionHelpInfo field getter
-func (i *FlagDescription) GetDescriptionHelpInfo() string {
-	if i == nil {
-		return ""
+// GetID gets DescriptionHelpInfo field
+func (fd *FlagDescription) GetID() FlagID {
+	if fd == nil {
+		return FlagIDUndefined
 	}
-	return i.descriptionHelpInfo
+	return fd.id
 }
 
-// GetArgDescription - ArgDescription field getter
-func (i *FlagDescription) GetArgDescription() *ArgumentsDescription {
-	if i == nil {
+// GetFlags gets Flags field
+func (fd *FlagDescription) GetFlags() []Flag {
+	if fd == nil {
 		return nil
 	}
-	return i.argDescription
+	return fd.flags
+}
+
+// GetDescriptionHelpInfo gets DescriptionHelpInfo field
+func (fd *FlagDescription) GetDescriptionHelpInfo() string {
+	if fd == nil {
+		return ""
+	}
+	return fd.descriptionHelpInfo
+}
+
+// GetArgDescription gets ArgDescription field
+func (fd *FlagDescription) GetArgDescription() *ArgumentsDescription {
+	if fd == nil {
+		return nil
+	}
+	return fd.argDescription
 }

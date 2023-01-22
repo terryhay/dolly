@@ -19,17 +19,20 @@ const (
 %[1]s	DefaultValues: []string{`
 	argumentsDescriptionAllowedValuesPrefix = `
 %[1]s	AllowedValues: map[string]bool{`
+
 	argumentsDescriptionVariantValue = `
 %[1]s		"%[2]s",`
 	argumentsDescriptionMapVariantValue = `
 %[1]s		"%[2]s": true,`
+
 	argumentsDescriptionVariantValuesPostfix = `
 %[1]s	}.ToConstPtr(),`
+
 	argumentsDescriptionPostfix = `
 %[1]s}.ToConstPtr()`
 )
 
-// GenArgDescriptionPart - creates a paste part with argument description
+// GenArgDescriptionPart creates a paste part with argument description
 func GenArgDescriptionPart(
 	argumentsDescription *confYML.ArgumentsDescription,
 	indent string,

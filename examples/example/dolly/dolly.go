@@ -57,50 +57,71 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 				"and use several paragraphs",
 			},
 		}.ToConst(),
-		FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-			FlagSLw: apConf.FlagDescriptionSrc{
+		FlagDescriptionSlice: []*apConf.FlagDescription{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagSLw,
+				},
 				DescriptionHelpInfo: "single string",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "str",
 				}.ToConstPtr(),
 			}.ToConstPtr(),
-			FlagSl: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagSl,
+				},
 				DescriptionHelpInfo: "string list",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeList,
 					SynopsisHelpDescription: "str",
 				}.ToConstPtr(),
 			}.ToConstPtr(),
-			FlagILw: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagILw,
+				},
 				DescriptionHelpInfo: "int string",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "str",
 				}.ToConstPtr(),
 			}.ToConstPtr(),
-			FlagIl: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagIl,
+				},
 				DescriptionHelpInfo: "int list",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeList,
 					SynopsisHelpDescription: "str",
 				}.ToConstPtr(),
 			}.ToConstPtr(),
-			FlagFLw: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagFLw,
+				},
 				DescriptionHelpInfo: "single float",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "str",
 				}.ToConstPtr(),
 			}.ToConstPtr(),
-			FlagFl: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagFl,
+				},
 				DescriptionHelpInfo: "float list",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeList,
 					SynopsisHelpDescription: "str",
 				}.ToConstPtr(),
 			}.ToConstPtr(),
-			FlagCheckargs: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagCheckargs,
+				},
 				DescriptionHelpInfo: "do arguments checking",
 			}.ToConstPtr(),
 		},

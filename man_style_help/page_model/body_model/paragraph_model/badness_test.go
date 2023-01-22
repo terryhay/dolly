@@ -19,7 +19,7 @@ func TestBadness(t *testing.T) {
 func TestBadnessWorse(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		caseData string
 		b1       badness
 		b2       badness
@@ -95,9 +95,9 @@ func TestBadnessWorse(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseData, func(t *testing.T) {
-			require.Equal(t, td.worse, td.b1.worse(td.b2))
+	for _, tc := range testCases {
+		t.Run(tc.caseData, func(t *testing.T) {
+			require.Equal(t, tc.worse, tc.b1.worse(tc.b2))
 		})
 	}
 }

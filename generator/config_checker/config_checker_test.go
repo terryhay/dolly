@@ -26,7 +26,7 @@ func TestConfigCheckerErrors(t *testing.T) {
 		flag = flag[:maxFlagLen]
 	}
 
-	testData := []struct {
+	testCases := []struct {
 		caseName                   string
 		namelessCommandDescription *confYML.NamelessCommandDescription
 		commandDescriptionMap      map[string]*confYML.CommandDescription
@@ -273,11 +273,11 @@ func TestConfigCheckerErrors(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			err := Check(td.namelessCommandDescription, td.commandDescriptionMap, td.flagDescriptionMap)
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			err := Check(tc.namelessCommandDescription, tc.commandDescriptionMap, tc.flagDescriptionMap)
 			require.NotNil(t, err)
-			require.Equal(t, td.expectedErrorCode, err.Code())
+			require.Equal(t, tc.expectedErrorCode, err.Code())
 		})
 	}
 }

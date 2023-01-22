@@ -1,7 +1,7 @@
 package paragraph_model
 
 import (
-	"github.com/terryhay/dolly/man_style_help/index"
+	"github.com/terryhay/dolly/utils/index"
 )
 
 // splitter contains page about breaking text for split text to lines

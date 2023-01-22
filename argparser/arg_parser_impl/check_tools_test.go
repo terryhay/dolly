@@ -4,6 +4,7 @@ import (
 	"github.com/brianvoe/gofakeit"
 	"github.com/stretchr/testify/require"
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
+	cmdArg "github.com/terryhay/dolly/argparser/cmd_arg"
 	"github.com/terryhay/dolly/argparser/parsed_data"
 	"github.com/terryhay/dolly/utils/dollyerr"
 	"testing"
@@ -12,7 +13,7 @@ import (
 func TestCheckNoDashInFront(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		arg           string
@@ -25,18 +26,18 @@ func TestCheckNoDashInFront(t *testing.T) {
 		{
 			caseName:      "dash_in_front",
 			arg:           "-" + gofakeit.Color(),
-			expectedValue: false,
+			expectedValue: true,
 		},
 		{
 			caseName:      "no_dash_in_front",
 			arg:           gofakeit.Color(),
-			expectedValue: true,
+			expectedValue: false,
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			require.Equal(t, td.expectedValue, checkNoDashInFront(td.arg))
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			require.Equal(t, tc.expectedValue, cmdArg.CmdArg(tc.arg).HasDashInFront())
 		})
 	}
 }
@@ -44,7 +45,7 @@ func TestCheckNoDashInFront(t *testing.T) {
 func TestCheckParsedData(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		commandDescription *apConf.CommandDescription
@@ -75,16 +76,16 @@ func TestCheckParsedData(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			err := checkParsedData(td.commandDescription, td.data)
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			err := checkParsedData(tc.commandDescription, tc.data)
 
-			if td.expectedErr == nil {
+			if tc.expectedErr == nil {
 				require.Nil(t, err)
 				return
 			}
 
-			require.Equal(t, td.expectedErr.Code(), err.Code())
+			require.Equal(t, tc.expectedErr.Code(), err.Code())
 		})
 	}
 }
@@ -94,7 +95,7 @@ func TestIsValueAllowed(t *testing.T) {
 
 	value := gofakeit.Color()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		argDescription *apConf.ArgumentsDescription
@@ -135,16 +136,16 @@ func TestIsValueAllowed(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			err := isValueAllowed(td.argDescription, td.value)
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			err := isValueAllowed(tc.argDescription, tc.value)
 
-			if td.expectedErr == nil {
+			if tc.expectedErr == nil {
 				require.Nil(t, err)
 				return
 			}
 
-			require.Equal(t, td.expectedErr.Code(), err.Code())
+			require.Equal(t, tc.expectedErr.Code(), err.Code())
 		})
 	}
 }

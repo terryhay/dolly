@@ -1,25 +1,37 @@
 package arg_parser_config
 
-// CommandID is id of command which contains some amount of flags and arguments (0 value is reserved)
-type CommandID uint
+type (
+	// CommandID - id of command which contains some amount of flags and arguments (0 value is undefined value)
+	CommandID uint
 
-// CommandIDUndefined - a default return CommandID value, don't use it
-const CommandIDUndefined CommandID = 0
+	// Command is name type of command
+	Command string
 
-// Command is name type of command
-type Command string
+	// FlagID - id of flag (0 value is undefined value)
+	FlagID uint
 
-// CommandUndefined - a default Command value, don't use it
-const CommandUndefined Command = ""
+	// Flag is name type of command flag
+	Flag string
 
-// Flag is name type of command flag
-type Flag string
+	// ArgAmountType defines an amount of arguments
+	ArgAmountType uint8
+)
 
-// FlagUndefined - a default Flag value, don't use it
-const FlagUndefined Flag = ""
+const (
+	// CommandIDUndefined - a default return CommandID value, don't use it
+	CommandIDUndefined CommandID = 0
 
-// ArgAmountType defines an amount of arguments
-type ArgAmountType uint8
+	// CommandUndefined - a default Command value, don't use it
+	CommandUndefined Command = ""
+)
+
+const (
+	// FlagIDUndefined - default FlagID value, don't use it
+	FlagIDUndefined FlagID = 0
+
+	// FlagUndefined - a default Flag value, don't use it
+	FlagUndefined Flag = ""
+)
 
 const (
 	// ArgAmountTypeNoArgs - default value, no arguments
@@ -31,3 +43,11 @@ const (
 	// ArgAmountTypeList - value array is expected
 	ArgAmountTypeList
 )
+
+func (c Command) ToString() string {
+	return string(c)
+}
+
+func (f Flag) ToString() string {
+	return string(f)
+}

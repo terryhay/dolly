@@ -3,7 +3,6 @@ package page_model
 import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/terryhay/dolly/man_style_help/index"
 	"github.com/terryhay/dolly/man_style_help/page"
 	"github.com/terryhay/dolly/man_style_help/row"
 	rll "github.com/terryhay/dolly/man_style_help/row_len_limiter"
@@ -11,6 +10,7 @@ import (
 	"github.com/terryhay/dolly/man_style_help/size"
 	ts "github.com/terryhay/dolly/man_style_help/terminal_size"
 	"github.com/terryhay/dolly/utils/dollyerr"
+	"github.com/terryhay/dolly/utils/index"
 	"testing"
 )
 

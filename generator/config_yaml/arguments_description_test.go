@@ -13,9 +13,9 @@ import (
 func TestArgumentsDescriptionGetters(t *testing.T) {
 	t.Parallel()
 
-	var pointer *ArgumentsDescription
-
 	t.Run("nil_pointer", func(t *testing.T) {
+		var pointer *ArgumentsDescription
+
 		require.Equal(t, apConf.ArgAmountTypeNoArgs, pointer.GetAmountType())
 		require.Equal(t, "", pointer.GetSynopsisHelpDescription())
 		require.Nil(t, pointer.GetDefaultValues())
@@ -23,24 +23,25 @@ func TestArgumentsDescriptionGetters(t *testing.T) {
 	})
 
 	t.Run("initialized_pointer", func(t *testing.T) {
-		pointer = &ArgumentsDescription{
-			amountType:              apConf.ArgAmountTypeSingle,
-			synopsisHelpDescription: gofakeit.Name(),
-			defaultValues:           []string{gofakeit.Name()},
-			allowedValues:           []string{gofakeit.Name()},
+		src := ArgumentsDescriptionSrc{
+			AmountType:              apConf.ArgAmountTypeSingle,
+			SynopsisHelpDescription: gofakeit.Name(),
+			DefaultValues:           []string{gofakeit.Name()},
+			AllowedValues:           []string{gofakeit.Name()},
 		}
+		pointer := src.ToConstPtr()
 
-		require.Equal(t, pointer.amountType, pointer.GetAmountType())
-		require.Equal(t, pointer.synopsisHelpDescription, pointer.GetSynopsisHelpDescription())
-		require.Equal(t, pointer.defaultValues, pointer.GetDefaultValues())
-		require.Equal(t, pointer.allowedValues, pointer.GetAllowedValues())
+		require.Equal(t, src.AmountType, pointer.GetAmountType())
+		require.Equal(t, src.SynopsisHelpDescription, pointer.GetSynopsisHelpDescription())
+		require.Equal(t, src.DefaultValues, pointer.GetDefaultValues())
+		require.Equal(t, src.AllowedValues, pointer.GetAllowedValues())
 	})
 }
 
 func TestArgumentsDescriptionUnmarshalErrors(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		yamlFileName      string
 		expectedErrorText string
 	}{
@@ -58,13 +59,13 @@ func TestArgumentsDescriptionUnmarshalErrors(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.yamlFileName, func(t *testing.T) {
-			config, err := GetConfig(fmt.Sprintf("./test_cases/arguments_description_cases/%s", td.yamlFileName))
+	for _, tc := range testCases {
+		t.Run(tc.yamlFileName, func(t *testing.T) {
+			config, err := GetConfig(fmt.Sprintf("./test_cases/arguments_description_cases/%s", tc.yamlFileName))
 			require.Nil(t, config)
 			require.NotNil(t, err)
 			require.Equal(t, dollyerr.CodeGetConfigUnmarshalError, err.Code())
-			require.Equal(t, td.expectedErrorText, err.Error().Error())
+			require.Equal(t, tc.expectedErrorText, err.Error().Error())
 		})
 	}
 
@@ -81,7 +82,7 @@ func TestArgumentsDescriptionUnmarshalErrors(t *testing.T) {
 func TestArgumentsDescriptionUnmarshalNoErrorWhenNoOptionalFields(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		yamlFileName string
 	}{
 		{
@@ -92,9 +93,9 @@ func TestArgumentsDescriptionUnmarshalNoErrorWhenNoOptionalFields(t *testing.T) 
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.yamlFileName, func(t *testing.T) {
-			config, err := GetConfig(fmt.Sprintf("./test_cases/arguments_description_cases/%s", td.yamlFileName))
+	for _, tc := range testCases {
+		t.Run(tc.yamlFileName, func(t *testing.T) {
+			config, err := GetConfig(fmt.Sprintf("./test_cases/arguments_description_cases/%s", tc.yamlFileName))
 			require.NotNil(t, config)
 			require.Nil(t, err)
 		})

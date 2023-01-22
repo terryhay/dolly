@@ -2,7 +2,6 @@ package page_model
 
 import (
 	"fmt"
-	"github.com/terryhay/dolly/man_style_help/index"
 	"github.com/terryhay/dolly/man_style_help/page"
 	"github.com/terryhay/dolly/man_style_help/page_model/body_model"
 	"github.com/terryhay/dolly/man_style_help/page_model/footer_model"
@@ -10,6 +9,7 @@ import (
 	"github.com/terryhay/dolly/man_style_help/size"
 	ts "github.com/terryhay/dolly/man_style_help/terminal_size"
 	"github.com/terryhay/dolly/utils/dollyerr"
+	"github.com/terryhay/dolly/utils/index"
 )
 
 // PageModel - class which is getting page text parts for render in a terminal

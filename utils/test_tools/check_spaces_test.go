@@ -8,7 +8,7 @@ import (
 func TestCheckSpaces(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName    string
 		text        string
 		expectedRes bool
@@ -44,10 +44,10 @@ func TestCheckSpaces(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			res, _ := CheckSpaces(td.text)
-			require.Equal(t, td.expectedRes, res)
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			res, _ := CheckSpaces(tc.text)
+			require.Equal(t, tc.expectedRes, res)
 		})
 	}
 }

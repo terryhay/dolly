@@ -2,12 +2,12 @@ package body_model
 
 import (
 	"github.com/stretchr/testify/require"
-	"github.com/terryhay/dolly/man_style_help/index"
 	"github.com/terryhay/dolly/man_style_help/page"
 	rll "github.com/terryhay/dolly/man_style_help/row_len_limiter"
 	rllMock "github.com/terryhay/dolly/man_style_help/row_len_limiter/mock"
 	"github.com/terryhay/dolly/man_style_help/size"
 	ts "github.com/terryhay/dolly/man_style_help/terminal_size"
+	"github.com/terryhay/dolly/utils/index"
 	"testing"
 )
 

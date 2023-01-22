@@ -188,8 +188,11 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 			NameHelpInfo: "",
 			DescriptionHelpInfo: nil,
 		}.ToConst(),
-		FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-			FlagRf1: apConf.FlagDescriptionSrc{
+		FlagDescriptionSlice: []*apConf.FlagDescription{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagRf1,
+				},
 				DescriptionHelpInfo:  "",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
@@ -202,7 +205,10 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 					}.ToConstPtr(),
 				}.ToConstPtr(),
 			}.ToConstPtr(),
-			FlagRf2: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagRf2,
+				},
 				DescriptionHelpInfo:  "",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeList,
@@ -215,10 +221,16 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 					}.ToConstPtr(),
 				}.ToConstPtr(),
 			}.ToConstPtr(),
-			FlagOf1: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagOf1,
+				},
 				DescriptionHelpInfo:  "",
 			}.ToConstPtr(),
-			FlagOf2: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagOf2,
+				},
 				DescriptionHelpInfo:  "",
 			}.ToConstPtr(),
 		},
@@ -358,7 +370,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 				"command description help info",
 			},
 		}.ToConst(),
-		FlagDescriptions: nil,
+		FlagDescriptionSlice: nil,
 		CommandDescriptions: nil,
 		HelpCommandDescription: apConf.NewHelpCommandDescription(
 			CommandIDPrintHelpInfo,
@@ -442,7 +454,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 				"command description help info",
 			},
 		}.ToConst(),
-		FlagDescriptions: nil,
+		FlagDescriptionSlice: nil,
 		CommandDescriptions: nil,
 		HelpCommandDescription: nil,
 		NamelessCommandDescription: apConf.NewNamelessCommandDescription(
@@ -504,7 +516,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 			NameHelpInfo: "",
 			DescriptionHelpInfo: nil,
 		}.ToConst(),
-		FlagDescriptions: nil,
+		FlagDescriptionSlice: nil,
 		CommandDescriptions: nil,
 		HelpCommandDescription: nil,
 		NamelessCommandDescription: nil}.ToConst()

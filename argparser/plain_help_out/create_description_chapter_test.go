@@ -14,16 +14,17 @@ func TestCreateDescriptionChapter(t *testing.T) {
 
 	randDescriptionHelpInfo := gofakeit.Name()
 	randCommand := apConf.Command(gofakeit.Color())
-	randFlag := apConf.Flag(gofakeit.Color())
+	randFlag1 := apConf.Flag("flagSecond")
+	randFlag2 := apConf.Flag("flagFirst")
 	randFlagDescriptionHelpInfo := gofakeit.Name()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		descriptionHelpInfo        []string
 		namelessCommandDescription apConf.NamelessCommandDescription
 		commandDescriptions        []*apConf.CommandDescription
-		flagDescriptions           map[apConf.Flag]*apConf.FlagDescription
+		flagDescriptions           []*apConf.FlagDescription
 
 		expected string
 	}{
@@ -37,8 +38,11 @@ func TestCreateDescriptionChapter(t *testing.T) {
 		{
 			caseName:            "two_flags",
 			descriptionHelpInfo: []string{randDescriptionHelpInfo},
-			flagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-				randFlag: apConf.FlagDescriptionSrc{
+			flagDescriptions: []*apConf.FlagDescription{
+				apConf.FlagDescriptionSrc{
+					Flags: []apConf.Flag{
+						randFlag1,
+					},
 					DescriptionHelpInfo: randFlagDescriptionHelpInfo,
 				}.ToConstPtr(),
 			},
@@ -51,7 +55,7 @@ The flags are as follows:
 		%s
 `,
 				randDescriptionHelpInfo,
-				randFlag,
+				randFlag1,
 				randFlagDescriptionHelpInfo,
 			),
 		},
@@ -63,8 +67,17 @@ The flags are as follows:
 					Commands: map[apConf.Command]bool{randCommand: true},
 				}.ToConstPtr(),
 			},
-			flagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-				randFlag: apConf.FlagDescriptionSrc{
+			flagDescriptions: []*apConf.FlagDescription{
+				apConf.FlagDescriptionSrc{
+					Flags: []apConf.Flag{
+						randFlag1,
+					},
+					DescriptionHelpInfo: randFlagDescriptionHelpInfo,
+				}.ToConstPtr(),
+				apConf.FlagDescriptionSrc{
+					Flags: []apConf.Flag{
+						randFlag2,
+					},
 					DescriptionHelpInfo: randFlagDescriptionHelpInfo,
 				}.ToConstPtr(),
 			},
@@ -76,24 +89,28 @@ The commands are as follows:
 	[1m%s[0m
 		
 The flags are as follows:
-	[1m%s[0m
+	[1mflagFirst[0m
 		%s
-`, randDescriptionHelpInfo, randCommand, randFlag, randFlagDescriptionHelpInfo),
+
+	[1mflagSecond[0m
+		%s
+`, randDescriptionHelpInfo, randCommand, randFlagDescriptionHelpInfo, randFlagDescriptionHelpInfo),
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
 			actual := createDescriptionChapter(
-				td.descriptionHelpInfo,
-				td.namelessCommandDescription,
-				td.commandDescriptions,
-				td.flagDescriptions)
+				tc.descriptionHelpInfo,
+				tc.namelessCommandDescription,
+				tc.commandDescriptions,
+				tc.flagDescriptions,
+			)
 
 			ok, msg := tools.CheckSpaces(actual)
 			require.True(t, ok, msg)
 
-			require.Equal(t, td.expected, actual)
+			require.Equal(t, tc.expected, actual)
 		})
 	}
 }

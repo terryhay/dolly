@@ -2,6 +2,7 @@ package arg_parser_impl
 
 import (
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
+	cmdArg "github.com/terryhay/dolly/argparser/cmd_arg"
 	"github.com/terryhay/dolly/argparser/parsed_data"
 	"github.com/terryhay/dolly/utils/dollyerr"
 )
@@ -16,12 +17,12 @@ const (
 
 const countOfParseStates = int(parseStateReadingArgumentList) + 1
 
-// ArgParserImpl - implementation of command line argument parser
+// ArgParserImpl implements command line argument parser
 type ArgParserImpl struct {
 	commandDescriptions        map[apConf.Command]*apConf.CommandDescription
 	namelessCommandDescription *apConf.CommandDescription
 	flagDescriptions           map[apConf.Flag]*apConf.FlagDescription
-	stateProcessors            [countOfParseStates]func(arg string) *dollyerr.Error
+	stateProcessors            [countOfParseStates]func(arg cmdArg.CmdArg) *dollyerr.Error
 
 	// mutable page
 	mArgDescription     *apConf.ArgumentsDescription
@@ -36,16 +37,16 @@ type ArgParserImpl struct {
 	rParsedFlagDataMap map[apConf.Flag]*parsed_data.ParsedFlagData
 }
 
-// NewCmdArgParserImpl - ArgParserImpl object constructor
+// NewCmdArgParserImpl constructs ArgParserImpl object
 func NewCmdArgParserImpl(config apConf.ArgParserConfig) *ArgParserImpl {
 	res := &ArgParserImpl{
 		commandDescriptions: createCommandDescriptionMap(
 			config.GetCommandDescriptions(),
 			config.GetHelpCommandDescription()),
 		namelessCommandDescription: castNamelessCommandDescriptionToPointer(config.GetNamelessCommandDescription()),
-		flagDescriptions:           config.GetFlagDescriptions(),
+		flagDescriptions:           createFlagDescriptionMap(config.GetFlagDescriptionSlice()),
 	}
-	res.stateProcessors = [countOfParseStates]func(arg string) *dollyerr.Error{
+	res.stateProcessors = [countOfParseStates]func(arg cmdArg.CmdArg) *dollyerr.Error{
 		parseStateReadingFlag:           res.processReadingFlag,
 		parseStateReadingSingleArgument: res.processReadingSingleArgument,
 		parseStateReadingArgumentList:   res.processReadingArgumentList,
@@ -55,27 +56,21 @@ func NewCmdArgParserImpl(config apConf.ArgParserConfig) *ArgParserImpl {
 }
 
 func createCommandDescriptionMap(
-	commandsDescriptionSlice []*apConf.CommandDescription,
+	commandDescriptions []*apConf.CommandDescription,
 	helpCommandDescription apConf.HelpCommandDescription,
 ) map[apConf.Command]*apConf.CommandDescription {
 
-	commandsCount := 0
-	commandDescription := castHelpCommandDescriptionToPointer(helpCommandDescription)
-	if commandDescription != nil {
-		commandsCount++
-	}
-	commandsCount += len(commandsDescriptionSlice)
+	res := make(map[apConf.Command]*apConf.CommandDescription, len(commandDescriptions)*2)
 
-	res := make(map[apConf.Command]*apConf.CommandDescription, commandsCount)
-
-	var command apConf.Command
-	for command = range commandDescription.GetCommands() {
-		res[command] = commandDescription
+	if desc := castHelpCommandDescriptionToPointer(helpCommandDescription); desc != nil {
+		for command := range desc.GetCommands() {
+			res[command] = desc
+		}
 	}
 
-	for i := range commandsDescriptionSlice {
-		for command = range commandsDescriptionSlice[i].GetCommands() {
-			res[command] = commandDescription
+	for _, desc := range commandDescriptions {
+		for command := range desc.GetCommands() {
+			res[command] = desc
 		}
 	}
 
@@ -94,4 +89,15 @@ func castNamelessCommandDescriptionToPointer(namelessCommandDescription apConf.N
 		return nil
 	}
 	return namelessCommandDescription.(*apConf.CommandDescription)
+}
+
+func createFlagDescriptionMap(flagDescriptions []*apConf.FlagDescription) map[apConf.Flag]*apConf.FlagDescription {
+	res := make(map[apConf.Flag]*apConf.FlagDescription, len(flagDescriptions)*2)
+	for _, desc := range flagDescriptions {
+		for _, flag := range desc.GetFlags() {
+			res[flag] = desc
+		}
+	}
+
+	return res
 }

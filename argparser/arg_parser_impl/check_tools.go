@@ -8,13 +8,6 @@ import (
 	"strings"
 )
 
-func checkNoDashInFront(arg string) bool {
-	if len(arg) == 0 {
-		return true
-	}
-	return arg[:1] != "-"
-}
-
 func checkParsedData(
 	usingCommandDescription *apConf.CommandDescription,
 	data *parsed_data.ParsedData,

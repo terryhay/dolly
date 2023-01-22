@@ -12,33 +12,34 @@ import (
 func TestAppHelpDescriptionGetters(t *testing.T) {
 	t.Parallel()
 
-	var pointer *AppHelpDescription
-
 	t.Run("nil_pointer", func(t *testing.T) {
+		var pointer *AppHelpDescription
+
 		require.Equal(t, "", pointer.GetApplicationName())
 		require.Equal(t, "", pointer.GetNameHelpInfo())
 		require.Nil(t, pointer.GetDescriptionHelpInfo())
 	})
 
 	t.Run("initialized_pointer", func(t *testing.T) {
-		pointer = &AppHelpDescription{
-			applicationName: gofakeit.Name(),
-			nameHelpInfo:    gofakeit.Name(),
-			descriptionHelpInfo: []string{
+		src := AppHelpDescriptionSrc{
+			ApplicationName: gofakeit.Name(),
+			NameHelpInfo:    gofakeit.Name(),
+			DescriptionHelpInfo: []string{
 				gofakeit.Name(),
 			},
 		}
+		pointer := src.ToConstPtr()
 
-		require.Equal(t, pointer.applicationName, pointer.GetApplicationName())
-		require.Equal(t, pointer.nameHelpInfo, pointer.GetNameHelpInfo())
-		require.Equal(t, pointer.descriptionHelpInfo, pointer.GetDescriptionHelpInfo())
+		require.Equal(t, src.ApplicationName, pointer.GetApplicationName())
+		require.Equal(t, src.NameHelpInfo, pointer.GetNameHelpInfo())
+		require.Equal(t, src.DescriptionHelpInfo, pointer.GetDescriptionHelpInfo())
 	})
 }
 
 func TestAppHelpDescriptionUnmarshalErrors(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		yamlFileName      string
 		expectedErrorText string
 	}{
@@ -56,13 +57,13 @@ func TestAppHelpDescriptionUnmarshalErrors(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.yamlFileName, func(t *testing.T) {
-			config, err := GetConfig(fmt.Sprintf("./test_cases/app_help_description_cases/%s", td.yamlFileName))
+	for _, tc := range testCases {
+		t.Run(tc.yamlFileName, func(t *testing.T) {
+			config, err := GetConfig(fmt.Sprintf("./test_cases/app_help_description_cases/%s", tc.yamlFileName))
 			require.Nil(t, config)
 			require.NotNil(t, err)
 			require.Equal(t, dollyerr.CodeGetConfigUnmarshalError, err.Code())
-			require.Equal(t, td.expectedErrorText, err.Error().Error())
+			require.Equal(t, tc.expectedErrorText, err.Error().Error())
 		})
 	}
 

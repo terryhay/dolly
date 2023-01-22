@@ -2,6 +2,7 @@ package config_yaml
 
 import (
 	"fmt"
+	"sort"
 	"unsafe"
 )
 
@@ -13,9 +14,10 @@ type FlagDescription struct {
 
 	// optional
 	argumentsDescription *ArgumentsDescription
+	additionalFlags      []string
 }
 
-// GetFlag - Flag getter
+// GetFlag gets flag filed
 func (fd *FlagDescription) GetFlag() string {
 	if fd == nil {
 		return ""
@@ -31,7 +33,7 @@ func (fd *FlagDescription) GetDescriptionHelpInfo() string {
 	return fd.descriptionHelpInfo
 }
 
-// GetSynopsisDescription - SynopsisDescription field getter
+// GetSynopsisDescription gets synopsisDescription field
 func (fd *FlagDescription) GetSynopsisDescription() string {
 	if fd == nil {
 		return ""
@@ -39,7 +41,7 @@ func (fd *FlagDescription) GetSynopsisDescription() string {
 	return fd.synopsisDescription
 }
 
-// GetArgumentsDescription - ArgumentsDescription field getter
+// GetArgumentsDescription gets argumentsDescription field
 func (fd *FlagDescription) GetArgumentsDescription() *ArgumentsDescription {
 	if fd == nil {
 		return nil
@@ -47,10 +49,35 @@ func (fd *FlagDescription) GetArgumentsDescription() *ArgumentsDescription {
 	return fd.argumentsDescription
 }
 
-// UnmarshalYAML - custom unmarshal logic with checking required fields
-func (fd *FlagDescription) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
+// GetAdditionalFlags gets additionalFlags filed
+func (fd *FlagDescription) GetAdditionalFlags() []string {
+	if fd == nil {
+		return nil
+	}
+	return fd.additionalFlags
+}
+
+// ExtractSortedFlags collects all flags in new slice and return it
+func (fd *FlagDescription) ExtractSortedFlags() []string {
+	if fd == nil {
+		return nil
+	}
+
+	flagsAll := make([]string, 0, 1+len(fd.additionalFlags))
+	flagsAll = append(flagsAll, fd.flag)
+	for _, flag := range fd.additionalFlags {
+		flagsAll = append(flagsAll, flag)
+	}
+
+	sort.Strings(flagsAll)
+
+	return flagsAll
+}
+
+// UnmarshalYAML implements custom unmarshal logic with checking required fields
+func (fd *FlagDescription) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	src := FlagDescriptionSrc{}
-	if err = unmarshal(&src); err != nil {
+	if err := unmarshal(&src); err != nil {
 		return err
 	}
 
@@ -75,6 +102,7 @@ type FlagDescriptionSrc struct {
 
 	// optional
 	ArgumentsDescription *ArgumentsDescription `yaml:"arguments_description"`
+	AdditionalFlags      []string              `yaml:"additional_flags"`
 }
 
 // ToConstPtr converts src to FlagDescription pointer

@@ -33,8 +33,8 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 				"you can write more detailed description here",
 			},
 		}.ToConst(),
-		FlagDescriptions:    nil,
-		CommandDescriptions: nil,
+		FlagDescriptionSlice: nil,
+		CommandDescriptions:  nil,
 		HelpCommandDescription: apConf.NewHelpCommandDescription(
 			CommandIDPrintHelpInfo,
 			map[apConf.Command]bool{

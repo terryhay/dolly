@@ -47,6 +47,10 @@ github.com/terryhay/dolly/utils v0.0.0-20221111213050-8ab1f60db739 h1:B3cGUgGpnH
 github.com/terryhay/dolly/utils v0.0.0-20221111213050-8ab1f60db739/go.mod h1:cyM/60uf5Y7N8jH4GrZj36ijCmnhQiH9RisKLIUF7AI=
 github.com/terryhay/dolly/utils v0.0.0-20221112102944-61bba21eed6a h1:6CaToNKdET3I8M6nGhUQNE5gRPBo756PpSKdDWM5iRw=
 github.com/terryhay/dolly/utils v0.0.0-20221112102944-61bba21eed6a/go.mod h1:cyM/60uf5Y7N8jH4GrZj36ijCmnhQiH9RisKLIUF7AI=
+github.com/terryhay/dolly/utils v0.0.0-20230114113530-3ffd06d755e7 h1:Z+bfQPcIHFPUvHbp58WifDX5n9BG39X4lBvLpjnl9Dg=
+github.com/terryhay/dolly/utils v0.0.0-20230114113530-3ffd06d755e7/go.mod h1:cyM/60uf5Y7N8jH4GrZj36ijCmnhQiH9RisKLIUF7AI=
+github.com/terryhay/dolly/utils v0.0.0-20230204144134-d144ceb1299c h1:04gtirNiMb+oKIECWlLYVrIahlWcv9PTKunM656fUc0=
+github.com/terryhay/dolly/utils v0.0.0-20230204144134-d144ceb1299c/go.mod h1:cyM/60uf5Y7N8jH4GrZj36ijCmnhQiH9RisKLIUF7AI=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405 h1:yhCVgyC4o1eVCa2tZl7eS0r+SDo693bJlVdllGtEeKM=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c h1:dUUwHk2QECo/6vqA44rthZ8ie2QXMNeKRTHCNY2nXvo=

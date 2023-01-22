@@ -3,6 +3,7 @@ package parser
 import (
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
 	impl "github.com/terryhay/dolly/argparser/arg_parser_impl"
+	cmdArg "github.com/terryhay/dolly/argparser/cmd_arg"
 	"github.com/terryhay/dolly/argparser/parsed_data"
 	helpOut "github.com/terryhay/dolly/argparser/plain_help_out"
 	"github.com/terryhay/dolly/utils/dollyerr"
@@ -39,22 +40,27 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 				"generate parser package which contains a command line page parser",
 			},
 		}.ToConst(),
-		FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-			FlagC: apConf.FlagDescriptionSrc{
+		FlagDescriptionSlice: []*apConf.FlagDescription{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagC,
+				},
 				DescriptionHelpInfo: "yaml file config path",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "file",
 				}.ToConstPtr(),
 			}.ToConstPtr(),
-			FlagO: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagO,
+				},
 				DescriptionHelpInfo: "generate package path",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "dir",
 				}.ToConstPtr(),
 			}.ToConstPtr(),
-			CommandHelp: {},
 		},
 		HelpCommandDescription: apConf.NewHelpCommandDescription(
 			CommandIDHelp,
@@ -75,7 +81,7 @@ func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
 		),
 	}.ToConst()
 
-	res, err = impl.NewCmdArgParserImpl(appArgConfig).Parse(args)
+	res, err = impl.NewCmdArgParserImpl(appArgConfig).Parse(cmdArg.MakeCmdArgIterator(args))
 	if err != nil {
 		return nil, err
 	}

@@ -11,7 +11,7 @@ import (
 func TestExtractCommandDescriptionMapErrors(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName            string
 		commandDescriptions []*confYML.CommandDescription
 		expectedErrorCode   dollyerr.Code
@@ -92,12 +92,12 @@ func TestExtractCommandDescriptionMapErrors(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			flagDescriptionMap, err := ExtractCommandDescriptionMap(td.commandDescriptions)
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			flagDescriptionMap, err := ExtractCommandDescriptionMap(tc.commandDescriptions)
 			require.Nil(t, flagDescriptionMap)
 			require.NotNil(t, err)
-			require.Equal(t, td.expectedErrorCode, err.Code())
+			require.Equal(t, tc.expectedErrorCode, err.Code())
 		})
 	}
 }
@@ -105,7 +105,7 @@ func TestExtractCommandDescriptionMapErrors(t *testing.T) {
 func TestExtractCommandDescriptionMap(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName            string
 		commandDescriptions []*confYML.CommandDescription
 		expectedMap         map[string]*confYML.CommandDescription
@@ -169,14 +169,14 @@ func TestExtractCommandDescriptionMap(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			flagDescriptionMap, err := ExtractCommandDescriptionMap(td.commandDescriptions)
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			flagDescriptionMap, err := ExtractCommandDescriptionMap(tc.commandDescriptions)
 			require.Nil(t, err)
 
-			require.Equal(t, len(td.expectedMap), len(flagDescriptionMap))
+			require.Equal(t, len(tc.expectedMap), len(flagDescriptionMap))
 
-			for command, expectedCommandDescription := range td.expectedMap {
+			for command, expectedCommandDescription := range tc.expectedMap {
 				flagDescription, contain := flagDescriptionMap[command]
 				require.True(t, contain)
 				require.Equal(t, expectedCommandDescription.GetCommand(), flagDescription.GetCommand())

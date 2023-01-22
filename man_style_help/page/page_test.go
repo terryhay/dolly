@@ -10,7 +10,7 @@ import (
 func TestPrintHelpInfo(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		config   apConf.ArgParserConfig
@@ -29,12 +29,12 @@ func TestPrintHelpInfo(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			hpd := MakePage(td.config)
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			hpd := MakePage(tc.config)
 
-			require.Equal(t, len(td.expected.Paragraphs), len(hpd.Paragraphs))
-			assert.Equal(t, td.expected, hpd)
+			require.Equal(t, len(tc.expected.Paragraphs), len(hpd.Paragraphs))
+			assert.Equal(t, tc.expected, hpd)
 		})
 	}
 }

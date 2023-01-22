@@ -29,7 +29,7 @@ func TestHeaderModelGetters(t *testing.T) {
 func TestMakeHeaderModel(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		headerText string
@@ -111,16 +111,16 @@ func TestMakeHeaderModel(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			headerModel, err := NewHeaderModel(page.MakeParagraph(0, td.headerText), td.size)
-			if td.expectedErr {
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			headerModel, err := NewHeaderModel(page.MakeParagraph(0, tc.headerText), tc.size)
+			if tc.expectedErr {
 				require.Nil(t, headerModel)
 				require.NotNil(t, err)
 				return
 			}
 
-			require.Equal(t, td.expectedHeaderModel, headerModel)
+			require.Equal(t, tc.expectedHeaderModel, headerModel)
 			require.Nil(t, err)
 		})
 	}

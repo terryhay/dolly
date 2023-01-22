@@ -47,7 +47,7 @@ func TestCreateSynopsisChapter(t *testing.T) {
 		}.ToConstPtr(),
 	}.ToConstPtr()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		appDescription             apConf.ApplicationDescription
@@ -104,13 +104,13 @@ func TestCreateSynopsisChapter(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
 			paragraphs := appendSynopsisChapterParagraphs(make([]Paragraph, 0),
-				td.appDescription,
-				td.namelessCommandDescription,
-				td.commandDescriptions,
-				td.flagDescriptions)
+				tc.appDescription,
+				tc.namelessCommandDescription,
+				tc.commandDescriptions,
+				tc.flagDescriptions)
 
 			paragraphTexts := make([]string, 0, len(paragraphs))
 			for i := range paragraphs {
@@ -121,7 +121,7 @@ func TestCreateSynopsisChapter(t *testing.T) {
 			//ok, msg := test_tools.CheckSpaces(text)
 			//require.True(t, ok, msg)
 
-			require.Equal(t, td.expected, text)
+			require.Equal(t, tc.expected, text)
 		})
 	}
 }

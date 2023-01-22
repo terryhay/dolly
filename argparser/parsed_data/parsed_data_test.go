@@ -52,7 +52,7 @@ func TestGetFlagArgValuesErrors(t *testing.T) {
 
 	flag := apConf.Flag(gofakeit.Color())
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		parsedData *ParsedData
@@ -82,11 +82,11 @@ func TestGetFlagArgValuesErrors(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName+"_GetFlagArgValues", func(t *testing.T) {
-			v, ok := td.parsedData.GetFlagArgValues(td.flag)
+	for _, tc := range testCases {
+		t.Run(tc.caseName+"_GetFlagArgValues", func(t *testing.T) {
+			v, ok := tc.parsedData.GetFlagArgValues(tc.flag)
 			require.Equal(t, 0, len(v))
-			require.Equal(t, td.expectedSuccess, ok)
+			require.Equal(t, tc.expectedSuccess, ok)
 		})
 	}
 }
@@ -96,7 +96,7 @@ func TestGetFlagArgValueErrors(t *testing.T) {
 
 	flag := apConf.Flag(gofakeit.Color())
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		parsedData *ParsedData
@@ -125,11 +125,11 @@ func TestGetFlagArgValueErrors(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName+"_GetFlagArgValues", func(t *testing.T) {
-			v, ok := td.parsedData.GetFlagArgValue(td.flag)
+	for _, tc := range testCases {
+		t.Run(tc.caseName+"_GetFlagArgValues", func(t *testing.T) {
+			v, ok := tc.parsedData.GetFlagArgValue(tc.flag)
 			require.Equal(t, 0, len(v))
-			require.Equal(t, td.expectedSuccess, ok)
+			require.Equal(t, tc.expectedSuccess, ok)
 		})
 	}
 }

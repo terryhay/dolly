@@ -52,35 +52,53 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 				"zgrep, zegrep, and zfgrep act like grep, egrep, and fgrep, respectively, but accept input files compressed with the compress(1) or gzip(1) compression utilities.  bzgrep, bzegrep, and bzfgrep act like grep, egrep, and fgrep, respectively, but accept input files compressed with the bzip2(1) compression utility.",
 			},
 		}.ToConst(),
-		FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-			FlagAUp: apConf.FlagDescriptionSrc{
+		FlagDescriptionSlice: []*apConf.FlagDescription{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagAUp,
+				},
 				DescriptionHelpInfo: "Print num lines of trailing context after each match.  See also the -B and -C options.",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "num",
 				}.ToConstPtr(),
 			}.ToConstPtr(),
-			FlagALw: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagALw,
+				},
 				DescriptionHelpInfo: "Treat all files as ASCII text.  Normally grep will simply print “Binary file ... matches” if files contain binary characters.  Use of this option forces grep to output lines matching the specified pattern.",
 			}.ToConstPtr(),
-			FlagBUp: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagBUp,
+				},
 				DescriptionHelpInfo: "Print num lines of leading context before each match.  See also the -A and -C options.",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "num",
 				}.ToConstPtr(),
 			}.ToConstPtr(),
-			FlagBLw: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagBLw,
+				},
 				DescriptionHelpInfo: "The offset in bytes of a matched pattern is displayed in front of the respective matched line.",
 			}.ToConstPtr(),
-			FlagCUp: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagCUp,
+				},
 				DescriptionHelpInfo: "Print num lines of leading and trailing context surrounding each match.  The default value of num is “2” and is equivalent to “-A 2 -B 2”.  Note: no whitespace may be given between the option and its argument.",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,
 					SynopsisHelpDescription: "num",
 				}.ToConstPtr(),
 			}.ToConstPtr(),
-			FlagCLw: apConf.FlagDescriptionSrc{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagCLw,
+				},
 				DescriptionHelpInfo: "Only a count of selected lines is written to standard output.",
 			}.ToConstPtr(),
 		},

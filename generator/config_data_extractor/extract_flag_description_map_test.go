@@ -11,7 +11,7 @@ import (
 func TestExtractFlagDescriptionMapErrors(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName          string
 		flagDescriptions  []*confYML.FlagDescription
 		expectedErrorCode dollyerr.Code
@@ -50,12 +50,12 @@ func TestExtractFlagDescriptionMapErrors(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			flagDescriptionMap, err := ExtractFlagDescriptionMap(td.flagDescriptions)
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			flagDescriptionMap, err := ExtractFlagDescriptionMap(tc.flagDescriptions)
 			require.Nil(t, flagDescriptionMap)
 			require.NotNil(t, err)
-			require.Equal(t, td.expectedErrorCode, err.Code())
+			require.Equal(t, tc.expectedErrorCode, err.Code())
 		})
 	}
 }
@@ -63,7 +63,7 @@ func TestExtractFlagDescriptionMapErrors(t *testing.T) {
 func TestExtractFlagDescriptionMap(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName         string
 		flagDescriptions []*confYML.FlagDescription
 		expectedMap      map[string]*confYML.FlagDescription
@@ -95,13 +95,13 @@ func TestExtractFlagDescriptionMap(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			flagDescriptionMap, err := ExtractFlagDescriptionMap(td.flagDescriptions)
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			flagDescriptionMap, err := ExtractFlagDescriptionMap(tc.flagDescriptions)
 			require.Nil(t, err)
-			require.Equal(t, len(td.expectedMap), len(flagDescriptionMap))
+			require.Equal(t, len(tc.expectedMap), len(flagDescriptionMap))
 
-			for flag, expectedFlagDescription := range td.expectedMap {
+			for flag, expectedFlagDescription := range tc.expectedMap {
 				flagDescription, contain := flagDescriptionMap[flag]
 				require.True(t, contain)
 				require.Equal(t, expectedFlagDescription.GetFlag(), flagDescription.GetFlag())

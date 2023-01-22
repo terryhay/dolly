@@ -10,7 +10,7 @@ import (
 func TestArgValueToString(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 		argValue ArgValue
 	}{
@@ -24,10 +24,10 @@ func TestArgValueToString(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			res := td.argValue.ToString()
-			require.Equal(t, string(td.argValue), res)
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			res := tc.argValue.ToString()
+			require.Equal(t, string(tc.argValue), res)
 		})
 	}
 }

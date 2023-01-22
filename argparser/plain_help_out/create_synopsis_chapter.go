@@ -28,7 +28,8 @@ func createSynopsisChapter(
 			&builder,
 			appName,
 			namelessCommandDescription.(*apConf.CommandDescription),
-			flagDescriptions)
+			flagDescriptions,
+		)
 	}
 
 	for _, commandDescription := range commandDescriptions {
@@ -36,7 +37,8 @@ func createSynopsisChapter(
 			&builder,
 			appName,
 			commandDescription,
-			flagDescriptions)
+			flagDescriptions,
+		)
 	}
 	builder.WriteString("\n")
 
@@ -46,36 +48,31 @@ func createSynopsisChapter(
 func addCommandSynopsisLine(
 	builder *strings.Builder,
 	appName string,
-	commandDescription *apConf.CommandDescription,
-	flagDescriptions map[apConf.Flag]*apConf.FlagDescription) {
-
-	if len(commandDescription.GetCommands()) > 0 {
+	descriptionCommand *apConf.CommandDescription,
+	descriptionFlags map[apConf.Flag]*apConf.FlagDescription,
+) {
+	if len(descriptionCommand.GetCommands()) > 0 {
 		builder.WriteString(fmt.Sprintf(synopsisLineCommandPart,
 			appName,
-			strings.Join(getSortedCommands(commandDescription.GetCommands()), ", "),
-			createArgumentsPart(commandDescription.GetArgDescription())))
+			strings.Join(getSortedCommands(descriptionCommand.GetCommands()), ", "),
+			createArgumentsPart(descriptionCommand.GetArgDescription())))
 	} else {
 		builder.WriteString(fmt.Sprintf(synopsisLineNamelessCommandPart,
 			appName,
-			strings.Join(getSortedCommands(commandDescription.GetCommands()), ", ")))
+			strings.Join(getSortedCommands(descriptionCommand.GetCommands()), ", ")))
 	}
 
-	var (
-		flag            string
-		flagDescription *apConf.FlagDescription
-	)
-
 	// required flags part
-	for _, flag = range getSortedFlags(commandDescription.GetRequiredFlags()) {
-		flagDescription = flagDescriptions[apConf.Flag(flag)]
+	for _, flag := range getSortedFlags(descriptionCommand.GetRequiredFlags()) {
+		flagDescription := descriptionFlags[apConf.Flag(flag)]
 
 		builder.WriteString(fmt.Sprintf(" \u001B[1m%s\u001B[0m", flag))
 		builder.WriteString(createArgumentsPart(flagDescription.GetArgDescription()))
 	}
 
 	// optional flags part
-	for _, flag = range getSortedFlags(commandDescription.GetOptionalFlags()) {
-		flagDescription = flagDescriptions[apConf.Flag(flag)]
+	for _, flag := range getSortedFlags(descriptionCommand.GetOptionalFlags()) {
+		flagDescription := descriptionFlags[apConf.Flag(flag)]
 
 		builder.WriteString(fmt.Sprintf(" [\u001B[1m%s\u001B[0m", flag))
 		builder.WriteString(createArgumentsPart(flagDescription.GetArgDescription()))

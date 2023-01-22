@@ -38,8 +38,11 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 				"you can write more detailed description here",
 			},
 		}.ToConst(),
-		FlagDescriptions: map[apConf.Flag]*apConf.FlagDescription{
-			FlagCheck: apConf.FlagDescriptionSrc{
+		FlagDescriptionSlice: []*apConf.FlagDescription{
+			apConf.FlagDescriptionSrc{
+				Flags: []apConf.Flag{
+					FlagCheck,
+				},
 				DescriptionHelpInfo: "check command arguments types",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
 					AmountType:              apConf.ArgAmountTypeSingle,

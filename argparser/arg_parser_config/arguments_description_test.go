@@ -30,9 +30,9 @@ func TestArgumentsDescriptionGetters(t *testing.T) {
 
 		pointer = src.ToConstPtr()
 
-		require.Equal(t, pointer.GetAmountType(), pointer.GetAmountType())
-		require.Equal(t, pointer.GetSynopsisHelpDescription(), pointer.GetSynopsisHelpDescription())
-		require.Equal(t, pointer.GetDefaultValues(), pointer.GetDefaultValues())
-		require.Equal(t, pointer.GetAllowedValues(), pointer.GetAllowedValues())
+		require.Equal(t, src.AmountType, pointer.GetAmountType())
+		require.Equal(t, src.SynopsisHelpDescription, pointer.GetSynopsisHelpDescription())
+		require.Equal(t, src.DefaultValues, pointer.GetDefaultValues())
+		require.Equal(t, src.AllowedValues, pointer.GetAllowedValues())
 	})
 }

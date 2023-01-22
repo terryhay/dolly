@@ -2,12 +2,12 @@ package body_model
 
 import (
 	"fmt"
-	"github.com/terryhay/dolly/man_style_help/index"
 	"github.com/terryhay/dolly/man_style_help/page"
 	prm "github.com/terryhay/dolly/man_style_help/page_model/body_model/paragraph_model"
 	"github.com/terryhay/dolly/man_style_help/size"
 	"github.com/terryhay/dolly/man_style_help/terminal_size"
 	"github.com/terryhay/dolly/utils/dollyerr"
+	"github.com/terryhay/dolly/utils/index"
 )
 
 // BodyModel implements a text page body model with some paragraphs

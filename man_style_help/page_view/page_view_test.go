@@ -183,7 +183,7 @@ func TestErrorsBeforeEventLoop(t *testing.T) {
 		widthsChan <- 0
 	}()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		initData     tbd.Mock
@@ -255,15 +255,15 @@ func TestErrorsBeforeEventLoop(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
 			var pageView PageView
-			err := pageView.Init(tbd.NewTermBoxDecorator(&td.initData), pageData)
+			err := pageView.Init(tbd.NewTermBoxDecorator(&tc.initData), pageData)
 			require.Nil(t, err)
 
 			err = pageView.Run()
 			require.NotNil(t, err)
-			require.Equal(t, td.expectedCode, err.Code())
+			require.Equal(t, tc.expectedCode, err.Code())
 		})
 	}
 }

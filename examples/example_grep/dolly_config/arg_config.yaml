@@ -14,10 +14,11 @@ arg_parser_config:
       - "grep is used for simple patterns and basic regular expressions (BREs); egrep can handle extended regular expressions (EREs).  See re_format(7) for more information on regular expressions.  fgrep is quicker than both grep and egrep, but can only handle fixed patterns (i.e., it does not interpret regular expressions).  Patterns may consist of one or more lines, allowing any of the pattern lines to match a portion of the input."
       - "zgrep, zegrep, and zfgrep act like grep, egrep, and fgrep, respectively, but accept input files compressed with the compress(1) or gzip(1) compression utilities.  bzgrep, bzegrep, and bzfgrep act like grep, egrep, and fgrep, respectively, but accept input files compressed with the bzip2(1) compression utility."
 
-
   # optional
   flag_descriptions:
     - flag: &flagAUppercase "-A"
+      additional_flags:
+        - "--after-context"
       description_help_info: "Print num lines of trailing context after each match.  See also the -B and -C options."
       # optional fields
       arguments_description:

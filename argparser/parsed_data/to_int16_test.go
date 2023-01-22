@@ -32,7 +32,7 @@ func TestArgValueToInt16(t *testing.T) {
 	randInt64PositiveValue := int64(math.MaxUint32) + int64(randPositiveValue)
 	randInt64NegativeValue := -1 * randInt64PositiveValue
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 		argValue ArgValue
 
@@ -71,18 +71,18 @@ func TestArgValueToInt16(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			res, err := td.argValue.ToInt16()
-			if td.expectedErr {
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			res, err := tc.argValue.ToInt16()
+			if tc.expectedErr {
 				require.NotNil(t, err)
-				require.Equal(t, td.expectedRes, res)
+				require.Equal(t, tc.expectedRes, res)
 
 				return
 			}
 
 			require.Nil(t, err)
-			require.Equal(t, td.expectedRes, res)
+			require.Equal(t, tc.expectedRes, res)
 		})
 	}
 }
@@ -101,7 +101,7 @@ func TestArgValueToUint16(t *testing.T) {
 	randInt64PositiveValue := int64(math.MaxUint32) + int64(randPositiveValue)
 	randInt64NegativeValue := -1 * randInt64PositiveValue
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 		argValue ArgValue
 
@@ -140,18 +140,18 @@ func TestArgValueToUint16(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			res, err := td.argValue.ToUint16()
-			if td.expectedErr {
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			res, err := tc.argValue.ToUint16()
+			if tc.expectedErr {
 				require.NotNil(t, err)
-				require.Equal(t, td.expectedRes, res)
+				require.Equal(t, tc.expectedRes, res)
 
 				return
 			}
 
 			require.Nil(t, err)
-			require.Equal(t, td.expectedRes, res)
+			require.Equal(t, tc.expectedRes, res)
 		})
 	}
 }

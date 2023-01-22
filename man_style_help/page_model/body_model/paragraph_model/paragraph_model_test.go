@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"github.com/brianvoe/gofakeit"
 	"github.com/stretchr/testify/require"
-	"github.com/terryhay/dolly/man_style_help/index"
 	"github.com/terryhay/dolly/man_style_help/page"
 	"github.com/terryhay/dolly/man_style_help/row"
 	rll "github.com/terryhay/dolly/man_style_help/row_len_limiter"
 	rllMock "github.com/terryhay/dolly/man_style_help/row_len_limiter/mock"
 	"github.com/terryhay/dolly/man_style_help/runes"
 	"github.com/terryhay/dolly/man_style_help/size"
+	"github.com/terryhay/dolly/utils/index"
 	"strings"
 	"testing"
 )
@@ -34,7 +34,7 @@ func TestParagraphModel(t *testing.T) {
 func TestParagraphModelInit(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		sourceText  string
@@ -312,27 +312,27 @@ func TestParagraphModelInit(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
 			prm := NewParagraphModel(
-				td.rowLenLimit,
-				page.MakeParagraph(td.tabCount, td.sourceText),
+				tc.rowLenLimit,
+				page.MakeParagraph(tc.tabCount, tc.sourceText),
 			)
 
-			if len(td.expectedRows) == 0 {
+			if len(tc.expectedRows) == 0 {
 				require.Equal(t, 1, prm.GetRowCount().ToInt(),
 					"expected rows count must be equal to paragraph dynamic_row count")
 				return
 			}
 
-			require.Equal(t, len(td.expectedRows), prm.GetRowCount().ToInt(),
+			require.Equal(t, len(tc.expectedRows), prm.GetRowCount().ToInt(),
 				"expected rows count must be equal to paragraph dynamic_row count")
 
 			for i := index.Null; i.ToInt() < prm.GetRowCount().ToInt(); i++ {
-				require.True(t, len([]rune(td.expectedRows[i])) < td.rowLenLimit.Max().ToInt()+1,
-					fmt.Sprintf("dynamic_row len is more than max limit = %d", td.rowLenLimit.Max()))
+				require.True(t, len([]rune(tc.expectedRows[i])) < tc.rowLenLimit.Max().ToInt()+1,
+					fmt.Sprintf("dynamic_row len is more than max limit = %d", tc.rowLenLimit.Max()))
 
-				require.Equal(t, td.expectedRows[i], rowToString(prm.GetRow(i)))
+				require.Equal(t, tc.expectedRows[i], rowToString(prm.GetRow(i)))
 			}
 		})
 	}

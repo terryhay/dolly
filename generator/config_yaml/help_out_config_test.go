@@ -10,22 +10,23 @@ import (
 func TestHelpOutConfig(t *testing.T) {
 	t.Parallel()
 
-	var pointer *HelpOutConfig
-
 	t.Run("nil_pointer", func(t *testing.T) {
+		var pointer *HelpOutConfig
+
 		require.Equal(t, HelpOutToolPlainText, pointer.GetUsingTool())
 	})
 
 	t.Run("initialized_pointer", func(t *testing.T) {
-		pointer = &HelpOutConfig{
-			usingTool: HelpOutToolManStyle,
+		src := HelpOutConfigSrc{
+			UsingTool: HelpOutToolManStyle,
 		}
+		pointer := src.ToConstPtr()
 
-		require.Equal(t, pointer.usingTool, pointer.GetUsingTool())
+		require.Equal(t, src.UsingTool, pointer.GetUsingTool())
 	})
 
 	t.Run("fake_unmarshal_error", func(t *testing.T) {
-		pointer = &HelpOutConfig{}
+		pointer := &HelpOutConfig{}
 		err := pointer.UnmarshalYAML(func(interface{}) error {
 			return fmt.Errorf("error")
 		})
@@ -37,7 +38,7 @@ func TestHelpOutConfig(t *testing.T) {
 func TestHelpOutConfigUnmarshalErrors(t *testing.T) {
 	t.Parallel()
 
-	testData := []struct {
+	testCases := []struct {
 		yamlFileName      string
 		expectedErrorText string
 	}{
@@ -47,13 +48,13 @@ func TestHelpOutConfigUnmarshalErrors(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.yamlFileName, func(t *testing.T) {
-			config, err := GetConfig(fmt.Sprintf("./test_cases/help_out_config_cases/%s", td.yamlFileName))
+	for _, tc := range testCases {
+		t.Run(tc.yamlFileName, func(t *testing.T) {
+			config, err := GetConfig(fmt.Sprintf("./test_cases/help_out_config_cases/%s", tc.yamlFileName))
 			require.Nil(t, config)
 			require.NotNil(t, err)
 			require.Equal(t, dollyerr.CodeGetConfigUnmarshalError, err.Code())
-			require.Equal(t, td.expectedErrorText, err.Error().Error())
+			require.Equal(t, tc.expectedErrorText, err.Error().Error())
 		})
 	}
 }

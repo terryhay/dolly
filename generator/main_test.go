@@ -23,7 +23,7 @@ func TestLogic(t *testing.T) {
 
 	getYAMLConfigErr := dollyerr.NewError(dollyerr.CodeConfigFlagIsNotUsedInCommands, fmt.Errorf(gofakeit.Name()))
 
-	testData := []struct {
+	testCases := []struct {
 		caseName string
 
 		dollyParseFunc    func(args []string) (res *parsed.ParsedData, err *dollyerr.Error)
@@ -298,10 +298,10 @@ func TestLogic(t *testing.T) {
 		},
 	}
 
-	for _, td := range testData {
-		t.Run(td.caseName, func(t *testing.T) {
-			err, code := logic(td.dollyParseFunc, td.getYAMLConfigFunc, td.osd)
-			require.Equal(t, uint(td.expectedErrCode), code)
+	for _, tc := range testCases {
+		t.Run(tc.caseName, func(t *testing.T) {
+			err, code := logic(tc.dollyParseFunc, tc.getYAMLConfigFunc, tc.osd)
+			require.Equal(t, uint(tc.expectedErrCode), code)
 			if code == 0 {
 				require.NoError(t, err)
 				return
