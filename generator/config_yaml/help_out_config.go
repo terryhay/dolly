@@ -1,19 +1,40 @@
 package config_yaml
 
 import (
+	"errors"
 	"fmt"
-	"unsafe"
 )
 
 // HelpOutTool - type of help out tool
 type HelpOutTool uint
 
 const (
+	// HelpOutToolUndefined - undefined value of HelpOutTool
+	HelpOutToolUndefined HelpOutTool = iota
+
 	// HelpOutToolPlainText - output help info like plain text
-	HelpOutToolPlainText HelpOutTool = iota
+	HelpOutToolPlainText
 
 	// HelpOutToolManStyle - output help info in a man style stream
 	HelpOutToolManStyle
+)
+
+func makeHelpOutTool(v string) HelpOutTool {
+	switch {
+	case len(v) == 0, v == usingToolPlain:
+		return HelpOutToolPlainText
+
+	case v == usingToolManStyle:
+		return HelpOutToolManStyle
+
+	default:
+		return HelpOutToolUndefined
+	}
+}
+
+const (
+	usingToolPlain    = "plain"
+	usingToolManStyle = "man_style"
 )
 
 // HelpOutConfig - configuration of using help info output tool
@@ -21,7 +42,7 @@ type HelpOutConfig struct {
 	usingTool HelpOutTool
 }
 
-// GetUsingTool - usingTool field getter
+// GetUsingTool gets usingTool field
 func (hoc *HelpOutConfig) GetUsingTool() HelpOutTool {
 	if hoc == nil {
 		return HelpOutToolPlainText
@@ -29,43 +50,34 @@ func (hoc *HelpOutConfig) GetUsingTool() HelpOutTool {
 	return hoc.usingTool
 }
 
-// UnmarshalYAML - custom unmarshal logic with checking required fields
-func (hoc *HelpOutConfig) UnmarshalYAML(unmarshal func(interface{}) error) (err error) {
-	_ = hoc
+// ErrHelpOutUnexpectedTool - 'help_out_config.using_tool' is empty or invalid in source yaml file
+var ErrHelpOutUnexpectedTool = errors.New(`HelpOutConfig.IsValid: 'help_out_config.using_tool' is empty or invalid in source yaml file`)
 
-	proxy := struct {
-		UsingTool string `yaml:"using_tool"`
-	}{}
-	if err = unmarshal(&proxy); err != nil {
-		return err
+// IsValid checks if HelpOutConfig is valid
+func (hoc *HelpOutConfig) IsValid() error {
+	if hoc == nil {
+		return nil
 	}
 
-	const (
-		helpOutToolPlainTextValue = "plain"
-		helpOutToolManStyleValue  = "man_style"
-	)
-
-	switch proxy.UsingTool {
-	case helpOutToolPlainTextValue:
-		hoc.usingTool = HelpOutToolPlainText
-
-	case helpOutToolManStyleValue:
-		hoc.usingTool = HelpOutToolManStyle
-
-	default:
-		return fmt.Errorf(`help_out_config.using_tool unmarshal error: unexpected value %s (expected: "%s", "%s")`,
-			proxy.UsingTool, helpOutToolPlainTextValue, helpOutToolManStyleValue)
+	if hoc.usingTool == HelpOutToolUndefined {
+		return fmt.Errorf(`%w: expected: [%s, %s]`, ErrHelpOutUnexpectedTool, usingToolPlain, usingToolManStyle)
 	}
 
 	return nil
 }
 
-// HelpOutConfigSrc - source for constuct a configuration of using help info output tool
-type HelpOutConfigSrc struct {
-	UsingTool HelpOutTool
+// HelpOutConfigOpt - source for construct a configuration of using help info output tool
+type HelpOutConfigOpt struct {
+	UsingTool string `yaml:"using_tool"`
 }
 
-// ToConstPtr converts src to HelpOutConfig pointer
-func (m HelpOutConfigSrc) ToConstPtr() *HelpOutConfig {
-	return (*HelpOutConfig)(unsafe.Pointer(&m))
+// NewHelpOutConfig converts opt to HelpOutConfig pointer
+func NewHelpOutConfig(opt *HelpOutConfigOpt) *HelpOutConfig {
+	if opt == nil {
+		return nil
+	}
+
+	return &HelpOutConfig{
+		usingTool: makeHelpOutTool(opt.UsingTool),
+	}
 }

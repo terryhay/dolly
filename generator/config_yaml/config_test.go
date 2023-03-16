@@ -1,71 +1,84 @@
 package config_yaml
 
 import (
-	"fmt"
-	"github.com/brianvoe/gofakeit"
-	"github.com/terryhay/dolly/utils/dollyerr"
 	"testing"
 
+	osd "github.com/terryhay/dolly/generator/proxyes/os_proxy"
+
+	"github.com/brianvoe/gofakeit"
 	"github.com/stretchr/testify/require"
 )
 
 func TestConfigGetters(t *testing.T) {
 	t.Parallel()
 
-	var pointer *Config
-
 	t.Run("nil_pointer", func(t *testing.T) {
+		var opt *ConfigOpt
+		pointer := NewConfig(opt)
+		require.Nil(t, pointer)
+
+		require.ErrorIs(t, pointer.IsValid(), ErrConfigNilPointer)
 		require.Equal(t, "", pointer.GetVersion())
 		require.Nil(t, pointer.GetArgParserConfig())
 		require.Nil(t, pointer.GetHelpOutConfig())
 	})
 
 	t.Run("initialized_pointer", func(t *testing.T) {
-		pointer = &Config{
-			version:         gofakeit.Name(),
-			argParserConfig: &ArgParserConfig{},
-			helpOutConfig:   &HelpOutConfig{},
+		opt := &ConfigOpt{
+			Version:         gofakeit.Name(),
+			ArgParserConfig: &ArgParserConfigOpt{},
+			HelpOutConfig:   &HelpOutConfigOpt{},
 		}
+		pointer := NewConfig(opt)
+		require.NotNil(t, pointer)
 
-		require.Equal(t, pointer.version, pointer.GetVersion())
-		require.Equal(t, pointer.argParserConfig, pointer.GetArgParserConfig())
-		require.Equal(t, pointer.helpOutConfig, pointer.GetHelpOutConfig())
+		require.Equal(t, opt.Version, pointer.GetVersion())
+		require.Equal(t, NewArgParserConfig(opt.ArgParserConfig), pointer.GetArgParserConfig())
+		require.Equal(t, NewHelpOutConfig(opt.HelpOutConfig), pointer.GetHelpOutConfig())
 	})
 }
 
-func TestConfigUnmarshalErrors(t *testing.T) {
+func TestConfigIsValidErrors(t *testing.T) {
 	t.Parallel()
 
-	testCases := []struct {
-		yamlFileName      string
-		expectedErrorText string
+	tests := []struct {
+		caseFile string
+		expError error
 	}{
 		{
-			yamlFileName:      "no_version.yaml",
-			expectedErrorText: "confYML.GetConfig: unmarshal error: config unmarshal error: no required field \"version\"",
+			caseFile: "./test_cases/config_cases/err_no_version.yaml",
+			expError: ErrConfigNoVersion,
 		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.caseFile, func(t *testing.T) {
+			config, err := Load(osd.New(), tc.caseFile)
+			require.NotNil(t, config)
+			require.NoError(t, err)
+
+			err = config.IsValid()
+			require.ErrorIs(t, err, tc.expError)
+		})
+	}
+}
+
+func TestConfigIsValidSuccess(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		caseFile string
+	}{
 		{
-			yamlFileName:      "no_arg_parser_config.yaml",
-			expectedErrorText: "confYML.GetConfig: unmarshal error: config unmarshal error: no required field \"arg_parser_config\"",
+			caseFile: "./test_cases/config_cases/valid.yaml",
 		},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.yamlFileName, func(t *testing.T) {
-			config, err := GetConfig(fmt.Sprintf("./test_cases/config_cases/%s", tc.yamlFileName))
-			require.Nil(t, config)
-			require.NotNil(t, err)
-			require.Equal(t, dollyerr.CodeGetConfigUnmarshalError, err.Code())
-			require.Equal(t, tc.expectedErrorText, err.Error().Error())
+	for _, tc := range tests {
+		t.Run(tc.caseFile, func(t *testing.T) {
+			config, err := Load(osd.New(), tc.caseFile)
+			require.NoError(t, err)
+			require.NoError(t, config.IsValid())
 		})
 	}
-
-	t.Run("fake_unmarshal_error", func(t *testing.T) {
-		pointer := &Config{}
-		err := pointer.UnmarshalYAML(func(interface{}) error {
-			return fmt.Errorf("error")
-		})
-
-		require.NotNil(t, err)
-	})
 }

@@ -1,36 +1,34 @@
 package file_writer
 
 import (
-	"fmt"
-	fld "github.com/terryhay/dolly/generator/file_decorator"
-	osd "github.com/terryhay/dolly/generator/os_decorator"
-	"github.com/terryhay/dolly/utils/dollyerr"
+	"errors"
+	"os"
 	"unicode/utf8"
+
+	"github.com/terryhay/dolly/generator/proxyes/file_proxy"
+	"github.com/terryhay/dolly/generator/proxyes/os_proxy"
 )
 
 // WriteFile - write file string by dir path
-func WriteFile(osDecor osd.OSDecorator, dirPath, fileString string) *dollyerr.Error {
+func WriteFile(osDecor os_proxy.Proxy, dirPath, fileString string) error {
 	const (
 		nameDir  = "dolly"
 		nameFile = "dolly.go"
 	)
 
-	if !osDecor.IsExist(dirPath) {
-		return dollyerr.NewError(dollyerr.CodeGeneratorInvalidPath, fmt.Errorf("WriteFile: path does not exist: %s", dirPath))
+	if err := osDecor.IsExist(dirPath); err != nil {
+		return err
 	}
 
 	argParserDirPath := expandPath(dirPath, nameDir)
-	if !osDecor.IsExist(argParserDirPath) {
-		err := createArgParserDir(osDecor, argParserDirPath)
-		if err != nil {
-			return dollyerr.Append(err, fmt.Errorf(""))
+	if errExist := osDecor.IsExist(argParserDirPath); errExist != nil {
+		if errCreate := createArgParserDir(osDecor, argParserDirPath); errCreate != nil {
+			return errors.Join(errExist, errCreate)
 		}
 	}
 
 	argParserFilePath := expandPath(argParserDirPath, nameFile)
-	err := write(osDecor, argParserFilePath, fileString)
-
-	return err
+	return write(osDecor, argParserFilePath, fileString)
 }
 
 func expandPath(path, name string) string {
@@ -46,37 +44,34 @@ func expandPath(path, name string) string {
 	return path + name
 }
 
-func createArgParserDir(osDecor osd.OSDecorator, generatePath string) *dollyerr.Error {
-	if err := osDecor.MkdirAll(generatePath, 0777); err != nil {
-		return dollyerr.NewError(
-			dollyerr.CodeGeneratorCreateDirError,
-			fmt.Errorf("create dir error: %s\n", err.Error()))
-	}
-	return nil
+func createArgParserDir(osDecor os_proxy.Proxy, generatePath string) error {
+	const permissionsToWrite os.FileMode = 0777
+	return osDecor.MkdirAll(generatePath, permissionsToWrite)
 }
 
-func write(osDecor osd.OSDecorator, filePath, fileBody string) (res *dollyerr.Error) {
-	file, err := osDecor.Create(filePath)
+func write(decOS os_proxy.Proxy, filePath, fileBody string) (err error) {
+	var decFile file_proxy.Proxy
+	decFile, err = decOS.Create(filePath)
 	if err != nil {
-		return dollyerr.NewError(
-			dollyerr.CodeGeneratorCreateFileError,
-			fmt.Errorf("create file error: %s\n", err.Error()))
+		return err
 	}
 
-	defer func(file fld.FileDecorator) {
-		err = file.Close()
-		if err != nil {
-			res = dollyerr.Append(err, fmt.Errorf("write: can't close the file"))
+	defer func() {
+		if errClose := decFile.Close(); errClose != nil {
+			if err != nil {
+				err = errors.Join(err, errClose)
+				return
+			}
+
+			err = errClose
+			return
 		}
-	}(file)
+	}()
 
-	err = file.WriteString(fileBody)
+	err = decFile.WriteString(fileBody)
 	if err != nil {
-		return dollyerr.Append(err, fmt.Errorf("write: can't write a string"))
+		return err
 	}
 
-	return dollyerr.NewErrorIfItIs(
-		dollyerr.CodeGeneratorWriteFileError,
-		"file write error",
-		err.Error())
+	return err
 }

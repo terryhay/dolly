@@ -1,0 +1,31 @@
+version: 1.0.0
+
+arg_parser:
+
+  commands:
+    - main_name: "dir"
+      chapter_description_info: "precesses all file from dir"
+      arg:
+        amount_type: "single"
+        synopsis_description: "path"
+      required_flags:
+        - "-o"
+      optional_flags:
+        - "-log"
+        - "lang"
+
+    - main_name: "file"
+      chapter_description_info: "processes a file"
+      arguments:
+        amount_type: "single"
+        synopsis_description: "path"
+      required_flags:
+        - "-o"
+      optional_flags:
+        - "-log"
+        - "lang"
+
+  help_command:
+    main_name: "help"
+    additional_names:
+      - "-h"

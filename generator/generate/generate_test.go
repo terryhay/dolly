@@ -1,136 +1,135 @@
 package generate
 
 import (
-	"github.com/stretchr/testify/require"
-	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	confYML "github.com/terryhay/dolly/generator/config_yaml"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+	ce "github.com/terryhay/dolly/generator/config_entity"
+	confYML "github.com/terryhay/dolly/generator/config_yaml"
 )
 
 func TestGenerate(t *testing.T) {
 	t.Parallel()
 
-	command := "cmd"
-	additionalCommand := "addcmd"
-	commandDescriptionHelpInfo := "command description help info"
+	nameCommand := "cmd"
+	nameCommandAdditional := "cmd-add"
+	commandDescriptionHelpInfo := "nameCommand description help info"
 
-	helpCommand := "help"
-	additionalHelpCommand := "addhelp"
+	nameCommandHelp := "--help"
+	nameCommandHelpAdditional := "-h"
 
-	requiredFlag1 := "-" + "-rf1"
-	requiredFlag1Description := confYML.FlagDescriptionSrc{
-		Flag: requiredFlag1,
-		ArgumentsDescription: confYML.ArgumentsDescriptionSrc{
-			AmountType: apConf.ArgAmountTypeSingle,
-			DefaultValues: []string{
-				"f1DefValue",
-			},
-			AllowedValues: []string{
-				"f1AllValue",
-			},
-		}.ToConstPtr(),
-	}.ToConstPtr()
+	namePlaceholder1 := "placeholder1"
+	namePlaceholder2 := "placeholder2"
+	namePlaceholder3 := "placeholder3"
+	namePlaceholder4 := "placeholder4"
 
-	requiredFlag2 := "-" + "-rf2"
-	requiredFlag2Description := confYML.FlagDescriptionSrc{
-		Flag: requiredFlag2,
-		ArgumentsDescription: confYML.ArgumentsDescriptionSrc{
-			AmountType: apConf.ArgAmountTypeList,
-			DefaultValues: []string{
-				"f2DefValue",
-			},
-			AllowedValues: []string{
-				"f2AllValue",
-			},
-		}.ToConstPtr(),
-	}.ToConstPtr()
+	nameRequiredFlag := "-rf"
+	nameRequiredFlag2 := "--req-flag"
 
-	optionalFlag1 := "-" + "-of1"
-	optionalFlag1Description := confYML.FlagDescriptionSrc{
-		Flag: optionalFlag1,
-	}.ToConstPtr()
+	optionalFlag1 := "-f1"
+	optionalFlag2 := "--opt-flag"
 
-	optionalFlag2 := "-" + "-of2"
-	optionalFlag2Description := confYML.FlagDescriptionSrc{
-		Flag: optionalFlag2,
-	}.ToConstPtr()
-
-	config := confYML.ArgParserConfigSrc{
-		AppHelpDescription: &confYML.AppHelpDescription{},
-		HelpCommandDescription: confYML.HelpCommandDescriptionSrc{
-			Command: helpCommand,
-			AdditionalCommands: []string{
-				additionalHelpCommand,
-			},
-		}.ToConstPtr(),
-		NamelessCommandDescription: confYML.NamelessCommandDescriptionSrc{
-			ArgumentsDescription: &confYML.ArgumentsDescription{},
-			RequiredFlags: []string{
-				requiredFlag1,
-				requiredFlag2,
-			},
-			OptionalFlags: []string{
-				optionalFlag1,
-				optionalFlag2,
-			},
-		}.ToConstPtr(),
-		CommandDescriptions: []*confYML.CommandDescription{
-			confYML.CommandDescriptionSrc{
-				Command: command,
-				AdditionalCommands: []string{
-					additionalCommand,
+	configEntity, err := ce.MakeConfigEntity(
+		confYML.NewConfig(&confYML.ConfigOpt{
+			Version: "1.0.0",
+			ArgParserConfig: &confYML.ArgParserConfigOpt{
+				AppHelp: &confYML.AppHelpOpt{
+					AppName:         "app",
+					ChapterNameInfo: "chapter name info",
 				},
-				DescriptionHelpInfo: commandDescriptionHelpInfo,
-				ArgumentsDescription: confYML.ArgumentsDescriptionSrc{
-					AmountType: apConf.ArgAmountTypeSingle,
-					DefaultValues: []string{
-						"cmdDefValue",
+				Placeholders: []*confYML.PlaceholderOpt{
+					{
+						Name: namePlaceholder1,
+						Flags: []*confYML.FlagOpt{
+							{
+								MainName:               nameRequiredFlag,
+								ChapterDescriptionInfo: "required flag",
+							},
+						},
+						Argument: &confYML.ArgumentOpt{
+							DefaultValues: []string{
+								"cmdDefValue",
+							},
+							AllowedValues: []string{
+								"cmdDefValue",
+								"cmdAllValue",
+							},
+							HelpName: "arg",
+						},
 					},
-					AllowedValues: []string{
-						"cmdAllValue",
+					{
+						Name: namePlaceholder2,
+						Flags: []*confYML.FlagOpt{
+							{
+								MainName:               nameRequiredFlag2,
+								ChapterDescriptionInfo: "required second flag",
+							},
+						},
+						Argument: &confYML.ArgumentOpt{
+							IsList: true,
+							DefaultValues: []string{
+								"f2DefValue",
+							},
+							AllowedValues: []string{
+								"f2DefValue",
+								"f2AllValue",
+							},
+							HelpName: "arg",
+						},
 					},
-				}.ToConstPtr(),
-				RequiredFlags: []string{
-					requiredFlag1,
-					requiredFlag2,
+					{
+						Name: namePlaceholder3,
+						Flags: []*confYML.FlagOpt{
+							{
+								MainName:               optionalFlag1,
+								ChapterDescriptionInfo: "first optional flag",
+								IsOptional:             true,
+							},
+						},
+					},
+					{
+						Name: namePlaceholder4,
+						Flags: []*confYML.FlagOpt{
+							{
+								MainName:               optionalFlag2,
+								ChapterDescriptionInfo: "second optional flag",
+								IsOptional:             true,
+							},
+						},
+					},
 				},
-				OptionalFlags: []string{
-					optionalFlag1,
-					optionalFlag2,
+				NamelessCommand: &confYML.NamelessCommandOpt{
+					ChapterDescriptionInfo: "this is command without name",
+					UsingPlaceholders: []string{
+						namePlaceholder1,
+						namePlaceholder2,
+					},
 				},
-			}.ToConstPtr(),
-			confYML.CommandDescriptionSrc{
-				// fake empty command
-				ArgumentsDescription: confYML.ArgumentsDescriptionSrc{
-					AmountType: apConf.ArgAmountTypeList,
-					DefaultValues: []string{
-						"fakeEmptyCommandDefValue",
+				Commands: []*confYML.CommandOpt{
+					{
+						MainName: nameCommand,
+						AdditionalNames: []string{
+							nameCommandAdditional,
+						},
+						ChapterDescriptionInfo: commandDescriptionHelpInfo,
+						UsingPlaceholders: []string{
+							namePlaceholder3,
+							namePlaceholder4,
+						},
 					},
-					AllowedValues: []string{
-						"fakeEmptyCommandAllValue",
+				},
+				HelpCommand: &confYML.HelpCommandOpt{
+					MainName: nameCommandHelp,
+					AdditionalNames: []string{
+						nameCommandHelpAdditional,
 					},
-				}.ToConstPtr(),
-			}.ToConstPtr(),
-		},
-		FlagDescriptions: []*confYML.FlagDescription{
-			requiredFlag1Description,
-			requiredFlag2Description,
-			optionalFlag1Description,
-			optionalFlag2Description,
-		},
-	}.ToConstPtr()
+				},
+			},
+		}),
+	)
+	require.NoError(t, err)
 
-	argParserFileText := Generate(
-		config,
-		confYML.HelpOutConfigSrc{
-			UsingTool: confYML.HelpOutToolManStyle,
-		}.ToConstPtr(),
-		map[string]*confYML.FlagDescription{
-			requiredFlag1: requiredFlag1Description,
-			requiredFlag2: requiredFlag2Description,
-			optionalFlag1: optionalFlag1Description,
-			optionalFlag2: optionalFlag2Description,
-		})
+	argParserFileText := Generate(configEntity)
 
 	require.Equal(t, `// This code was generated by dolly.generator. DO NOT EDIT
 
@@ -138,400 +137,162 @@ package dolly
 
 import (
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	parsed "github.com/terryhay/dolly/argparser/parsed_data"
-	"github.com/terryhay/dolly/argparser/parser"
-	"github.com/terryhay/dolly/man_style_help/page"
-	pgv "github.com/terryhay/dolly/man_style_help/page_view"
-	tbd "github.com/terryhay/dolly/man_style_help/termbox_decorator"
-)
-
-const (
-	// CommandIDNamelessCommand - 
-	CommandIDNamelessCommand apConf.CommandID = iota + 1
-	//  - 
-	
-	// CommandIDCmd - command description help info
-	CommandIDCmd
-	// CommandIDPrintHelpInfo - print help info
-	CommandIDPrintHelpInfo
-)
-
-const (
-	//  - 
-	 apConf.Command = ""
-	// CommandAddcmd - command description help info
-	CommandAddcmd = "addcmd"
-	// CommandAddhelp - print help info
-	CommandAddhelp = "addhelp"
-	// CommandCmd - command description help info
-	CommandCmd = "cmd"
-	// CommandHelp - print help info
-	CommandHelp = "help"
-)
-
-const (
-	// FlagOf1 - 
-	FlagOf1 apConf.Flag = "--of1"
-	// FlagOf2 - 
-	FlagOf2 = "--of2"
-	// FlagRf1 - 
-	FlagRf1 = "--rf1"
-	// FlagRf2 - 
-	FlagRf2 = "--rf2"
-)
-
-// Parse - processes command line arguments
-func Parse(args []string) (*parsed.ParsedData, error) {
-	appArgConfig := apConf.ArgParserConfigSrc{
-		AppDescription: apConf.ApplicationDescriptionSrc{
-			AppName: "",
-			NameHelpInfo: "",
-			DescriptionHelpInfo: nil,
-		}.ToConst(),
-		FlagDescriptionSlice: []*apConf.FlagDescription{
-			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
-					FlagRf1,
-				},
-				DescriptionHelpInfo:  "",
-				ArgDescription: apConf.ArgumentsDescriptionSrc{
-					AmountType:              apConf.ArgAmountTypeSingle,
-					SynopsisHelpDescription: "",
-					DefaultValues: []string{
-						"f1DefValue",
-					}.ToConstPtr(),
-					AllowedValues: map[string]bool{
-						"f1AllValue": true,
-					}.ToConstPtr(),
-				}.ToConstPtr(),
-			}.ToConstPtr(),
-			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
-					FlagRf2,
-				},
-				DescriptionHelpInfo:  "",
-				ArgDescription: apConf.ArgumentsDescriptionSrc{
-					AmountType:              apConf.ArgAmountTypeList,
-					SynopsisHelpDescription: "",
-					DefaultValues: []string{
-						"f2DefValue",
-					}.ToConstPtr(),
-					AllowedValues: map[string]bool{
-						"f2AllValue": true,
-					}.ToConstPtr(),
-				}.ToConstPtr(),
-			}.ToConstPtr(),
-			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
-					FlagOf1,
-				},
-				DescriptionHelpInfo:  "",
-			}.ToConstPtr(),
-			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
-					FlagOf2,
-				},
-				DescriptionHelpInfo:  "",
-			}.ToConstPtr(),
-		},
-		CommandDescriptions: []*apConf.CommandDescription{
-			apConf.CommandDescriptionSrc{
-				ID:                  CommandIDCmd,
-				DescriptionHelpInfo: "command description help info",
-				Commands: map[apConf.Command]bool{
-					CommandCmd: true,
-					CommandAddcmd: true,
-				},
-				RequiredFlags: map[apConf.Flag]bool{
-					FlagRf1: true,
-					FlagRf2: true,
-				},
-				OptionalFlags: map[apConf.Flag]bool{
-					FlagOf1: true,
-					FlagOf2: true,
-				},
-			}.ToConstPtr(),
-			apConf.CommandDescriptionSrc{
-				ID:                  ,
-				DescriptionHelpInfo: "",
-				Commands: map[apConf.Command]bool{
-					: true,
-				},
-			}.ToConstPtr(),
-		},
-		HelpCommandDescription: apConf.NewHelpCommandDescription(
-			CommandIDPrintHelpInfo,
-			map[apConf.Command]bool{
-				CommandAddhelp: true,
-				CommandHelp: true,
-			},
-		),
-		NamelessCommandDescription: apConf.NewNamelessCommandDescription(
-			CommandIDNamelessCommand,
-			"",
-			apConf.ArgumentsDescriptionSrc{
-				AmountType:              apConf.ArgAmountTypeNoArgs,
-				SynopsisHelpDescription: "",
-			}.ToConstPtr(),
-			map[apConf.Flag]bool{
-				FlagRf1: true,
-				FlagRf2: true,
-			},
-			map[apConf.Flag]bool{
-				FlagOf1: true,
-				FlagOf2: true,
-			},
-		)}.ToConst()
-
-	res, err := parser.Parse(appArgConfig, args)
-	if err != nil {
-		return nil, err.Error()
-	}
-
-	if res.GetCommandID() == CommandIDPrintHelpInfo {
-		var pageView pgv.PageView
-		err = pageView.Init(tbd.NewTermBoxDecorator(nil), page.MakePage(appArgConfig))
-		if err != nil {
-			return nil, err.Error()
-		}
-		err = pageView.Run()
-		if err != nil {
-			return nil, err.Error()
-		}
-
-		return nil, nil
-	}
-
-	return res, nil
-}
-`, argParserFileText)
-}
-
-func TestGenerateWithoutNamelessCommand(t *testing.T) {
-	t.Parallel()
-
-	descriptionHelpInfo := "command description help info"
-
-	helpCommand := "help"
-	additionalHelpCommand := "addhelp"
-
-	argParserFileText := Generate(
-		confYML.ArgParserConfigSrc{
-			AppHelpDescription: confYML.AppHelpDescriptionSrc{
-				DescriptionHelpInfo: []string{
-					descriptionHelpInfo,
-				},
-			}.ToConstPtr(),
-			HelpCommandDescription: confYML.HelpCommandDescriptionSrc{
-				Command: helpCommand,
-				AdditionalCommands: []string{
-					additionalHelpCommand,
-				},
-			}.ToConstPtr(),
-		}.ToConstPtr(),
-		confYML.HelpOutConfigSrc{
-			UsingTool: confYML.HelpOutToolManStyle,
-		}.ToConstPtr(),
-		nil)
-
-	require.Equal(t, `// This code was generated by dolly.generator. DO NOT EDIT
-
-package dolly
-
-import (
-	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	parsed "github.com/terryhay/dolly/argparser/parsed_data"
-	"github.com/terryhay/dolly/argparser/parser"
-	"github.com/terryhay/dolly/man_style_help/page"
-	pgv "github.com/terryhay/dolly/man_style_help/page_view"
-	tbd "github.com/terryhay/dolly/man_style_help/termbox_decorator"
-)
-
-const (
-	// CommandIDPrintHelpInfo - print help info
-	CommandIDPrintHelpInfo apConf.CommandID = iota + 1
-)
-
-const (
-	// CommandAddhelp - print help info
-	CommandAddhelp apConf.Command = "addhelp"
-	// CommandHelp - print help info
-	CommandHelp = "help"
-)
-
-
-// Parse - processes command line arguments
-func Parse(args []string) (*parsed.ParsedData, error) {
-	appArgConfig := apConf.ArgParserConfigSrc{
-		AppDescription: apConf.ApplicationDescriptionSrc{
-			AppName: "",
-			NameHelpInfo: "",
-			DescriptionHelpInfo: []string{
-				"command description help info",
-			},
-		}.ToConst(),
-		FlagDescriptionSlice: nil,
-		CommandDescriptions: nil,
-		HelpCommandDescription: apConf.NewHelpCommandDescription(
-			CommandIDPrintHelpInfo,
-			map[apConf.Command]bool{
-				CommandAddhelp: true,
-				CommandHelp: true,
-			},
-		),
-		NamelessCommandDescription: nil}.ToConst()
-
-	res, err := parser.Parse(appArgConfig, args)
-	if err != nil {
-		return nil, err.Error()
-	}
-
-	if res.GetCommandID() == CommandIDPrintHelpInfo {
-		var pageView pgv.PageView
-		err = pageView.Init(tbd.NewTermBoxDecorator(nil), page.MakePage(appArgConfig))
-		if err != nil {
-			return nil, err.Error()
-		}
-		err = pageView.Run()
-		if err != nil {
-			return nil, err.Error()
-		}
-
-		return nil, nil
-	}
-
-	return res, nil
-}
-`, argParserFileText)
-}
-
-func TestGenerateWithoutHelpCommandDescription(t *testing.T) {
-	t.Parallel()
-
-	argParserFileText := Generate(
-		confYML.ArgParserConfigSrc{
-			AppHelpDescription: confYML.AppHelpDescriptionSrc{
-				DescriptionHelpInfo: []string{
-					"command description help info",
-				},
-			}.ToConstPtr(),
-			NamelessCommandDescription: confYML.NamelessCommandDescriptionSrc{
-				DescriptionHelpInfo: "nameless command description help info",
-			}.ToConstPtr(),
-		}.ToConstPtr(),
-		confYML.HelpOutConfigSrc{
-			UsingTool: confYML.HelpOutToolManStyle,
-		}.ToConstPtr(),
-		nil)
-
-	require.Equal(t, `// This code was generated by dolly.generator. DO NOT EDIT
-
-package dolly
-
-import (
-	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	parsed "github.com/terryhay/dolly/argparser/parsed_data"
-	"github.com/terryhay/dolly/argparser/parser"
-	"github.com/terryhay/dolly/man_style_help/page"
-	pgv "github.com/terryhay/dolly/man_style_help/page_view"
-	tbd "github.com/terryhay/dolly/man_style_help/termbox_decorator"
-)
-
-const (
-	// CommandIDNamelessCommand - nameless command description help info
-	CommandIDNamelessCommand apConf.CommandID = iota + 1
-)
-
-
-
-// Parse - processes command line arguments
-func Parse(args []string) (*parsed.ParsedData, error) {
-	appArgConfig := apConf.ArgParserConfigSrc{
-		AppDescription: apConf.ApplicationDescriptionSrc{
-			AppName: "",
-			NameHelpInfo: "",
-			DescriptionHelpInfo: []string{
-				"command description help info",
-			},
-		}.ToConst(),
-		FlagDescriptionSlice: nil,
-		CommandDescriptions: nil,
-		HelpCommandDescription: nil,
-		NamelessCommandDescription: apConf.NewNamelessCommandDescription(
-			CommandIDNamelessCommand,
-			"nameless command description help info",
-			 nil,
-			nil,
-			nil,
-		)}.ToConst()
-
-	res, err := parser.Parse(appArgConfig, args)
-	if err != nil {
-		return nil, err.Error()
-	}
-
-	if res.GetCommandID() ==  {
-		var pageView pgv.PageView
-		err = pageView.Init(tbd.NewTermBoxDecorator(nil), page.MakePage(appArgConfig))
-		if err != nil {
-			return nil, err.Error()
-		}
-		err = pageView.Run()
-		if err != nil {
-			return nil, err.Error()
-		}
-
-		return nil, nil
-	}
-
-	return res, nil
-}
-`, argParserFileText)
-}
-
-func TestNilInputData(t *testing.T) {
-	t.Parallel()
-
-	argParserFileText := Generate(nil, nil, nil)
-
-	require.Equal(t, `// This code was generated by dolly.generator. DO NOT EDIT
-
-package dolly
-
-import (
-	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	parsed "github.com/terryhay/dolly/argparser/parsed_data"
+	"github.com/terryhay/dolly/argparser/parsed"
 	"github.com/terryhay/dolly/argparser/parser"
 	helpOut "github.com/terryhay/dolly/argparser/plain_help_out"
+	coty "github.com/terryhay/dolly/tools/common_types"
+	fmtd "github.com/terryhay/dolly/tools/fmt_decorator"
 )
 
+const (
+    // NameApp - name of the application
+    NameApp coty.NameApp = "app"
+)
 
+const (
+    // NameCommandCmd - nameCommand description help info
+    NameCommandCmd coty.NameCommand = "cmd"
 
+    // NameCommandCmdAdd - nameCommand description help info
+    NameCommandCmdAdd coty.NameCommand = "cmd-add"
 
-// Parse - processes command line arguments
-func Parse(args []string) (*parsed.ParsedData, error) {
-	appArgConfig := apConf.ArgParserConfigSrc{
-		AppDescription: apConf.ApplicationDescriptionSrc{
-			AppName: "",
-			NameHelpInfo: "",
-			DescriptionHelpInfo: nil,
-		}.ToConst(),
-		FlagDescriptionSlice: nil,
-		CommandDescriptions: nil,
-		HelpCommandDescription: nil,
-		NamelessCommandDescription: nil}.ToConst()
+    // NameCommandHLw - print help info
+    NameCommandHLw coty.NameCommand = "-h"
 
-	res, err := parser.Parse(appArgConfig, args)
-	if err != nil {
-		return nil, err.Error()
-	}
+    // NameCommandHelp - print help info
+    NameCommandHelp coty.NameCommand = "--help"
 
-	if res.GetCommandID() ==  {
-		helpOut.PrintHelpInfo(appArgConfig)
+    // NameCommandNameless - this is command without name
+    NameCommandNameless coty.NameCommand = "Nameless"
+)
+
+const (
+    // IDPlaceholderPlaceholder1 - placeholder1
+    IDPlaceholderPlaceholder1 coty.IDPlaceholder = iota + 1
+
+    // IDPlaceholderPlaceholder2 - placeholder2
+    IDPlaceholderPlaceholder2
+
+    // IDPlaceholderPlaceholder3 - placeholder3
+    IDPlaceholderPlaceholder3
+
+    // IDPlaceholderPlaceholder4 - placeholder4
+    IDPlaceholderPlaceholder4
+)
+
+const (
+    // NameFlagF1 - first optional flag
+    NameFlagF1 coty.NameFlag = "-f1"
+
+    // NameFlagOptFlag - second optional flag
+    NameFlagOptFlag coty.NameFlag = "--opt-flag"
+
+    // NameFlagReqFlag - required second flag
+    NameFlagReqFlag coty.NameFlag = "--req-flag"
+
+    // NameFlagRf - required flag
+    NameFlagRf coty.NameFlag = "-rf"
+)
+
+// Parse processes command line arguments
+func Parse(args []string) (*parsed.Result, error) {
+    appArgConfig := apConf.MakeArgParserConfig(apConf.ArgParserConfigOpt{
+        App: apConf.ApplicationOpt{
+            AppName:         NameApp,
+            InfoChapterNAME: "chapter name info",
+        },
+        CommandNameless: &apConf.NamelessCommandOpt{
+            HelpInfo: "this is command without name",
+            Placeholders: []*apConf.PlaceholderOpt{
+                {
+                    ID: IDPlaceholderPlaceholder1,
+                    FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+                        NameFlagRf: {
+                            NameMain: NameFlagRf,
+                            HelpInfo: "required flag",
+                        },
+                    },
+                    Argument: &apConf.ArgumentOpt{
+                        DefaultValues: []string{
+                            "cmdDefValue",
+                        },
+                        AllowedValues: []string{
+                            "cmdAllValue",
+                            "cmdDefValue",
+                        },
+                    },
+                },
+                {
+                    ID: IDPlaceholderPlaceholder2,
+                    FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+                        NameFlagReqFlag: {
+                            NameMain: NameFlagReqFlag,
+                            HelpInfo: "required second flag",
+                        },
+                    },
+                    Argument: &apConf.ArgumentOpt{
+                        IsList: coty.ArgAmountTypeList,
+                        DefaultValues: []string{
+                            "f2DefValue",
+                        },
+                        AllowedValues: []string{
+                            "f2AllValue",
+                            "f2DefValue",
+                        },
+                    },
+                },
+            },
+        },
+        Commands: []*apConf.CommandOpt{
+            {
+                NameMain: NameCommandCmd,
+                NamesAdditional: map[coty.NameCommand]struct{}{
+                    NameCommandCmdAdd,
+                },
+                HelpInfo: "nameCommand description help info",
+                Placeholders: []*apConf.PlaceholderOpt{
+                    {
+                        ID: IDPlaceholderPlaceholder3,
+                        FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+                            NameFlagF1: {
+                                NameMain: NameFlagF1,
+                                HelpInfo: "first optional flag",
+                                IsOptional:          true
+                            },
+                        },
+                    },
+                    {
+                        ID: IDPlaceholderPlaceholder4,
+                        FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+                            NameFlagOptFlag: {
+                                NameMain: NameFlagOptFlag,
+                                HelpInfo: "second optional flag",
+                                IsOptional:          true
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        CommandHelpOut: &apConf.HelpOutCommandOpt{
+            NameMain: NameCommandHelp,
+            NamesAdditional: map[coty.NameCommand]struct{}{
+                NameCommandHelp: {},
+                NameCommandHLw: {},
+            },
+        },
+    })
+
+    res, errParse := parser.Parse(appArgConfig, args)
+    if errParse != nil {
+        return nil, errParse
+    }
+
+    if res.GetCommandMainName() == NameCommandHelp {
+		helpOut.PrintHelpInfo(fmtd.NewFmtDecorator(), appArgConfig)
 		return nil, nil
-	}
+    }
 
-	return res, nil
-}
-`, argParserFileText)
+    return res, nil
+}`, argParserFileText)
 }

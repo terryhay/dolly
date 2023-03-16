@@ -1,8 +1,9 @@
 package row_len_limiter
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/stretchr/testify/require"
 )
@@ -49,7 +50,7 @@ func TestRowLenLimiter(t *testing.T) {
 		defaultRowLenLimit: defaultLimit,
 	}, rll)
 
-	assert.Equal(t, RowLenLimit{}, rll.GetRowLenLimit(0))
-	assert.Equal(t, RowLenLimit{}, rll.GetRowLenLimit(0))
-	assert.Equal(t, defaultLimit, rll.GetRowLenLimit(defaultLimit.Max()))
+	assert.Equal(t, RowLenLimit{}, rll.RowLenLimit(0))
+	assert.Equal(t, RowLenLimit{}, rll.RowLenLimit(0))
+	assert.Equal(t, defaultLimit, rll.RowLenLimit(defaultLimit.Max()))
 }

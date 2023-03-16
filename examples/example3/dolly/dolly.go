@@ -4,59 +4,55 @@ package dolly
 
 import (
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	parsed "github.com/terryhay/dolly/argparser/parsed_data"
+	"github.com/terryhay/dolly/argparser/parsed"
 	"github.com/terryhay/dolly/argparser/parser"
 	helpOut "github.com/terryhay/dolly/argparser/plain_help_out"
+	coty "github.com/terryhay/dolly/tools/common_types"
+	fmtd "github.com/terryhay/dolly/tools/fmt_decorator"
 )
 
 const (
-	// CommandIDNamelessCommand - runs example3
-	CommandIDNamelessCommand apConf.CommandID = iota + 1
-	// CommandIDPrintHelpInfo - print help info
-	CommandIDPrintHelpInfo
+	// NameApp - name of the application
+	NameApp coty.NameApp = "example3"
 )
 
 const (
-	// CommandHLw - print help info
-	CommandHLw apConf.Command = "-h"
-	// CommandHelp - print help info
-	CommandHelp = "help"
+	// NameCommandHLw - print help info
+	NameCommandHLw coty.NameCommand = "-h"
+
+	// NameCommandHelp - print help info
+	NameCommandHelp coty.NameCommand = "help"
+
+	// NameCommandNameless - runs example3
+	NameCommandNameless coty.NameCommand = "Nameless"
 )
 
-// Parse - processes command line arguments
-func Parse(args []string) (*parsed.ParsedData, error) {
-	appArgConfig := apConf.ArgParserConfigSrc{
-		AppDescription: apConf.ApplicationDescriptionSrc{
-			AppName:      "example3",
-			NameHelpInfo: "shows how parser generator works without commands and flags",
-			DescriptionHelpInfo: []string{
-				"you can write more detailed description here",
+// Parse processes command line arguments
+func Parse(args []string) (*parsed.Result, error) {
+	appArgConfig := apConf.MakeArgParserConfig(apConf.ArgParserConfigOpt{
+		App: apConf.ApplicationOpt{
+			AppName:         NameApp,
+			InfoChapterNAME: "shows how parser generator works without commands and flags",
+		},
+		CommandNameless: &apConf.NamelessCommandOpt{
+			HelpInfo: "runs example3",
+		},
+		CommandHelpOut: &apConf.HelpOutCommandOpt{
+			NameMain: NameCommandHelp,
+			NamesAdditional: map[coty.NameCommand]struct{}{
+				NameCommandHelp: {},
+				NameCommandHLw:  {},
 			},
-		}.ToConst(),
-		FlagDescriptionSlice: nil,
-		CommandDescriptions:  nil,
-		HelpCommandDescription: apConf.NewHelpCommandDescription(
-			CommandIDPrintHelpInfo,
-			map[apConf.Command]bool{
-				CommandHLw:  true,
-				CommandHelp: true,
-			},
-		),
-		NamelessCommandDescription: apConf.NewNamelessCommandDescription(
-			CommandIDNamelessCommand,
-			"runs example3",
-			nil,
-			nil,
-			nil,
-		)}.ToConst()
+		},
+	})
 
-	res, err := parser.Parse(appArgConfig, args)
-	if err != nil {
-		return nil, err.Error()
+	res, errParse := parser.Parse(appArgConfig, args)
+	if errParse != nil {
+		return nil, errParse
 	}
 
-	if res.GetCommandID() == CommandIDPrintHelpInfo {
-		helpOut.PrintHelpInfo(appArgConfig)
+	if res.GetCommandMainName() == NameCommandHelp {
+		helpOut.PrintHelpInfo(fmtd.New(), appArgConfig)
 		return nil, nil
 	}
 

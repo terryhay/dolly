@@ -1,42 +1,40 @@
 package body_model
 
 import (
-	"fmt"
-	"github.com/terryhay/dolly/man_style_help/page"
-	prm "github.com/terryhay/dolly/man_style_help/page_model/body_model/paragraph_model"
-	"github.com/terryhay/dolly/man_style_help/size"
-	"github.com/terryhay/dolly/man_style_help/terminal_size"
-	"github.com/terryhay/dolly/utils/dollyerr"
-	"github.com/terryhay/dolly/utils/index"
+	hp "github.com/terryhay/dolly/argparser/help_page/page"
+	prm "github.com/terryhay/dolly/man_style_help/page_model/body_model/row_model"
+	ts "github.com/terryhay/dolly/man_style_help/terminal_size"
+	"github.com/terryhay/dolly/tools/index"
+	"github.com/terryhay/dolly/tools/size"
 )
 
-// BodyModel implements a text page body model with some paragraphs
+// BodyModel implements a text page body model with some modelRows
 type BodyModel struct {
-	paragraphs []*prm.ParagraphModel
+	modelRows []*prm.RowModel
 
-	termSize terminal_size.TerminalSize
+	termSize ts.TerminalSize
 
-	anchorParagraphIndex     index.Index
+	anchorRowModelIndex      index.Index
 	anchorRowAbsolutelyIndex index.Index
 	rowCount                 size.Height
 }
 
 // NewBodyModel constructs BodyModel object
-func NewBodyModel(pageData page.Page, termSize terminal_size.TerminalSize) *BodyModel {
-	paragraphs := make([]*prm.ParagraphModel, 0, len(pageData.Paragraphs))
+func NewBodyModel(pageBody hp.Body, termSize ts.TerminalSize) *BodyModel {
+	paragraphs := make([]*prm.RowModel, 0, pageBody.RowCount())
 
-	rowCount := size.Height(0)
-	for i := 0; i < len(pageData.Paragraphs); i++ {
-		p := prm.NewParagraphModel(termSize.GetWidthLimit(), pageData.Paragraphs[i])
-		rowCount += p.GetRowCount()
+	rowCount := size.HeightZero
+	for i := index.Zero; i < pageBody.RowCount(); i++ {
+		paragraph := prm.NewRowModel(pageBody.Row(i), termSize.GetWidthLimit())
+		rowCount += paragraph.GetRowCount()
 
-		paragraphs = append(paragraphs, p)
+		paragraphs = append(paragraphs, paragraph)
 	}
 
 	return &BodyModel{
-		paragraphs: paragraphs,
-		termSize:   termSize,
-		rowCount:   rowCount,
+		modelRows: paragraphs,
+		termSize:  termSize,
+		rowCount:  rowCount,
 	}
 }
 
@@ -48,25 +46,21 @@ func (bm *BodyModel) GetRowCount() size.Height {
 	return bm.rowCount
 }
 
-// GetAnchorParagraphIndex gets anchorParagraphIndex field value
-func (bm *BodyModel) GetAnchorParagraphIndex() index.Index {
+// GetAnchorRowModelIndex gets anchorRowModelIndex field value
+func (bm *BodyModel) GetAnchorRowModelIndex() index.Index {
 	if bm == nil {
-		return 0
+		return index.Zero
 	}
-	return bm.anchorParagraphIndex
+	return bm.anchorRowModelIndex
 }
 
-// GetAnchorParagraphRowIndex finds anchor paragraph by index and returns its anchor row index
-func (bm *BodyModel) GetAnchorParagraphRowIndex() index.Index {
-	if bm == nil {
-		return 0
+// GetAnchorRowIndex finds anchor paragraph by index and returns its anchor row index
+func (bm *BodyModel) GetAnchorRowIndex() index.Index {
+	if bm == nil || len(bm.modelRows) <= bm.anchorRowModelIndex.Int() {
+		return index.Zero
 	}
 
-	var res index.Index
-	if bm.anchorParagraphIndex.ToInt() < len(bm.paragraphs) {
-		res = bm.paragraphs[bm.anchorParagraphIndex].GetAnchorRowIndex()
-	}
-	return res
+	return bm.modelRows[bm.anchorRowModelIndex].GetAnchorRowIndex()
 }
 
 // GetAnchorRowAbsolutelyIndex gets anchorRowAbsolutelyIndex field value
@@ -77,69 +71,64 @@ func (bm *BodyModel) GetAnchorRowAbsolutelyIndex() index.Index {
 	return bm.anchorRowAbsolutelyIndex
 }
 
-// GetParagraph gets paragraphModel object by index
-func (bm *BodyModel) GetParagraph(i index.Index) *prm.ParagraphModel {
-	if bm == nil || len(bm.paragraphs) <= i.ToInt() {
+// GetRowModel gets paragraphModel object by index
+func (bm *BodyModel) GetRowModel(i index.Index) *prm.RowModel {
+	if bm == nil || len(bm.modelRows) <= i.Int() {
 		return nil
 	}
 
-	return bm.paragraphs[i]
+	return bm.modelRows[i]
 }
 
 // Update applies terminal size and display actionSequence to the models and rebuild getting display dynamic_row window
-func (bm *BodyModel) Update(termSize terminal_size.TerminalSize, shiftVertical int) *dollyerr.Error {
+func (bm *BodyModel) Update(termSize ts.TerminalSize, shiftVertical int) {
 	if bm == nil {
-		return nil
+		return
 	}
 
-	widthLimit := termSize.GetWidthLimit()
-	if !widthLimit.IsValid() {
-		return dollyerr.NewError(
-			dollyerr.CodeHelpDisplayTerminalWidthLimitError,
-			fmt.Errorf("PageModel.update: invalid RowLenLimit: %s", widthLimit.String()),
-		)
-	}
-
-	if bm.termSize.GetWidthLimit() != widthLimit {
-		bm.termSize = bm.termSize.CloneWithNewWidthLimit(widthLimit)
+	if bm.termSize.GetWidthLimit() != termSize.GetWidthLimit() {
+		bm.termSize = ts.MakeTerminalSize(termSize.GetWidthLimit(), bm.termSize.GetHeight())
 
 		oldAnchorRowAbsolutelyIndex := bm.anchorRowAbsolutelyIndex
 
 		bm.rowCount = 0
-		for i := 0; i < len(bm.paragraphs); i++ {
-			bm.rowCount += bm.paragraphs[i].Update(bm.termSize.GetWidthLimit())
-			if i == bm.anchorParagraphIndex.ToInt() {
-				bm.anchorRowAbsolutelyIndex = index.MakeIndex(bm.rowCount.ToInt() - bm.paragraphs[i].GetRowCount().ToInt() + bm.paragraphs[i].GetAnchorRowIndex().ToInt())
+		for i := index.Zero; i < index.Index(len(bm.modelRows)); i++ {
+			bm.rowCount += bm.modelRows[i].Update(bm.termSize.GetWidthLimit())
+			if i == bm.anchorRowModelIndex {
+				bm.anchorRowAbsolutelyIndex = index.MakeIndex(bm.rowCount.Int() - bm.modelRows[i].GetRowCount().Int() + bm.modelRows[i].GetAnchorRowIndex().Int())
 			}
 		}
 
-		if oldAnchorRowAbsolutelyIndex == 0 {
-			bm.anchorParagraphIndex = 0
+		switch {
+		case oldAnchorRowAbsolutelyIndex == 0:
+			bm.anchorRowModelIndex = 0
 			bm.anchorRowAbsolutelyIndex = 0
+
+		// Big shift and big terminal height were here, now they have collapsed. So need to shift up the text
+		case bm.rowCount.Int()-bm.anchorRowAbsolutelyIndex.Int() < bm.termSize.GetHeight().Int():
+			shiftVertical += bm.rowCount.Int() - bm.anchorRowAbsolutelyIndex.Int() - bm.termSize.GetHeight().Int()
 		}
 	}
 
-	return bm.Shift(termSize.GetHeight(), shiftVertical)
+	bm.Shift(termSize.GetHeight(), shiftVertical)
 }
 
 // Shift applies a shift to display dynamic_row window
-func (bm *BodyModel) Shift(terminalHeight size.Height, shiftVertical int) *dollyerr.Error {
+func (bm *BodyModel) Shift(terminalHeight size.Height, shiftVertical int) {
 	if bm == nil {
-		return nil
+		return
 	}
 
-	bm.termSize = bm.termSize.CloneWithNewHeight(terminalHeight)
+	bm.termSize = ts.MakeTerminalSize(bm.termSize.GetWidthLimit(), terminalHeight)
 
 	if shiftVertical > 0 {
 		bm.shiftDown(shiftVertical)
-		return nil
+		return
 	}
 	if shiftVertical < 0 {
 		bm.shiftUp(shiftVertical)
-		return nil
+		return
 	}
-
-	return nil
 }
 
 // shiftDown applies forward shift to display dynamic_row window
@@ -147,26 +136,26 @@ func (bm *BodyModel) shiftDown(shiftVertical int) {
 	_ = bm
 
 	if bm.rowCount <= bm.termSize.GetHeight() {
-		if len(bm.paragraphs) > 0 {
-			bm.paragraphs[bm.anchorParagraphIndex].SetBackRowAsAnchor()
+		if len(bm.modelRows) > 0 {
+			bm.modelRows[bm.anchorRowModelIndex].SetBackRowAsAnchor()
 		}
-		bm.anchorParagraphIndex = 0
+		bm.anchorRowModelIndex = 0
 		bm.anchorRowAbsolutelyIndex = 0
 		return
 	}
 
-	if bm.rowCount.ToInt()-bm.anchorRowAbsolutelyIndex.ToInt() == bm.termSize.GetHeight().ToInt() ||
-		len(bm.paragraphs) == 0 {
+	if bm.rowCount.Int()-bm.anchorRowAbsolutelyIndex.Int() == bm.termSize.GetHeight().Int() ||
+		len(bm.modelRows) == 0 {
 		return
 	}
 
-	if bm.rowCount.ToInt()-bm.anchorRowAbsolutelyIndex.ToInt()-shiftVertical < bm.termSize.GetHeight().ToInt() {
-		shiftVertical = bm.rowCount.ToInt() - bm.anchorRowAbsolutelyIndex.ToInt() - bm.termSize.GetHeight().ToInt()
+	if bm.rowCount.Int()-bm.anchorRowAbsolutelyIndex.Int()-shiftVertical < bm.termSize.GetHeight().Int() {
+		shiftVertical = bm.rowCount.Int() - bm.anchorRowAbsolutelyIndex.Int() - bm.termSize.GetHeight().Int()
 	}
 
 	for i := 0; i < shiftVertical; i++ {
-		if !bm.paragraphs[bm.anchorParagraphIndex].ShiftAnchorRow(1) {
-			bm.anchorParagraphIndex++
+		if !bm.modelRows[bm.anchorRowModelIndex].ShiftAnchorRow(1) {
+			bm.anchorRowModelIndex++
 		}
 	}
 
@@ -179,25 +168,25 @@ func (bm *BodyModel) shiftUp(shiftVertical int) {
 	_ = bm
 
 	if bm.rowCount <= bm.termSize.GetHeight() {
-		if len(bm.paragraphs) > 0 {
-			bm.paragraphs[bm.anchorParagraphIndex].SetBackRowAsAnchor()
+		if len(bm.modelRows) > 0 {
+			bm.modelRows[bm.anchorRowModelIndex].SetBackRowAsAnchor()
 		}
-		bm.anchorParagraphIndex = 0
+		bm.anchorRowModelIndex = 0
 		bm.anchorRowAbsolutelyIndex = 0
 		return
 	}
 
-	if bm.anchorRowAbsolutelyIndex.ToInt()+shiftVertical < 0 {
-		bm.paragraphs[bm.anchorParagraphIndex].SetAnchorRowIndex(index.Null)
-		bm.anchorParagraphIndex = 0
+	if bm.anchorRowAbsolutelyIndex.Int()+shiftVertical < 0 {
+		bm.modelRows[bm.anchorRowModelIndex].SetAnchorRowIndex(index.Zero)
+		bm.anchorRowModelIndex = 0
 		bm.anchorRowAbsolutelyIndex = 0
 		return
 	}
 
 	for i := 0; i > shiftVertical; i-- {
-		if !bm.paragraphs[bm.anchorParagraphIndex].ShiftAnchorRow(-1) {
-			bm.anchorParagraphIndex--
-			bm.paragraphs[bm.anchorParagraphIndex].SetBackRowAsAnchor()
+		if !bm.modelRows[bm.anchorRowModelIndex].ShiftAnchorRow(-1) {
+			bm.anchorRowModelIndex--
+			bm.modelRows[bm.anchorRowModelIndex].SetBackRowAsAnchor()
 		}
 	}
 

@@ -1,317 +1,340 @@
 package main
 
 import (
+	"errors"
+	"math/rand"
+	"os"
+	"testing"
+
+	"github.com/terryhay/dolly/generator/proxyes/file_proxy"
+	"github.com/terryhay/dolly/generator/proxyes/os_proxy"
+
 	"bou.ke/monkey"
-	"fmt"
 	"github.com/brianvoe/gofakeit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	parsed "github.com/terryhay/dolly/argparser/parsed_data"
+	"github.com/terryhay/dolly/argparser/parsed"
+	ce "github.com/terryhay/dolly/generator/config_entity"
 	confYML "github.com/terryhay/dolly/generator/config_yaml"
-	"github.com/terryhay/dolly/generator/os_decorator"
-	osd "github.com/terryhay/dolly/generator/os_decorator"
 	"github.com/terryhay/dolly/generator/parser"
-	"github.com/terryhay/dolly/utils/dollyerr"
-	"os"
-	"testing"
+	coty "github.com/terryhay/dolly/tools/common_types"
 )
 
-func TestLogic(t *testing.T) {
-	parsingErr := dollyerr.NewError(dollyerr.CodeUndefinedError, fmt.Errorf(gofakeit.Name()))
+func TestProcess(t *testing.T) {
+	t.Parallel()
+
+	errParsing := errors.New(gofakeit.Paragraph(1, 1, rand.Intn(10)+1, ""))
 	configPath := parsed.ArgValue(gofakeit.Name())
+	errYmlConfig := errors.New(gofakeit.Paragraph(1, 1, rand.Intn(10)+1, ""))
+	errExist := errors.New(gofakeit.Paragraph(1, 1, rand.Intn(10)+1, ""))
 
-	getYAMLConfigErr := dollyerr.NewError(dollyerr.CodeConfigFlagIsNotUsedInCommands, fmt.Errorf(gofakeit.Name()))
-
-	testCases := []struct {
+	tests := []struct {
 		caseName string
 
-		dollyParseFunc    func(args []string) (res *parsed.ParsedData, err *dollyerr.Error)
-		getYAMLConfigFunc func(configPath string) (*confYML.Config, *dollyerr.Error)
-		osd               os_decorator.OSDecorator
+		funcParse          func(args []string) (res *parsed.Result, err error)
+		funcLoadYamlConfig func(decOS os_proxy.Proxy, configPath string) (*confYML.Config, error)
+		proxyOS            os_proxy.Proxy
 
-		expectedErrCode dollyerr.Code
+		expErr      error
+		expCodeExit os_proxy.ExitCode
 	}{
+		{
+			caseName: "get_arguments_error",
+
+			proxyOS: os_proxy.Mock(os_proxy.Opt{}),
+
+			expErr:      os_proxy.ErrGetArgsNoImplementation,
+			expCodeExit: ExitCodeGetArgsError,
+		},
 		{
 			caseName: "parsing_error",
 
-			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
-				return nil, parsingErr
+			funcParse: func(arg []string) (res *parsed.Result, err error) {
+				return nil, errParsing
 			},
-			osd: osd.NewOSDecorator(
-				&osd.Mock{
-					FuncGetArgs: func() []string {
-						return nil
-					},
+			proxyOS: os_proxy.Mock(os_proxy.Opt{
+				SlotGetArgs: func() []string {
+					return nil
 				},
-			),
-			expectedErrCode: parsingErr.Code(),
+			}),
+
+			expErr:      errParsing,
+			expCodeExit: ExitCodeArgParseError,
 		},
 		{
 			caseName: "get_config_path_arg_error",
 
-			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
+			funcParse: func(arg []string) (res *parsed.Result, err error) {
 				return nil, nil
 			},
-			osd: osd.NewOSDecorator(
-				&osd.Mock{
-					FuncGetArgs: func() []string {
-						return nil
-					},
+			proxyOS: os_proxy.Mock(os_proxy.Opt{
+				SlotGetArgs: func() []string {
+					return nil
 				},
-			),
-			expectedErrCode: dollyerr.CodeGeneratorNoRequiredFlag,
+			}),
+
+			expErr:      parsed.ErrFlagArgValuesNilPointer,
+			expCodeExit: ExitCodeGetFlagArgValueError,
 		},
 		{
 			caseName: "get_generate_dir_path_arg_error",
 
-			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
-				return &parsed.ParsedData{
-						FlagDataMap: map[apConf.Flag]*parsed.ParsedFlagData{
-							parser.FlagC: {
-								ArgData: &parsed.ParsedArgData{
+			funcParse: func(arg []string) (res *parsed.Result, err error) {
+				return parsed.MakeResult(&parsed.ResultOpt{
+						PlaceholdersByID: map[coty.IDPlaceholder]*parsed.PlaceholderOpt{
+							coty.ArgPlaceholderIDUndefined: {
+								ID:   coty.ArgPlaceholderIDUndefined,
+								Flag: parser.FlagC,
+								Argument: &parsed.ArgumentOpt{
 									ArgValues: []parsed.ArgValue{
 										configPath,
 									},
 								},
 							},
 						},
-					},
+					}),
 					nil
 			},
-			osd: osd.NewOSDecorator(
-				&osd.Mock{
-					FuncGetArgs: func() []string {
-						return nil
-					},
+			proxyOS: os_proxy.Mock(os_proxy.Opt{
+				SlotGetArgs: func() []string {
+					return nil
 				},
-			),
-			expectedErrCode: dollyerr.CodeGeneratorNoRequiredFlag,
+			}),
+
+			expErr:      parsed.ErrFlagArgValuesNoPlaceholder,
+			expCodeExit: ExitCodeGetFlagArgValueError,
 		},
 		{
-			caseName: "get_yaml_config_error",
+			caseName: "load_yaml_config_error",
 
-			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
-				return &parsed.ParsedData{
-						FlagDataMap: map[apConf.Flag]*parsed.ParsedFlagData{
-							parser.FlagC: {
-								ArgData: &parsed.ParsedArgData{
+			funcParse: func(arg []string) (res *parsed.Result, err error) {
+				return parsed.MakeResult(&parsed.ResultOpt{
+						PlaceholdersByID: map[coty.IDPlaceholder]*parsed.PlaceholderOpt{
+							coty.RandIDPlaceholder(): {
+								ID:   coty.RandIDPlaceholder(),
+								Flag: parser.FlagC,
+								Argument: &parsed.ArgumentOpt{
 									ArgValues: []parsed.ArgValue{
 										configPath,
 									},
 								},
 							},
-							parser.FlagO: {
-								ArgData: &parsed.ParsedArgData{
+
+							coty.RandIDPlaceholderSecond(): {
+								ID:   coty.RandIDPlaceholderSecond(),
+								Flag: parser.FlagO,
+								Argument: &parsed.ArgumentOpt{
 									ArgValues: []parsed.ArgValue{
 										parsed.ArgValue(gofakeit.Name()),
 									},
 								},
 							},
 						},
-					},
+					}),
 					nil
 			},
-			getYAMLConfigFunc: func(configPath string) (*confYML.Config, *dollyerr.Error) {
-				return nil, getYAMLConfigErr
+			funcLoadYamlConfig: func(_ os_proxy.Proxy, configPath string) (*confYML.Config, error) {
+				return nil, errYmlConfig
 			},
-			osd: osd.NewOSDecorator(
-				&osd.Mock{
-					FuncGetArgs: func() []string {
-						return nil
-					},
+			proxyOS: os_proxy.Mock(os_proxy.Opt{
+				SlotGetArgs: func() []string {
+					return nil
 				},
-			),
-			expectedErrCode: dollyerr.CodeConfigFlagIsNotUsedInCommands,
+			}),
+
+			expErr:      errYmlConfig,
+			expCodeExit: ExitCodeLoadParseConfigError,
 		},
 		{
-			caseName: "extract_flag_descriptions_error",
+			caseName: "make_config_entity_error",
 
-			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
-				return &parsed.ParsedData{
-						FlagDataMap: map[apConf.Flag]*parsed.ParsedFlagData{
-							parser.FlagC: {
-								ArgData: &parsed.ParsedArgData{
-									ArgValues: []parsed.ArgValue{
-										configPath,
-									},
+			funcParse: func(arg []string) (res *parsed.Result, err error) {
+				return parsed.MakeResult(&parsed.ResultOpt{
+					PlaceholdersByID: map[coty.IDPlaceholder]*parsed.PlaceholderOpt{
+						coty.RandIDPlaceholder(): {
+							ID:   coty.RandIDPlaceholder(),
+							Flag: parser.FlagC,
+							Argument: &parsed.ArgumentOpt{
+								ArgValues: []parsed.ArgValue{
+									configPath,
 								},
 							},
-							parser.FlagO: {
-								ArgData: &parsed.ParsedArgData{
-									ArgValues: []parsed.ArgValue{
-										parsed.ArgValue(gofakeit.Name()),
-									},
+						},
+
+						coty.RandIDPlaceholderSecond(): {
+							ID:   coty.RandIDPlaceholderSecond(),
+							Flag: parser.FlagO,
+							Argument: &parsed.ArgumentOpt{
+								ArgValues: []parsed.ArgValue{
+									parsed.ArgValue(gofakeit.Name()),
 								},
 							},
 						},
 					},
-					nil
+				}), nil
 			},
-			getYAMLConfigFunc: func(configPath string) (*confYML.Config, *dollyerr.Error) {
-				return confYML.ConfigSrc{
-						ArgParserConfig: confYML.ArgParserConfigSrc{
-							FlagDescriptions: []*confYML.FlagDescription{
-								nil,
+			funcLoadYamlConfig: func(_ os_proxy.Proxy, configPath string) (*confYML.Config, error) {
+				return confYML.NewConfig(&confYML.ConfigOpt{
+						Version: "1.0.0",
+						ArgParserConfig: &confYML.ArgParserConfigOpt{
+							AppHelp: &confYML.AppHelpOpt{
+								AppName:         coty.RandNameApp().String(),
+								ChapterNameInfo: coty.RandInfoChapterDescription().String(),
 							},
-						}.ToConstPtr(),
-					}.ToConstPtr(),
-					nil
-			},
-			osd: osd.NewOSDecorator(
-				&osd.Mock{
-					FuncGetArgs: func() []string {
-						return nil
-					},
-				},
-			),
-			expectedErrCode: dollyerr.CodeUndefinedError,
-		},
-		{
-			caseName: "extract_command_descriptions_error",
-
-			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
-				return &parsed.ParsedData{
-						FlagDataMap: map[apConf.Flag]*parsed.ParsedFlagData{
-							parser.FlagC: {
-								ArgData: &parsed.ParsedArgData{
-									ArgValues: []parsed.ArgValue{
-										configPath,
-									},
-								},
-							},
-							parser.FlagO: {
-								ArgData: &parsed.ParsedArgData{
-									ArgValues: []parsed.ArgValue{
-										parsed.ArgValue(gofakeit.Name()),
-									},
-								},
+							NamelessCommand: &confYML.NamelessCommandOpt{
+								ChapterDescriptionInfo: coty.RandInfoChapterDescription().String(),
 							},
 						},
-					},
+					}),
 					nil
 			},
-			getYAMLConfigFunc: func(configPath string) (*confYML.Config, *dollyerr.Error) {
-				return confYML.ConfigSrc{
-						ArgParserConfig: confYML.ArgParserConfigSrc{
-							CommandDescriptions: []*confYML.CommandDescription{
-								nil,
-							},
-						}.ToConstPtr(),
-					}.ToConstPtr(),
-					nil
-			},
-			osd: osd.NewOSDecorator(
-				&osd.Mock{
-					FuncGetArgs: func() []string {
-						return nil
-					},
+			proxyOS: os_proxy.Mock(os_proxy.Opt{
+				SlotGetArgs: func() []string {
+					return nil
 				},
-			),
-			expectedErrCode: dollyerr.CodeUndefinedError,
-		},
-		{
-			caseName: "checking_error",
+			}),
 
-			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
-				return &parsed.ParsedData{
-						FlagDataMap: map[apConf.Flag]*parsed.ParsedFlagData{
-							parser.FlagC: {
-								ArgData: &parsed.ParsedArgData{
-									ArgValues: []parsed.ArgValue{
-										configPath,
-									},
-								},
-							},
-							parser.FlagO: {
-								ArgData: &parsed.ParsedArgData{
-									ArgValues: []parsed.ArgValue{
-										parsed.ArgValue(gofakeit.Name()),
-									},
-								},
-							},
-						},
-					},
-					nil
-			},
-			getYAMLConfigFunc: func(configPath string) (*confYML.Config, *dollyerr.Error) {
-				return confYML.ConfigSrc{
-						ArgParserConfig: confYML.ArgParserConfigSrc{
-							CommandDescriptions: []*confYML.CommandDescription{
-								confYML.CommandDescriptionSrc{
-									Command: gofakeit.Name(),
-									RequiredFlags: []string{
-										gofakeit.Color(),
-									},
-								}.ToConstPtr(),
-							},
-						}.ToConstPtr(),
-					}.ToConstPtr(),
-					nil
-			},
-			osd: osd.NewOSDecorator(
-				&osd.Mock{
-					FuncGetArgs: func() []string {
-						return nil
-					},
-				},
-			),
-			expectedErrCode: dollyerr.CodeConfigFlagMustHaveDashInFront,
+			expErr:      ce.ErrMakeConfigEntity,
+			expCodeExit: ExitCodeConfigEntityMakeError,
 		},
 		{
 			caseName: "file_write_error",
 
-			dollyParseFunc: func(arg []string) (res *parsed.ParsedData, err *dollyerr.Error) {
-				return &parsed.ParsedData{
-						FlagDataMap: map[apConf.Flag]*parsed.ParsedFlagData{
-							parser.FlagC: {
-								ArgData: &parsed.ParsedArgData{
+			funcParse: func(arg []string) (res *parsed.Result, err error) {
+				return parsed.MakeResult(&parsed.ResultOpt{
+						PlaceholdersByID: map[coty.IDPlaceholder]*parsed.PlaceholderOpt{
+							coty.RandIDPlaceholder(): {
+								ID:   coty.RandIDPlaceholder(),
+								Flag: parser.FlagC,
+								Argument: &parsed.ArgumentOpt{
 									ArgValues: []parsed.ArgValue{
 										configPath,
 									},
 								},
 							},
-							parser.FlagO: {
-								ArgData: &parsed.ParsedArgData{
+
+							coty.RandIDPlaceholderSecond(): {
+								ID:   coty.RandIDPlaceholderSecond(),
+								Flag: parser.FlagO,
+								Argument: &parsed.ArgumentOpt{
 									ArgValues: []parsed.ArgValue{
 										parsed.ArgValue(gofakeit.Name()),
 									},
 								},
 							},
 						},
-					},
+					}),
 					nil
 			},
-			getYAMLConfigFunc: func(configPath string) (*confYML.Config, *dollyerr.Error) {
-				return &confYML.Config{},
+			funcLoadYamlConfig: func(_ os_proxy.Proxy, configPath string) (*confYML.Config, error) {
+				return confYML.NewConfig(&confYML.ConfigOpt{
+						Version: "1.0.0",
+						ArgParserConfig: &confYML.ArgParserConfigOpt{
+							AppHelp: &confYML.AppHelpOpt{
+								AppName:         coty.RandNameApp().String(),
+								ChapterNameInfo: coty.RandInfoChapterDescription().String(),
+							},
+							NamelessCommand: &confYML.NamelessCommandOpt{
+								ChapterDescriptionInfo: coty.RandInfoChapterDescription().String(),
+							},
+							HelpCommand: &confYML.HelpCommandOpt{
+								MainName: "-h",
+							},
+						},
+					}),
 					nil
 			},
-			osd: osd.NewOSDecorator(&osd.Mock{
-				FuncGetArgs: func() []string {
-					return nil
-				},
-				FuncIsExist: func(string) bool {
-					return false
-				},
+			proxyOS: os_proxy.Mock(os_proxy.Opt{
+				SlotGetArgs: func() []string { return nil },
+				SlotIsExist: func(string) error { return errExist },
 			}),
-			expectedErrCode: dollyerr.CodeGeneratorInvalidPath,
+
+			expErr:      errExist,
+			expCodeExit: ExitCodeWriteFileError,
+		},
+		{
+			caseName: "success",
+			funcParse: func(arg []string) (res *parsed.Result, err error) {
+				return parsed.MakeResult(&parsed.ResultOpt{
+						PlaceholdersByID: map[coty.IDPlaceholder]*parsed.PlaceholderOpt{
+							coty.RandIDPlaceholder(): {
+								ID:   coty.RandIDPlaceholder(),
+								Flag: parser.FlagC,
+								Argument: &parsed.ArgumentOpt{
+									ArgValues: []parsed.ArgValue{
+										configPath,
+									},
+								},
+							},
+
+							coty.RandIDPlaceholderSecond(): {
+								ID:   coty.RandIDPlaceholderSecond(),
+								Flag: parser.FlagO,
+								Argument: &parsed.ArgumentOpt{
+									ArgValues: []parsed.ArgValue{
+										parsed.ArgValue(gofakeit.Name()),
+									},
+								},
+							},
+						},
+					}),
+					nil
+			},
+			funcLoadYamlConfig: func(_ os_proxy.Proxy, configPath string) (*confYML.Config, error) {
+				return confYML.NewConfig(&confYML.ConfigOpt{
+						Version: "1.0.0",
+						ArgParserConfig: &confYML.ArgParserConfigOpt{
+							AppHelp: &confYML.AppHelpOpt{
+								AppName:         coty.RandNameApp().String(),
+								ChapterNameInfo: coty.RandInfoChapterDescription().String(),
+							},
+							NamelessCommand: &confYML.NamelessCommandOpt{
+								ChapterDescriptionInfo: coty.RandInfoChapterDescription().String(),
+							},
+							HelpCommand: &confYML.HelpCommandOpt{
+								MainName: "-h",
+							},
+						},
+					}),
+					nil
+			},
+			proxyOS: os_proxy.Mock(os_proxy.Opt{
+				SlotGetArgs: func() []string { return nil },
+				SlotCreate: func(path string) (file_proxy.Proxy, error) {
+					return file_proxy.Mock(file_proxy.Opt{
+						SlotClose:       func() error { return nil },
+						SlotWriteString: func(string) error { return nil },
+					}), nil
+				},
+				SlotIsExist: func(string) error { return nil },
+			}),
+
+			expCodeExit: ExitCodeSuccess,
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, testCase := range tests {
+		tc := testCase
+
 		t.Run(tc.caseName, func(t *testing.T) {
-			err, code := logic(tc.dollyParseFunc, tc.getYAMLConfigFunc, tc.osd)
-			require.Equal(t, uint(tc.expectedErrCode), code)
-			if code == 0 {
-				require.NoError(t, err)
+			t.Parallel()
+
+			codeExit, err := process(tc.proxyOS, tc.funcParse, tc.funcLoadYamlConfig)
+			require.ErrorIs(t, err, tc.expErr)
+			require.Equal(t, tc.expCodeExit, codeExit)
+
+			if codeExit != ExitCodeSuccess {
 				return
 			}
-			require.Error(t, err)
+
+			require.NoError(t, err)
 		})
 	}
 }
 
 func TestCrasher(t *testing.T) {
+	t.Parallel()
+
 	fakeExit := func(int) {
 		panic("os.Exit called")
 	}

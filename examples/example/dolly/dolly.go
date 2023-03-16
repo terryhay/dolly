@@ -4,178 +4,211 @@ package dolly
 
 import (
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	parsed "github.com/terryhay/dolly/argparser/parsed_data"
+	hp "github.com/terryhay/dolly/argparser/help_page"
+	"github.com/terryhay/dolly/argparser/parsed"
 	"github.com/terryhay/dolly/argparser/parser"
-	"github.com/terryhay/dolly/man_style_help/page"
 	pgv "github.com/terryhay/dolly/man_style_help/page_view"
 	tbd "github.com/terryhay/dolly/man_style_help/termbox_decorator"
+	coty "github.com/terryhay/dolly/tools/common_types"
 )
 
 const (
-	// CommandIDNamelessCommand - checks arguments types
-	CommandIDNamelessCommand apConf.CommandID = iota + 1
-	// CommandIDPrintHelpInfo - print help info
-	CommandIDPrintHelpInfo
-	// CommandIDPrint - print command line arguments with optional checking
-	CommandIDPrint
+	// NameApp - name of the application
+	NameApp coty.NameApp = "example"
 )
 
 const (
-	// CommandHLw - print help info
-	CommandHLw apConf.Command = "-h"
-	// CommandHelp - print help info
-	CommandHelp = "help"
-	// CommandPrint - print command line arguments with optional checking
-	CommandPrint = "print"
+	// NameCommandHLw - print help info
+	NameCommandHLw coty.NameCommand = "-h"
+
+	// NameCommandHelp - print help info
+	NameCommandHelp coty.NameCommand = "help"
+
+	// NameCommandNameless - checks arguments types
+	NameCommandNameless coty.NameCommand = "Nameless"
+
+	// NameCommandPrint - print command line arguments with optional checking
+	NameCommandPrint coty.NameCommand = "print"
 )
 
 const (
-	// FlagCheckargs - do arguments checking
-	FlagCheckargs apConf.Flag = "-checkargs"
-	// FlagFLw - single float
-	FlagFLw = "-f"
-	// FlagFl - float list
-	FlagFl = "-fl"
-	// FlagILw - int string
-	FlagILw = "-i"
-	// FlagIl - int list
-	FlagIl = "-il"
-	// FlagSLw - single string
-	FlagSLw = "-s"
-	// FlagSl - string list
-	FlagSl = "-sl"
+	// IDPlaceholderCheckargs - -checkargs
+	IDPlaceholderCheckargs coty.IDPlaceholder = iota + 1
+
+	// IDPlaceholderFloatList - float_list
+	IDPlaceholderFloatList
+
+	// IDPlaceholderFloatSingle - float_single
+	IDPlaceholderFloatSingle
+
+	// IDPlaceholderIntList - int_list
+	IDPlaceholderIntList
+
+	// IDPlaceholderIntSingle - int_single
+	IDPlaceholderIntSingle
+
+	// IDPlaceholderStringList - string_list
+	IDPlaceholderStringList
+
+	// IDPlaceholderStringSingle - string_single
+	IDPlaceholderStringSingle
 )
 
-// Parse - processes command line arguments
-func Parse(args []string) (*parsed.ParsedData, error) {
-	appArgConfig := apConf.ArgParserConfigSrc{
-		AppDescription: apConf.ApplicationDescriptionSrc{
-			AppName:      "example",
-			NameHelpInfo: "shows how parser generator works",
-			DescriptionHelpInfo: []string{
-				"you can write more detailed description here",
-				"and use several paragraphs",
-			},
-		}.ToConst(),
-		FlagDescriptionSlice: []*apConf.FlagDescription{
-			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
-					FlagSLw,
-				},
-				DescriptionHelpInfo: "single string",
-				ArgDescription: apConf.ArgumentsDescriptionSrc{
-					AmountType:              apConf.ArgAmountTypeSingle,
-					SynopsisHelpDescription: "str",
-				}.ToConstPtr(),
-			}.ToConstPtr(),
-			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
-					FlagSl,
-				},
-				DescriptionHelpInfo: "string list",
-				ArgDescription: apConf.ArgumentsDescriptionSrc{
-					AmountType:              apConf.ArgAmountTypeList,
-					SynopsisHelpDescription: "str",
-				}.ToConstPtr(),
-			}.ToConstPtr(),
-			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
-					FlagILw,
-				},
-				DescriptionHelpInfo: "int string",
-				ArgDescription: apConf.ArgumentsDescriptionSrc{
-					AmountType:              apConf.ArgAmountTypeSingle,
-					SynopsisHelpDescription: "str",
-				}.ToConstPtr(),
-			}.ToConstPtr(),
-			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
-					FlagIl,
-				},
-				DescriptionHelpInfo: "int list",
-				ArgDescription: apConf.ArgumentsDescriptionSrc{
-					AmountType:              apConf.ArgAmountTypeList,
-					SynopsisHelpDescription: "str",
-				}.ToConstPtr(),
-			}.ToConstPtr(),
-			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
-					FlagFLw,
-				},
-				DescriptionHelpInfo: "single float",
-				ArgDescription: apConf.ArgumentsDescriptionSrc{
-					AmountType:              apConf.ArgAmountTypeSingle,
-					SynopsisHelpDescription: "str",
-				}.ToConstPtr(),
-			}.ToConstPtr(),
-			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
-					FlagFl,
-				},
-				DescriptionHelpInfo: "float list",
-				ArgDescription: apConf.ArgumentsDescriptionSrc{
-					AmountType:              apConf.ArgAmountTypeList,
-					SynopsisHelpDescription: "str",
-				}.ToConstPtr(),
-			}.ToConstPtr(),
-			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
-					FlagCheckargs,
-				},
-				DescriptionHelpInfo: "do arguments checking",
-			}.ToConstPtr(),
+const (
+	// NameFlagCheckargs - do arguments checking
+	NameFlagCheckargs coty.NameFlag = "--checkargs"
+
+	// NameFlagFLw - single float
+	NameFlagFLw coty.NameFlag = "-f"
+
+	// NameFlagFl - float list
+	NameFlagFl coty.NameFlag = "-fl"
+
+	// NameFlagILw - int string
+	NameFlagILw coty.NameFlag = "-i"
+
+	// NameFlagIl - int list
+	NameFlagIl coty.NameFlag = "-il"
+
+	// NameFlagSLw - single string
+	NameFlagSLw coty.NameFlag = "-s"
+
+	// NameFlagSl - string list
+	NameFlagSl coty.NameFlag = "-sl"
+)
+
+// Parse processes command line arguments
+func Parse(args []string) (*parsed.Result, error) {
+	appArgConfig := apConf.MakeArgParserConfig(apConf.ArgParserConfigOpt{
+		App: apConf.ApplicationOpt{
+			AppName:         NameApp,
+			InfoChapterNAME: "shows how parser generator works",
 		},
-		CommandDescriptions: []*apConf.CommandDescription{
-			apConf.CommandDescriptionSrc{
-				ID:                  CommandIDPrint,
-				DescriptionHelpInfo: "print command line arguments with optional checking",
-				Commands: map[apConf.Command]bool{
-					CommandPrint: true,
+		CommandNameless: &apConf.NamelessCommandOpt{
+			HelpInfo: "checks arguments types",
+			Placeholders: []*apConf.PlaceholderOpt{
+				{
+					ID: IDPlaceholderFloatList,
+					FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+						NameFlagFl: {
+							NameMain: NameFlagFl,
+							HelpInfo: "float list",
+						},
+					},
 				},
-				OptionalFlags: map[apConf.Flag]bool{
-					FlagSLw:       true,
-					FlagSl:        true,
-					FlagILw:       true,
-					FlagIl:        true,
-					FlagFLw:       true,
-					FlagFl:        true,
-					FlagCheckargs: true,
+				{
+					ID: IDPlaceholderIntList,
+					FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+						NameFlagIl: {
+							NameMain: NameFlagIl,
+							HelpInfo: "int list",
+						},
+					},
 				},
-			}.ToConstPtr(),
+				{
+					ID: IDPlaceholderStringList,
+					FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+						NameFlagSl: {
+							NameMain: NameFlagSl,
+							HelpInfo: "string list",
+						},
+					},
+				},
+			},
 		},
-		HelpCommandDescription: apConf.NewHelpCommandDescription(
-			CommandIDPrintHelpInfo,
-			map[apConf.Command]bool{
-				CommandHLw:  true,
-				CommandHelp: true,
+		Commands: []*apConf.CommandOpt{
+			{
+				NameMain: NameCommandPrint,
+				HelpInfo: "print command line arguments with optional checking",
+				Placeholders: []*apConf.PlaceholderOpt{
+					{
+						ID: IDPlaceholderCheckargs,
+						FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+							NameFlagCheckargs: {
+								NameMain: NameFlagCheckargs,
+								HelpInfo: "do arguments checking",
+							},
+						},
+					},
+					{
+						ID: IDPlaceholderFloatList,
+						FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+							NameFlagFl: {
+								NameMain: NameFlagFl,
+								HelpInfo: "float list",
+							},
+						},
+					},
+					{
+						ID: IDPlaceholderFloatSingle,
+						FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+							NameFlagFLw: {
+								NameMain: NameFlagFLw,
+								HelpInfo: "single float",
+							},
+						},
+					},
+					{
+						ID: IDPlaceholderIntList,
+						FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+							NameFlagIl: {
+								NameMain: NameFlagIl,
+								HelpInfo: "int list",
+							},
+						},
+					},
+					{
+						ID: IDPlaceholderIntSingle,
+						FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+							NameFlagILw: {
+								NameMain: NameFlagILw,
+								HelpInfo: "int string",
+							},
+						},
+					},
+					{
+						ID: IDPlaceholderStringList,
+						FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+							NameFlagSl: {
+								NameMain: NameFlagSl,
+								HelpInfo: "string list",
+							},
+						},
+					},
+					{
+						ID: IDPlaceholderStringSingle,
+						FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+							NameFlagSLw: {
+								NameMain: NameFlagSLw,
+								HelpInfo: "single string",
+							},
+						},
+					},
+				},
 			},
-		),
-		NamelessCommandDescription: apConf.NewNamelessCommandDescription(
-			CommandIDNamelessCommand,
-			"checks arguments types",
-			nil,
-			nil,
-			map[apConf.Flag]bool{
-				FlagSl: true,
-				FlagIl: true,
-				FlagFl: true,
+		},
+		CommandHelpOut: &apConf.HelpOutCommandOpt{
+			NameMain: NameCommandHelp,
+			NamesAdditional: map[coty.NameCommand]struct{}{
+				NameCommandHelp: {},
+				NameCommandHLw:  {},
 			},
-		)}.ToConst()
+		},
+	})
 
-	res, err := parser.Parse(appArgConfig, args)
-	if err != nil {
-		return nil, err.Error()
+	res, errParse := parser.Parse(appArgConfig, args)
+	if errParse != nil {
+		return nil, errParse
 	}
 
-	if res.GetCommandID() == CommandIDPrintHelpInfo {
-		var pageView pgv.PageView
-		err = pageView.Init(tbd.NewTermBoxDecorator(nil), page.MakePage(appArgConfig))
+	if res.GetCommandMainName() == NameCommandHelp {
+		pageView, err := pgv.NewPageView(tbd.NewTermBoxDecorator(), NameApp, hp.MakeBody(appArgConfig))
 		if err != nil {
-			return nil, err.Error()
+			return nil, err
 		}
-		err = pageView.Run()
-		if err != nil {
-			return nil, err.Error()
+
+		if err = pageView.Run(); err != nil {
+			return nil, err
 		}
 
 		return nil, nil

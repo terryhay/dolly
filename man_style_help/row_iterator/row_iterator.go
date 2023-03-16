@@ -3,8 +3,8 @@ package row_iterator
 import (
 	pgm "github.com/terryhay/dolly/man_style_help/page_model"
 	"github.com/terryhay/dolly/man_style_help/row"
-	"github.com/terryhay/dolly/man_style_help/size"
-	"github.com/terryhay/dolly/utils/index"
+	"github.com/terryhay/dolly/tools/index"
+	"github.com/terryhay/dolly/tools/size"
 )
 
 // RowIterator contains some temp page for iterating by model rows
@@ -13,14 +13,14 @@ type RowIterator struct {
 
 	modelRow row.Row
 
-	reverseCounter    size.Height
-	paragraphIndex    index.Index
-	paragraphRowIndex index.Index
+	reverseCounter size.Height
+	rowModelIndex  index.Index
+	rowIndex       index.Index
 }
 
 // MakeRowIterator constructs a RowIterator object in a stack
 func MakeRowIterator(model *pgm.PageModel) RowIterator {
-	reverseCounter := model.GetUsingTerminalSize().GetHeight()
+	reverseCounter := model.GetUsingTermSize().GetHeight()
 	if model.GetRowCount() < reverseCounter {
 		reverseCounter = model.GetRowCount()
 	}
@@ -29,9 +29,9 @@ func MakeRowIterator(model *pgm.PageModel) RowIterator {
 		model:    model,
 		modelRow: model.GetHeaderModel().GetViewRow(),
 
-		reverseCounter:    reverseCounter,
-		paragraphIndex:    model.GetBodyModel().GetAnchorParagraphIndex(),
-		paragraphRowIndex: model.GetBodyModel().GetAnchorParagraphRowIndex(),
+		reverseCounter: reverseCounter,
+		rowModelIndex:  model.GetBodyModel().GetAnchorRowModelIndex(),
+		rowIndex:       model.GetBodyModel().GetAnchorRowIndex(),
 	}
 }
 
@@ -40,8 +40,8 @@ func (ri *RowIterator) End() bool {
 	return ri.reverseCounter == 0
 }
 
-// Row returns a current value of model dynamic_row
-func (ri *RowIterator) Row() row.Row {
+// RowModel returns a current value of model dynamic_row
+func (ri *RowIterator) RowModel() row.Row {
 	return ri.modelRow
 }
 
@@ -53,14 +53,14 @@ func (ri *RowIterator) Next() {
 		return
 	}
 
-	prm := ri.model.GetBodyModel().GetParagraph(ri.paragraphIndex)
+	prm := ri.model.GetBodyModel().GetRowModel(ri.rowModelIndex)
 	if prm == nil {
 		ri.modelRow = ri.model.GetFooterModel().GetFooterRow()
 		ri.reverseCounter--
 		return
 	}
 
-	ri.modelRow = prm.GetRow(ri.paragraphRowIndex)
+	ri.modelRow = prm.GetRow(ri.rowIndex)
 
 	ri.reverseCounter--
 	if ri.reverseCounter == 1 {
@@ -72,9 +72,9 @@ func (ri *RowIterator) Next() {
 		return
 	}
 
-	ri.paragraphRowIndex++
-	if ri.paragraphRowIndex.ToInt() == prm.GetRowCount().ToInt() {
-		ri.paragraphRowIndex = 0
-		ri.paragraphIndex++
+	ri.rowIndex++
+	if ri.rowIndex.Int() == prm.GetRowCount().Int() {
+		ri.rowIndex = 0
+		ri.rowModelIndex++
 	}
 }

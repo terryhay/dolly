@@ -2,41 +2,45 @@ package row_len_limiter
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/brianvoe/gofakeit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/terryhay/dolly/man_style_help/size"
-	"testing"
+	"github.com/terryhay/dolly/tools/size"
 )
 
 func TestRowLenLimitGetters(t *testing.T) {
 	t.Parallel()
 
 	t.Run("nil_pointer_getters", func(t *testing.T) {
+		t.Parallel()
 		var limit *RowLenLimit
 
-		require.False(t, limit.IsValid())
+		require.ErrorIs(t, limit.IsValid(), ErrIsValidMin)
 
-		require.Equal(t, 0, limit.Min().ToInt())
-		require.Equal(t, 0, limit.Optimum().ToInt())
-		require.Equal(t, 0, limit.Max().ToInt())
+		require.Equal(t, 0, limit.Min().Int())
+		require.Equal(t, 0, limit.Optimum().Int())
+		require.Equal(t, 0, limit.Max().Int())
 
 		require.Equal(t, 0, len(limit.String()))
 	})
 
-	t.Run("getters", func(t *testing.T) {
-		min := 20
-		optimum := 30
-		max := 40
+	t.Run("initialized", func(t *testing.T) {
+		t.Parallel()
 
-		limit := MakeRowLenLimit(size.Width(min), size.Width(optimum), size.Width(max))
-		require.True(t, limit.IsValid())
+		widthMin := 20
+		widthOptimum := 30
+		widthMax := 40
 
-		require.Equal(t, min, limit.Min().ToInt())
-		require.Equal(t, optimum, limit.Optimum().ToInt())
-		require.Equal(t, max, limit.Max().ToInt())
+		limit := MakeRowLenLimit(size.MakeWidth(widthMin), size.MakeWidth(widthOptimum), size.MakeWidth(widthMax))
+		require.NoError(t, limit.IsValid())
 
-		require.Equal(t, fmt.Sprintf("[min: %d; optimum: %d; max: %d]", min, optimum, max), limit.String())
+		require.Equal(t, widthMin, limit.Min().Int())
+		require.Equal(t, widthOptimum, limit.Optimum().Int())
+		require.Equal(t, widthMax, limit.Max().Int())
+
+		require.Equal(t, fmt.Sprintf("[min: %d; optimum: %d; max: %d]", widthMin, widthOptimum, widthMax), limit.String())
 	})
 }
 
@@ -45,20 +49,20 @@ func TestRowLenLimitShifting(t *testing.T) {
 
 	t.Run("nil_pointer_shifting", func(t *testing.T) {
 		var limit *RowLenLimit
-		assert.Equal(t, RowLenLimit{}, limit.ApplyTabShift(size.Width(gofakeit.Uint8())))
+		assert.Equal(t, RowLenLimit{}, limit.ApplyTabShift(size.MakeWidth(gofakeit.Uint8())))
 	})
 
 	t.Run("shifting", func(t *testing.T) {
-		min := 2 + int(gofakeit.Uint8())
-		optimum := min + int(gofakeit.Uint8())
-		max := optimum + int(gofakeit.Uint8())
+		widthMin := 2 + int(gofakeit.Uint8())
+		optimum := widthMin + int(gofakeit.Uint8())
+		widthMax := optimum + int(gofakeit.Uint8())
 
-		limit := MakeRowLenLimit(size.Width(min), size.Width(optimum), size.Width(max))
+		limit := MakeRowLenLimit(size.MakeWidth(widthMin), size.MakeWidth(optimum), size.MakeWidth(widthMax))
 		shifted := limit.ApplyTabShift(1)
 
-		require.Equal(t, limit.Min().ToInt()-1, shifted.Min().ToInt())
-		require.Equal(t, limit.Optimum().ToInt()-1, shifted.Optimum().ToInt())
-		require.Equal(t, limit.Max().ToInt()-1, shifted.Max().ToInt())
+		require.Equal(t, limit.Min().Int()-1, shifted.Min().Int())
+		require.Equal(t, limit.Optimum().Int()-1, shifted.Optimum().Int())
+		require.Equal(t, limit.Max().Int()-1, shifted.Max().Int())
 	})
 
 	t.Run("extremal_shifting", func(t *testing.T) {
@@ -77,26 +81,69 @@ func TestClone(t *testing.T) {
 	t.Parallel()
 
 	{
-		var limit *RowLenLimit
-		clone := limit.Clone()
-
-		require.NotNil(t, clone)
-		require.Equal(t, size.Width(0), clone.Min())
-		require.Equal(t, size.Width(0), clone.Optimum())
-		require.Equal(t, size.Width(0), clone.Max())
-	}
-
-	{
 		limit := MakeRowLenLimit(
-			size.Width(gofakeit.Uint8()),
-			size.Width(gofakeit.Uint8()),
-			size.Width(gofakeit.Uint8()),
+			size.MakeWidth(gofakeit.Uint8()),
+			size.MakeWidth(gofakeit.Uint8()),
+			size.MakeWidth(gofakeit.Uint8()),
 		)
-		clone := limit.Clone()
+		clone := CloneRowLenLimit(limit)
 
 		require.NotNil(t, clone)
 		require.Equal(t, limit.Min(), clone.Min())
 		require.Equal(t, limit.Optimum(), clone.Optimum())
 		require.Equal(t, limit.Max(), clone.Max())
+	}
+}
+
+func TestIsValid(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		caseName string
+		rll      RowLenLimit
+		expErr   error
+	}{
+		{
+			caseName: "zero_min",
+			rll:      MakeRowLenLimit(size.WidthZero, size.WidthTab, size.WidthTab),
+			expErr:   ErrIsValidMin,
+		},
+		{
+			caseName: "zero_optimum",
+			rll:      MakeRowLenLimit(size.WidthTab, size.WidthZero, size.WidthTab),
+			expErr:   ErrIsValidOptimum,
+		},
+		{
+			caseName: "zero_max",
+			rll:      MakeRowLenLimit(size.WidthTab, size.WidthTab, size.WidthZero),
+			expErr:   ErrIsValidMax,
+		},
+		{
+			caseName: "optimum_less_than_min",
+			rll:      MakeRowLenLimit(size.MakeWidth(2), size.MakeWidth(1), size.MakeWidth(10)),
+			expErr:   ErrIsValidMinMoreThanOptimum,
+		},
+		{
+			caseName: "max_less_than_optimum",
+			rll:      MakeRowLenLimit(size.MakeWidth(2), size.MakeWidth(11), size.MakeWidth(10)),
+			expErr:   ErrIsValidOptimumMoreThanMax,
+		},
+		{
+			caseName: "valid",
+			rll:      MakeRowLenLimit(size.MakeWidth(2), size.MakeWidth(5), size.MakeWidth(10)),
+		},
+	}
+
+	for _, testCase := range tests {
+		tc := testCase
+
+		t.Run(tc.caseName, func(t *testing.T) {
+			t.Parallel()
+
+			if tc.expErr == nil {
+				require.NoError(t, tc.rll.IsValid())
+			}
+			require.ErrorIs(t, tc.rll.IsValid(), tc.expErr)
+		})
 	}
 }

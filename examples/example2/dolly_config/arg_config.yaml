@@ -2,34 +2,34 @@
 version: 1.0.0
 
 # required
-arg_parser_config:
+arg_parser:
 
   # required
-  app_help_description:
+  app_help:
     # required fields:
     app_name: "example2"
-    name_help_info: "shows how parser generator works without commands"
-    description_help_info:
+    chapter_name_info: "shows how parser generator works without commands"
+    chapter_description_info:
       - "you can write more detailed description here"
 
   # required
-  help_command_description:
-    command: "help"
+  help_command:
+    main_name: "help"
     # optional fields
-    additional_commands:
+    additional_names:
       - "-h"
 
   # optional
-  flag_descriptions:
+  placeholders:
     - flag: &checkCommandArguments "-check"
-      description_help_info: "check command arguments types"
+      chapter_description_info: "check command arguments types"
       # optional fields
-      arguments_description:
+      arg:
         # required fields
         amount_type: "single"
         synopsis_description: "str"
         # optional fields:
-        arguments_description:
+        arg:
           amount_type: "single"
           synopsis_description: "log level"
           default_values:
@@ -40,11 +40,11 @@ arg_parser_config:
             - "f"
 
   # required if this is no command_descriptions
-  nameless_command_description:
+  nameless_command:
     # required
-    description_help_info: "checks arguments types"
+    chapter_description_info: "checks arguments types"
     # optional fields
-    arguments_description:
+    args:
       # required fields
       amount_type: "list"
       synopsis_description: "str list"

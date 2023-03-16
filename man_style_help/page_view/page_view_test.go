@@ -2,46 +2,47 @@ package page_view
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/brianvoe/gofakeit"
 	"github.com/nsf/termbox-go"
 	"github.com/stretchr/testify/require"
-	"github.com/terryhay/dolly/man_style_help/page"
+	hp "github.com/terryhay/dolly/argparser/help_page/page"
 	rll "github.com/terryhay/dolly/man_style_help/row_len_limiter"
 	"github.com/terryhay/dolly/man_style_help/runes"
 	tbd "github.com/terryhay/dolly/man_style_help/termbox_decorator"
-	"github.com/terryhay/dolly/utils/dollyerr"
-	"testing"
+	coty "github.com/terryhay/dolly/tools/common_types"
+	"github.com/terryhay/dolly/tools/size"
 )
 
 func TestPageView(t *testing.T) {
 	t.Parallel()
 
 	t.Run("error_initialization", func(t *testing.T) {
-		var pageView PageView
-		err := pageView.Init(
-			tbd.NewTermBoxDecorator(
-				&tbd.Mock{
-					FuncInit: func() error {
-						return fmt.Errorf("TermBoxDecorator: Init call error")
-					},
-				}),
-			page.Page{},
+		_, err := NewPageView(
+			tbd.TermBoxDecoratorMock{
+				FuncInit: func() error {
+					return fmt.Errorf("TermBoxDecorator: Init call error")
+				},
+			}.Create(),
+			coty.AppNameUndefined,
+			hp.Body{},
 		)
-		require.Error(t, err.Error())
+		require.Error(t, err)
 
-		err = pageView.Init(
-			tbd.NewTermBoxDecorator(
-				&tbd.Mock{
-					FuncInit: func() error {
-						return nil
-					},
-					FuncSize: func() (_ int, _ int) {
-						return 0, 0
-					},
-				}),
-			page.Page{},
+		_, err = NewPageView(
+			tbd.TermBoxDecoratorMock{
+				FuncInit: func() error {
+					return nil
+				},
+				FuncSize: func() (_ int, _ int) {
+					return 0, 0
+				},
+			}.Create(),
+			coty.AppNameUndefined,
+			hp.Body{},
 		)
-		require.Error(t, err.Error())
+		require.Error(t, err)
 	})
 
 	t.Run("running", func(t *testing.T) {
@@ -73,38 +74,34 @@ func TestPageView(t *testing.T) {
 			}
 		}()
 
-		var pageView PageView
-		err := pageView.Init(
-			tbd.NewTermBoxDecorator(
-				&tbd.Mock{
-					FuncClear: func(_, _ termbox.Attribute) error {
-						return nil
-					},
-					FuncClose: func() {
-					},
-					FuncFlush: func() error {
-						return nil
-					},
-					FuncInit: func() error {
-						return nil
-					},
-					FuncPollEvent: func() termbox.Event {
-						return <-ev
-					},
-					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
-					},
-					FuncSetChar: func(x, y int, ch rune) {
-					},
-					FuncSize: func() (width int, height int) {
-						return rll.TerminalMinWidth.ToInt(), 7
-					},
-				}),
-			page.Page{
-				Header: page.MakeParagraph(0, gofakeit.Name()),
-				Paragraphs: []page.Paragraph{
-					page.MakeParagraph(0, gofakeit.Name()),
+		pageView, err := NewPageView(
+			tbd.TermBoxDecoratorMock{
+				FuncClear: func(_, _ termbox.Attribute) error {
+					return nil
 				},
-			},
+				FuncClose: func() {
+				},
+				FuncFlush: func() error {
+					return nil
+				},
+				FuncInit: func() error {
+					return nil
+				},
+				FuncPollEvent: func() termbox.Event {
+					return <-ev
+				},
+				FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
+				},
+				FuncSetChar: func(x, y int, ch rune) {
+				},
+				FuncSize: func() (width int, height int) {
+					return rll.TerminalMinWidth.Int(), 7
+				},
+			}.Create(),
+			coty.RandNameApp(),
+			hp.MakeBody([]hp.Row{
+				hp.MakeRow(size.WidthZero, hp.MakeRowChunk(gofakeit.Name())),
+			}),
 		)
 		require.Nil(t, err)
 
@@ -122,38 +119,34 @@ func TestPageView(t *testing.T) {
 			}
 		}()
 
-		var pageView PageView
-		err := pageView.Init(
-			tbd.NewTermBoxDecorator(
-				&tbd.Mock{
-					FuncClear: func(_, _ termbox.Attribute) error {
-						return nil
-					},
-					FuncClose: func() {
-					},
-					FuncFlush: func() error {
-						return nil
-					},
-					FuncInit: func() error {
-						return nil
-					},
-					FuncPollEvent: func() termbox.Event {
-						return <-ev
-					},
-					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
-					},
-					FuncSetChar: func(x, y int, ch rune) {
-					},
-					FuncSize: func() (width int, height int) {
-						return rll.TerminalMinWidth.ToInt(), 7
-					},
-				}),
-			page.Page{
-				Header: page.MakeParagraph(0, gofakeit.Name()),
-				Paragraphs: []page.Paragraph{
-					page.MakeParagraph(0, gofakeit.Name()),
+		_, err := NewPageView(
+			tbd.TermBoxDecoratorMock{
+				FuncClear: func(_, _ termbox.Attribute) error {
+					return nil
 				},
-			},
+				FuncClose: func() {
+				},
+				FuncFlush: func() error {
+					return nil
+				},
+				FuncInit: func() error {
+					return nil
+				},
+				FuncPollEvent: func() termbox.Event {
+					return <-ev
+				},
+				FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
+				},
+				FuncSetChar: func(x, y int, ch rune) {
+				},
+				FuncSize: func() (width int, height int) {
+					return rll.TerminalMinWidth.Int(), 7
+				},
+			}.Create(),
+			coty.RandNameApp(),
+			hp.MakeBody([]hp.Row{
+				hp.MakeRow(size.WidthZero, hp.MakeRowChunk(gofakeit.Name())),
+			}),
 		)
 		require.Nil(t, err)
 	})
@@ -162,39 +155,26 @@ func TestPageView(t *testing.T) {
 func TestErrorsBeforeEventLoop(t *testing.T) {
 	t.Parallel()
 
-	pageData := page.Page{
-		Header: page.MakeParagraph(0, gofakeit.Name()),
-		Paragraphs: []page.Paragraph{
-			page.MakeParagraph(0, gofakeit.Name()),
-		},
-	}
-	funcClearRes := dollyerr.NewError(
-		dollyerr.CodeTermBoxDecoratorClearError,
-		fmt.Errorf("TermBoxDecorator: Clear call error"),
-	)
-	funcFlushRes := dollyerr.NewError(
-		dollyerr.CodeTermBoxDecoratorFlushError,
-		fmt.Errorf("TermBoxDecorator: Flush call error"),
-	)
-
-	widthsChan := make(chan int, 1)
+	chanWidths := make(chan int, 1)
 	go func() {
-		widthsChan <- rll.TerminalMinWidth.ToInt()
-		widthsChan <- 0
+		chanWidths <- rll.TerminalMinWidth.Int()
+		chanWidths <- 0
+
+		close(chanWidths)
 	}()
 
-	testCases := []struct {
+	tests := []struct {
 		caseName string
 
-		initData     tbd.Mock
-		expectedCode dollyerr.Code
+		termBoxMockSrc tbd.TermBoxDecoratorMock
+		expErr         error
 	}{
 		{
 			caseName: "clear_call_error",
 
-			initData: tbd.Mock{
+			termBoxMockSrc: tbd.TermBoxDecoratorMock{
 				FuncClear: func(_, _ termbox.Attribute) error {
-					return funcClearRes.Error()
+					return coty.RandError()
 				},
 				FuncClose: func() {
 				},
@@ -202,22 +182,22 @@ func TestErrorsBeforeEventLoop(t *testing.T) {
 					return nil
 				},
 				FuncSize: func() (width int, height int) {
-					return rll.TerminalMinWidth.ToInt(), 7
+					return rll.TerminalMinWidth.Int(), 7
 				},
 			},
-			expectedCode: dollyerr.CodeTermBoxDecoratorClearError,
+			expErr: coty.RandError(),
 		},
 		{
 			caseName: "flush_call_error",
 
-			initData: tbd.Mock{
+			termBoxMockSrc: tbd.TermBoxDecoratorMock{
 				FuncClear: func(_, _ termbox.Attribute) error {
 					return nil
 				},
 				FuncClose: func() {
 				},
 				FuncFlush: func() error {
-					return funcFlushRes.Error()
+					return coty.RandError()
 				},
 				FuncInit: func() error {
 					return nil
@@ -225,22 +205,22 @@ func TestErrorsBeforeEventLoop(t *testing.T) {
 				FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
 				},
 				FuncSize: func() (width int, height int) {
-					return rll.TerminalMinWidth.ToInt(), 7
+					return rll.TerminalMinWidth.Int(), 7
 				},
 			},
-			expectedCode: dollyerr.CodeTermBoxDecoratorFlushError,
+			expErr: coty.RandError(),
 		},
 		{
 			caseName: "page_model_update_error",
 
-			initData: tbd.Mock{
+			termBoxMockSrc: tbd.TermBoxDecoratorMock{
 				FuncClear: func(_, _ termbox.Attribute) error {
 					return nil
 				},
 				FuncClose: func() {
 				},
 				FuncFlush: func() error {
-					return funcFlushRes.Error()
+					return coty.RandError()
 				},
 				FuncInit: func() error {
 					return nil
@@ -248,22 +228,27 @@ func TestErrorsBeforeEventLoop(t *testing.T) {
 				FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
 				},
 				FuncSize: func() (width int, height int) {
-					return <-widthsChan, 7
+					return <-chanWidths, 7
 				},
 			},
-			expectedCode: dollyerr.CodeHelpDisplayTerminalWidthLimitError,
+			expErr: rll.ErrIsValidMin,
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, tc := range tests {
 		t.Run(tc.caseName, func(t *testing.T) {
-			var pageView PageView
-			err := pageView.Init(tbd.NewTermBoxDecorator(&tc.initData), pageData)
+			pageView, err := NewPageView(
+				tc.termBoxMockSrc.Create(),
+				coty.RandNameApp(),
+				hp.MakeBody([]hp.Row{
+					hp.MakeRow(size.WidthZero, hp.MakeRowChunk(gofakeit.Name())),
+				}),
+			)
 			require.Nil(t, err)
 
 			err = pageView.Run()
 			require.NotNil(t, err)
-			require.Equal(t, tc.expectedCode, err.Code())
+			require.ErrorIs(t, err, tc.expErr)
 		})
 	}
 }
@@ -292,38 +277,34 @@ func TestErrorInsideEventLoop(t *testing.T) {
 			clearResChan <- funcClearRes
 		}()
 
-		var pageView PageView
-		err := pageView.Init(
-			tbd.NewTermBoxDecorator(
-				&tbd.Mock{
-					FuncClear: func(_, _ termbox.Attribute) error {
-						return <-clearResChan
-					},
-					FuncClose: func() {
-					},
-					FuncFlush: func() error {
-						return nil
-					},
-					FuncInit: func() error {
-						return nil
-					},
-					FuncPollEvent: func() termbox.Event {
-						return <-eventChan
-					},
-					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
-					},
-					FuncSetChar: func(x, y int, ch rune) {
-					},
-					FuncSize: func() (width int, height int) {
-						return rll.TerminalMinWidth.ToInt(), 7
-					},
-				}),
-			page.Page{
-				Header: page.MakeParagraph(0, gofakeit.Name()),
-				Paragraphs: []page.Paragraph{
-					page.MakeParagraph(0, gofakeit.Name()),
+		pageView, err := NewPageView(
+			tbd.TermBoxDecoratorMock{
+				FuncClear: func(_, _ termbox.Attribute) error {
+					return <-clearResChan
 				},
-			},
+				FuncClose: func() {
+				},
+				FuncFlush: func() error {
+					return nil
+				},
+				FuncInit: func() error {
+					return nil
+				},
+				FuncPollEvent: func() termbox.Event {
+					return <-eventChan
+				},
+				FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
+				},
+				FuncSetChar: func(x, y int, ch rune) {
+				},
+				FuncSize: func() (width int, height int) {
+					return rll.TerminalMinWidth.Int(), 7
+				},
+			}.Create(),
+			coty.RandNameApp(),
+			hp.MakeBody([]hp.Row{
+				hp.MakeRow(size.WidthZero, hp.MakeRowChunk(gofakeit.Name())),
+			}),
 		)
 		require.Nil(t, err)
 
@@ -352,38 +333,34 @@ func TestErrorInsideEventLoop(t *testing.T) {
 			clearResChan <- funcClearRes
 		}()
 
-		var pageView PageView
-		err := pageView.Init(
-			tbd.NewTermBoxDecorator(
-				&tbd.Mock{
-					FuncClear: func(_, _ termbox.Attribute) error {
-						return <-clearResChan
-					},
-					FuncClose: func() {
-					},
-					FuncFlush: func() error {
-						return nil
-					},
-					FuncInit: func() error {
-						return nil
-					},
-					FuncPollEvent: func() termbox.Event {
-						return <-eventChan
-					},
-					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
-					},
-					FuncSetChar: func(x, y int, ch rune) {
-					},
-					FuncSize: func() (width int, height int) {
-						return rll.TerminalMinWidth.ToInt(), 7
-					},
-				}),
-			page.Page{
-				Header: page.MakeParagraph(0, gofakeit.Name()),
-				Paragraphs: []page.Paragraph{
-					page.MakeParagraph(0, gofakeit.Name()),
+		pageView, err := NewPageView(
+			tbd.TermBoxDecoratorMock{
+				FuncClear: func(_, _ termbox.Attribute) error {
+					return <-clearResChan
 				},
-			},
+				FuncClose: func() {
+				},
+				FuncFlush: func() error {
+					return nil
+				},
+				FuncInit: func() error {
+					return nil
+				},
+				FuncPollEvent: func() termbox.Event {
+					return <-eventChan
+				},
+				FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
+				},
+				FuncSetChar: func(x, y int, ch rune) {
+				},
+				FuncSize: func() (width int, height int) {
+					return rll.TerminalMinWidth.Int(), 7
+				},
+			}.Create(),
+			coty.RandNameApp(),
+			hp.MakeBody([]hp.Row{
+				hp.MakeRow(size.WidthZero, hp.MakeRowChunk(gofakeit.Name())),
+			}),
 		)
 		require.Nil(t, err)
 
@@ -412,38 +389,34 @@ func TestErrorInsideEventLoop(t *testing.T) {
 			clearResChan <- funcClearRes
 		}()
 
-		var pageView PageView
-		err := pageView.Init(
-			tbd.NewTermBoxDecorator(
-				&tbd.Mock{
-					FuncClear: func(_, _ termbox.Attribute) error {
-						return <-clearResChan
-					},
-					FuncClose: func() {
-					},
-					FuncFlush: func() error {
-						return nil
-					},
-					FuncInit: func() error {
-						return nil
-					},
-					FuncPollEvent: func() termbox.Event {
-						return <-eventChan
-					},
-					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
-					},
-					FuncSetChar: func(x, y int, ch rune) {
-					},
-					FuncSize: func() (width int, height int) {
-						return rll.TerminalMinWidth.ToInt(), 7
-					},
-				}),
-			page.Page{
-				Header: page.MakeParagraph(0, gofakeit.Name()),
-				Paragraphs: []page.Paragraph{
-					page.MakeParagraph(0, gofakeit.Name()),
+		pageView, err := NewPageView(
+			tbd.TermBoxDecoratorMock{
+				FuncClear: func(_, _ termbox.Attribute) error {
+					return <-clearResChan
 				},
-			},
+				FuncClose: func() {
+				},
+				FuncFlush: func() error {
+					return nil
+				},
+				FuncInit: func() error {
+					return nil
+				},
+				FuncPollEvent: func() termbox.Event {
+					return <-eventChan
+				},
+				FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
+				},
+				FuncSetChar: func(x, y int, ch rune) {
+				},
+				FuncSize: func() (width int, height int) {
+					return rll.TerminalMinWidth.Int(), 7
+				},
+			}.Create(),
+			coty.RandNameApp(),
+			hp.MakeBody([]hp.Row{
+				hp.MakeRow(size.WidthZero, hp.MakeRowChunk(gofakeit.Name())),
+			}),
 		)
 		require.Nil(t, err)
 
@@ -472,38 +445,34 @@ func TestErrorInsideEventLoop(t *testing.T) {
 			clearResChan <- funcClearRes
 		}()
 
-		var pageView PageView
-		err := pageView.Init(
-			tbd.NewTermBoxDecorator(
-				&tbd.Mock{
-					FuncClear: func(_, _ termbox.Attribute) error {
-						return <-clearResChan
-					},
-					FuncClose: func() {
-					},
-					FuncFlush: func() error {
-						return nil
-					},
-					FuncInit: func() error {
-						return nil
-					},
-					FuncPollEvent: func() termbox.Event {
-						return <-eventChan
-					},
-					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
-					},
-					FuncSetChar: func(x, y int, ch rune) {
-					},
-					FuncSize: func() (width int, height int) {
-						return rll.TerminalMinWidth.ToInt(), 7
-					},
-				}),
-			page.Page{
-				Header: page.MakeParagraph(0, gofakeit.Name()),
-				Paragraphs: []page.Paragraph{
-					page.MakeParagraph(0, gofakeit.Name()),
+		pageView, err := NewPageView(
+			tbd.TermBoxDecoratorMock{
+				FuncClear: func(_, _ termbox.Attribute) error {
+					return <-clearResChan
 				},
-			},
+				FuncClose: func() {
+				},
+				FuncFlush: func() error {
+					return nil
+				},
+				FuncInit: func() error {
+					return nil
+				},
+				FuncPollEvent: func() termbox.Event {
+					return <-eventChan
+				},
+				FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
+				},
+				FuncSetChar: func(x, y int, ch rune) {
+				},
+				FuncSize: func() (width int, height int) {
+					return rll.TerminalMinWidth.Int(), 7
+				},
+			}.Create(),
+			coty.RandNameApp(),
+			hp.MakeBody([]hp.Row{
+				hp.MakeRow(size.WidthZero, hp.MakeRowChunk(gofakeit.Name())),
+			}),
 		)
 		require.Nil(t, err)
 
@@ -532,38 +501,34 @@ func TestErrorInsideEventLoop(t *testing.T) {
 			clearResChan <- funcClearRes
 		}()
 
-		var pageView PageView
-		err := pageView.Init(
-			tbd.NewTermBoxDecorator(
-				&tbd.Mock{
-					FuncClear: func(_, _ termbox.Attribute) error {
-						return <-clearResChan
-					},
-					FuncClose: func() {
-					},
-					FuncFlush: func() error {
-						return nil
-					},
-					FuncInit: func() error {
-						return nil
-					},
-					FuncPollEvent: func() termbox.Event {
-						return <-eventChan
-					},
-					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
-					},
-					FuncSetChar: func(x, y int, ch rune) {
-					},
-					FuncSize: func() (width int, height int) {
-						return rll.TerminalMinWidth.ToInt(), 7
-					},
-				}),
-			page.Page{
-				Header: page.MakeParagraph(0, gofakeit.Name()),
-				Paragraphs: []page.Paragraph{
-					page.MakeParagraph(0, gofakeit.Name()),
+		pageView, err := NewPageView(
+			tbd.TermBoxDecoratorMock{
+				FuncClear: func(_, _ termbox.Attribute) error {
+					return <-clearResChan
 				},
-			},
+				FuncClose: func() {
+				},
+				FuncFlush: func() error {
+					return nil
+				},
+				FuncInit: func() error {
+					return nil
+				},
+				FuncPollEvent: func() termbox.Event {
+					return <-eventChan
+				},
+				FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
+				},
+				FuncSetChar: func(x, y int, ch rune) {
+				},
+				FuncSize: func() (width int, height int) {
+					return rll.TerminalMinWidth.Int(), 7
+				},
+			}.Create(),
+			coty.RandNameApp(),
+			hp.MakeBody([]hp.Row{
+				hp.MakeRow(size.WidthZero, hp.MakeRowChunk(gofakeit.Name())),
+			}),
 		)
 		require.Nil(t, err)
 
@@ -591,38 +556,34 @@ func TestErrorInsideEventLoop(t *testing.T) {
 			flushResChan <- fmt.Errorf("TermBoxDecorator: Clear call error")
 		}()
 
-		var pageView PageView
-		err := pageView.Init(
-			tbd.NewTermBoxDecorator(
-				&tbd.Mock{
-					FuncClear: func(_, _ termbox.Attribute) error {
-						return nil
-					},
-					FuncClose: func() {
-					},
-					FuncFlush: func() error {
-						return <-flushResChan
-					},
-					FuncInit: func() error {
-						return nil
-					},
-					FuncPollEvent: func() termbox.Event {
-						return <-eventChan
-					},
-					FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
-					},
-					FuncSetChar: func(x, y int, ch rune) {
-					},
-					FuncSize: func() (width int, height int) {
-						return rll.TerminalMinWidth.ToInt(), 7
-					},
-				}),
-			page.Page{
-				Header: page.MakeParagraph(0, gofakeit.Name()),
-				Paragraphs: []page.Paragraph{
-					page.MakeParagraph(0, gofakeit.Name()),
+		pageView, err := NewPageView(
+			tbd.TermBoxDecoratorMock{
+				FuncClear: func(_, _ termbox.Attribute) error {
+					return nil
 				},
-			},
+				FuncClose: func() {
+				},
+				FuncFlush: func() error {
+					return <-flushResChan
+				},
+				FuncInit: func() error {
+					return nil
+				},
+				FuncPollEvent: func() termbox.Event {
+					return <-eventChan
+				},
+				FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
+				},
+				FuncSetChar: func(x, y int, ch rune) {
+				},
+				FuncSize: func() (width int, height int) {
+					return rll.TerminalMinWidth.Int(), 7
+				},
+			}.Create(),
+			coty.RandNameApp(),
+			hp.MakeBody([]hp.Row{
+				hp.MakeRow(size.WidthZero, hp.MakeRowChunk(gofakeit.Name())),
+			}),
 		)
 		require.Nil(t, err)
 

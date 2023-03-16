@@ -2,56 +2,71 @@ package main
 
 import (
 	"fmt"
-	"github.com/terryhay/dolly/argparser/parsed_data"
-	"github.com/terryhay/dolly/examples/example/dolly"
 	"os"
 	"strings"
+
+	"github.com/terryhay/dolly/argparser/parsed"
+	"github.com/terryhay/dolly/examples/example/dolly"
+	osd "github.com/terryhay/dolly/generator/proxyes/os_proxy"
+	fmtd "github.com/terryhay/dolly/tools/fmt_decorator"
 )
 
 const (
-	exitCodeSuccess uint = iota
+	exitCodeSuccess osd.ExitCode = iota
+	exitCodeErrorArgParse
+	exitCodeErrorGetFlagSl
+	exitCodeErrorGetFlagIl
+	exitCodeErrorGetFlagFl
 	exitCodeConvertInt64Error
 	exitCodeConvertFloat64Error
 )
 
 func main() {
+	decOS := osd.New()
+	decOut := fmtd.New()
+
 	pd, err := dolly.Parse(os.Args[1:])
 	if err != nil {
-		fmt.Printf("example.Argparser error: %s\n", err.Error())
-		os.Exit(1)
+		decOS.Exit(exitCodeErrorArgParse, err)
 	}
 
-	code, _ := logic(pd)
-	os.Exit(int(code))
+	decOS.Exit(entity(pd, decOut))
 }
 
-func logic(pd *parsed_data.ParsedData) (uint, error) {
-	switch pd.GetCommandID() {
-	case dolly.CommandIDNamelessCommand:
+func entity(pd *parsed.Result, decOut fmtd.FmtDecorator) (code osd.ExitCode, err error) {
+	switch {
+	case pd.GetCommandMainName() == dolly.NameCommandNameless:
 		var (
-			builder      strings.Builder
-			contain      bool
-			err          error
-			float64Value float64
-			i            int
-			int64Value   int64
-			values       []parsed_data.ArgValue
+			builder strings.Builder
+
+			values []parsed.ArgValue
 		)
 
-		if values, contain = pd.GetFlagArgValues(dolly.FlagSl); contain {
-			builder.WriteString(fmt.Sprintf("flag %s arguments:\n\t", dolly.FlagSl))
+		values, err = pd.FlagArgValues(dolly.NameFlagSl)
+		if err != nil {
+			return exitCodeErrorGetFlagSl, err
+		}
 
-			for i = range values {
-				builder.WriteString(fmt.Sprintf(fmt.Sprintf("%s ", values[i].ToString())))
+		if len(values) > 0 {
+			builder.WriteString(fmt.Sprintf("flag %s arguments:\n\t", dolly.NameFlagSl))
+
+			for _, v := range values {
+				builder.WriteString(fmt.Sprintf(fmt.Sprintf("%s ", v)))
 			}
 			builder.WriteString("\n")
 		}
 
-		if values, contain = pd.GetFlagArgValues(dolly.FlagIl); contain {
-			builder.WriteString(fmt.Sprintf("flag %s arguments:\n\t", dolly.FlagIl))
+		values, err = pd.FlagArgValues(dolly.NameFlagIl)
+		if err != nil {
+			return exitCodeErrorGetFlagIl, err
+		}
 
-			for i = range values {
-				int64Value, err = values[i].ToInt64()
+		if len(values) > 0 {
+			builder.WriteString(fmt.Sprintf("flag %s arguments:\n\t", dolly.NameFlagIl))
+
+			var int64Value int64
+			for _, v := range values {
+				int64Value, err = v.Int64()
 				if err != nil {
 					return exitCodeConvertInt64Error, err
 				}
@@ -60,11 +75,17 @@ func logic(pd *parsed_data.ParsedData) (uint, error) {
 			builder.WriteString("\n")
 		}
 
-		if values, contain = pd.GetFlagArgValues(dolly.FlagFl); contain {
-			builder.WriteString(fmt.Sprintf("flag %s arguments:\n\t", dolly.FlagFl))
+		values, err = pd.FlagArgValues(dolly.NameFlagFl)
+		if err != nil {
+			return exitCodeErrorGetFlagFl, err
+		}
 
-			for i = range values {
-				float64Value, err = values[i].ToFloat64()
+		if len(values) > 0 {
+			builder.WriteString(fmt.Sprintf("flag %s arguments:\n\t", dolly.NameFlagFl))
+
+			var float64Value float64
+			for _, v := range values {
+				float64Value, err = v.Float64()
 				if err != nil {
 					return exitCodeConvertFloat64Error, err
 				}
@@ -73,7 +94,11 @@ func logic(pd *parsed_data.ParsedData) (uint, error) {
 			builder.WriteString("\n")
 		}
 
-		fmt.Printf(builder.String())
+		decOut.Println(builder.String())
+
+	case pd.GetCommandMainName() == dolly.NameCommandPrint:
+		decOut.Println(fmt.Sprintf("command: %s", pd.GetCommandMainName()))
+
 	}
 
 	return exitCodeSuccess, nil

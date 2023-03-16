@@ -1,6 +1,6 @@
 generate:
-	go build -o ../bin/generators/gen_dolly github.com/terryhay/dolly/generator
-	../bin/generators/gen_dolly -c ../../examples/example/dolly_config/arg_config.yaml -o ./
+	go build -o ./bin/generators/gen_dolly github.com/terryhay/dolly/generator
+	./bin/generators/gen_dolly -c ../../examples/example/config/dolly_config.yaml -o ./
 
 test:
 	go test ./... -cover

@@ -3,31 +3,20 @@
 package dolly
 
 import (
-	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	parsed "github.com/terryhay/dolly/argparser/parsed_data"
-	"github.com/terryhay/dolly/argparser/parser"
-	"github.com/terryhay/dolly/man_style_help/page"
-	pgv "github.com/terryhay/dolly/man_style_help/page_view"
-	tbd "github.com/terryhay/dolly/man_style_help/termbox_decorator"
-)
-
-const (
-	// CommandIDNamelessCommand - checks arguments types
-	CommandIDNamelessCommand apConf.CommandID = iota + 1
-	// CommandIDPrintHelpInfo - print help info
-	CommandIDPrintHelpInfo
+	"github.com/terryhay/dolly/argparser/parsed"
+	coty "github.com/terryhay/dolly/tools/common_types"
 )
 
 const (
 	// CommandHLw - print help info
-	CommandHLw apConf.Command = "-h"
+	CommandHLw coty.NameCommand = "-h"
 	// CommandHelp - print help info
 	CommandHelp = "help"
 )
 
 const (
 	// FlagALw - Treat all files as ASCII text.  Normally grep will simply print “Binary file ... matches” if files contain binary characters.  Use of this option forces grep to output lines matching the specified pattern.
-	FlagALw apConf.Flag = "-a"
+	FlagALw coty.NameFlag = "-a"
 	// FlagAUp - Print num lines of trailing context after each match.  See also the -B and -C options.
 	FlagAUp = "-A"
 	// FlagBLw - The offset in bytes of a matched pattern is displayed in front of the respective matched line.
@@ -41,89 +30,89 @@ const (
 )
 
 // Parse - processes command line arguments
-func Parse(args []string) (*parsed.ParsedData, error) {
-	appArgConfig := apConf.ArgParserConfigSrc{
-		AppDescription: apConf.ApplicationDescriptionSrc{
-			AppName:      "grep",
-			NameHelpInfo: "file pattern searcher",
-			DescriptionHelpInfo: []string{
+func Parse(args []string) (*parsed.Result, error) {
+	/*appArgConfig := apConf.ArgParserConfigOpt{
+		App: apConf.ApplicationDescriptionSrc{
+			NameApp:      "grep",
+			ChapterNameInfo: "file pattern searcher",
+			HelpInfo: []string{
 				"The grep utility searches any given input files, selecting lines that match one or more patterns.  By default, apattern matches an input line if the regular expression (RE) in the pattern matches the input line without its trailing newline.  An empty expression matches every line.  Each input line that matches at least one of the patterns is written to the standard output.",
 				"grep is used for simple patterns and basic regular expressions (BREs); egrep can handle extended regular expressions (EREs).  See re_format(7) for more information on regular expressions.  fgrep is quicker than both grep and egrep, but can only handle fixed patterns (i.e., it does not interpret regular expressions).  Patterns may consist of one or more lines, allowing any of the pattern lines to match a portion of the input.",
 				"zgrep, zegrep, and zfgrep act like grep, egrep, and fgrep, respectively, but accept input files compressed with the compress(1) or gzip(1) compression utilities.  bzgrep, bzegrep, and bzfgrep act like grep, egrep, and fgrep, respectively, but accept input files compressed with the bzip2(1) compression utility.",
 			},
-		}.ToConst(),
+		}.Create(),
 		FlagDescriptionSlice: []*apConf.FlagDescription{
 			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
+				FlagsByNames: []coty.NameFlag{
 					FlagAUp,
 				},
-				DescriptionHelpInfo: "Print num lines of trailing context after each match.  See also the -B and -C options.",
+				HelpInfo: "Print num lines of trailing context after each match.  See also the -B and -C options.",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
-					AmountType:              apConf.ArgAmountTypeSingle,
-					SynopsisHelpDescription: "num",
-				}.ToConstPtr(),
-			}.ToConstPtr(),
+					IsList:              coty.ArgAmountTypeSingle,
+					DescSynopsisHelp: "num",
+				}.Create(),
+			}.Create(),
 			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
+				FlagsByNames: []coty.NameFlag{
 					FlagALw,
 				},
-				DescriptionHelpInfo: "Treat all files as ASCII text.  Normally grep will simply print “Binary file ... matches” if files contain binary characters.  Use of this option forces grep to output lines matching the specified pattern.",
-			}.ToConstPtr(),
+				HelpInfo: "Treat all files as ASCII text.  Normally grep will simply print “Binary file ... matches” if files contain binary characters.  Use of this option forces grep to output lines matching the specified pattern.",
+			}.Create(),
 			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
+				FlagsByNames: []coty.NameFlag{
 					FlagBUp,
 				},
-				DescriptionHelpInfo: "Print num lines of leading context before each match.  See also the -A and -C options.",
+				HelpInfo: "Print num lines of leading context before each match.  See also the -A and -C options.",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
-					AmountType:              apConf.ArgAmountTypeSingle,
-					SynopsisHelpDescription: "num",
-				}.ToConstPtr(),
-			}.ToConstPtr(),
+					IsList:              coty.ArgAmountTypeSingle,
+					DescSynopsisHelp: "num",
+				}.Create(),
+			}.Create(),
 			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
+				FlagsByNames: []coty.NameFlag{
 					FlagBLw,
 				},
-				DescriptionHelpInfo: "The offset in bytes of a matched pattern is displayed in front of the respective matched line.",
-			}.ToConstPtr(),
+				HelpInfo: "The offset in bytes of a matched pattern is displayed in front of the respective matched line.",
+			}.Create(),
 			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
+				FlagsByNames: []coty.NameFlag{
 					FlagCUp,
 				},
-				DescriptionHelpInfo: "Print num lines of leading and trailing context surrounding each match.  The default value of num is “2” and is equivalent to “-A 2 -B 2”.  Note: no whitespace may be given between the option and its argument.",
+				HelpInfo: "Print num lines of leading and trailing context surrounding each match.  The default value of num is “2” and is equivalent to “-A 2 -B 2”.  Note: no whitespace may be given between the option and its argument.",
 				ArgDescription: apConf.ArgumentsDescriptionSrc{
-					AmountType:              apConf.ArgAmountTypeSingle,
-					SynopsisHelpDescription: "num",
-				}.ToConstPtr(),
-			}.ToConstPtr(),
+					IsList:              coty.ArgAmountTypeSingle,
+					DescSynopsisHelp: "num",
+				}.Create(),
+			}.Create(),
 			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
+				FlagsByNames: []coty.NameFlag{
 					FlagCLw,
 				},
-				DescriptionHelpInfo: "Only a count of selected lines is written to standard output.",
-			}.ToConstPtr(),
+				HelpInfo: "Only a count of selected lines is written to standard output.",
+			}.Create(),
 		},
-		CommandDescriptions: nil,
-		HelpCommandDescription: apConf.NewHelpCommandDescription(
+		Commands: nil,
+		CommandHelpOut: apConf.NewHelpCommandDescription(
 			CommandIDPrintHelpInfo,
-			map[apConf.Command]bool{
-				CommandHLw:  true,
-				CommandHelp: true,
+			map[coty.NameCommand]struct{}{
+				CommandHLw:  {},
+				CommandHelp: {},
 			},
 		),
-		NamelessCommandDescription: apConf.NewNamelessCommandDescription(
+		CommandNameless: apConf.NewNamelessCommandDescription(
 			CommandIDNamelessCommand,
 			"checks arguments types",
 			nil,
 			nil,
-			map[apConf.Flag]bool{
-				FlagAUp: true,
-				FlagALw: true,
-				FlagBUp: true,
-				FlagBLw: true,
-				FlagCUp: true,
-				FlagCLw: true,
+			map[coty.NameFlag]struct{}{
+				FlagAUp: {},
+				FlagALw: {},
+				FlagBUp: {},
+				FlagBLw: {},
+				FlagCUp: {},
+				FlagCLw: {},
 			},
-		)}.ToConst()
+		)}.Create()
 
 	res, err := parser.Parse(appArgConfig, args)
 	if err != nil {
@@ -132,7 +121,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 
 	if res.GetCommandID() == CommandIDPrintHelpInfo {
 		var pageView pgv.PageView
-		err = pageView.Init(tbd.NewTermBoxDecorator(nil), page.MakePage(appArgConfig))
+		err = pageView.Init(tbd.Create(nil), page.MakePage(appArgConfig))
 		if err != nil {
 			return nil, err.Error()
 		}
@@ -142,7 +131,7 @@ func Parse(args []string) (*parsed.ParsedData, error) {
 		}
 
 		return nil, nil
-	}
+	}//*/
 
-	return res, nil
+	return nil, nil
 }

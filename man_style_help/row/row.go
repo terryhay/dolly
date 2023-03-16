@@ -1,10 +1,11 @@
 package row
 
 import (
+	"strings"
+
 	"github.com/nsf/termbox-go"
 	"github.com/terryhay/dolly/man_style_help/runes"
-	"github.com/terryhay/dolly/man_style_help/size"
-	"strings"
+	"github.com/terryhay/dolly/tools/size"
 )
 
 // Row implements an immutable dynamic_row object for rendering in a terminal
@@ -37,7 +38,7 @@ func (r Row) GetCells() []termbox.Cell {
 func (r Row) String() string {
 	builder := strings.Builder{}
 
-	for i := size.Width(0); i < r.GetShiftIndex(); i++ {
+	for i := size.WidthZero; i < r.GetShiftIndex(); i++ {
 		builder.WriteRune(runes.RuneSpace)
 	}
 	for _, cell := range r.GetCells() {

@@ -3,8 +3,8 @@ package row_iterator
 import (
 	pgm "github.com/terryhay/dolly/man_style_help/page_model"
 	"github.com/terryhay/dolly/man_style_help/row"
-	"github.com/terryhay/dolly/man_style_help/size"
-	"github.com/terryhay/dolly/utils/index"
+	"github.com/terryhay/dolly/tools/index"
+	"github.com/terryhay/dolly/tools/size"
 )
 
 // Mock contains mock data of initialize mocked iterator object
@@ -23,8 +23,8 @@ func MockRowIterator(m Mock) RowIterator {
 
 		modelRow: m.ModelRow,
 
-		reverseCounter:    m.ReverseCounter,
-		paragraphIndex:    m.ParagraphIndex,
-		paragraphRowIndex: m.ParagraphRowIndex,
+		reverseCounter: m.ReverseCounter,
+		rowModelIndex:  m.ParagraphIndex,
+		rowIndex:       m.ParagraphRowIndex,
 	}
 }

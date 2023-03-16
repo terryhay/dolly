@@ -1,15 +1,16 @@
 package page_model
 
 import (
-	"fmt"
-	"github.com/terryhay/dolly/man_style_help/page"
+	"errors"
+
+	"github.com/terryhay/dolly/argparser/help_page/page"
 	"github.com/terryhay/dolly/man_style_help/page_model/body_model"
 	"github.com/terryhay/dolly/man_style_help/page_model/footer_model"
 	"github.com/terryhay/dolly/man_style_help/page_model/header_model"
-	"github.com/terryhay/dolly/man_style_help/size"
 	ts "github.com/terryhay/dolly/man_style_help/terminal_size"
-	"github.com/terryhay/dolly/utils/dollyerr"
-	"github.com/terryhay/dolly/utils/index"
+	coty "github.com/terryhay/dolly/tools/common_types"
+	"github.com/terryhay/dolly/tools/index"
+	"github.com/terryhay/dolly/tools/size"
 )
 
 // PageModel - class which is getting page text parts for render in a terminal
@@ -18,80 +19,77 @@ type PageModel struct {
 	modelBody   *body_model.BodyModel
 	modelFooter *footer_model.FooterModel
 
-	sizeTerm ts.TerminalSize
-	rowCount size.Height
+	usingTermSize ts.TerminalSize
+	rowCount      size.Height
 }
 
-// NewPageModel constructs PageModel object
-func NewPageModel(pageData page.Page, size ts.TerminalSize) (*PageModel, *dollyerr.Error) {
-	headerModel, err := header_model.NewHeaderModel(pageData.Header, size)
-	if err != nil {
-		return nil, dollyerr.Append(err, fmt.Errorf("NewPageModel error"))
+// ErrNewInvalidTerminalSize - TerminalSize.IsValid returned error
+var ErrNewInvalidTerminalSize = errors.New(`page_model.New: TerminalSize.IsValid returned error`)
+
+// New constructs PageModel object
+func New(appName coty.NameApp, pageBody page.Body, sizeTerminal ts.TerminalSize) (*PageModel, error) {
+	if err := sizeTerminal.IsValid(); err != nil {
+		return nil, errors.Join(ErrNewInvalidTerminalSize, err)
 	}
 
-	bodyModel := body_model.NewBodyModel(pageData, size)
-	footerModel := footer_model.NewFooterModel()
+	bodyModel := body_model.NewBodyModel(pageBody, sizeTerminal)
 
 	return &PageModel{
-			modelHeader: headerModel,
-			modelBody:   bodyModel,
-			modelFooter: footerModel,
+		modelHeader: header_model.NewHeaderModel(appName, sizeTerminal),
+		modelBody:   bodyModel,
+		modelFooter: footer_model.NewFooterModel(),
 
-			sizeTerm: size,
-			rowCount: 2 + bodyModel.GetRowCount(),
-		},
-		nil
+		usingTermSize: sizeTerminal,
+		rowCount:      2 + bodyModel.GetRowCount(),
+	}, nil
 }
 
-// GetAnchorRowAbsolutelyIndex - anchorRowAbsolutelyIndex field getter
+// GetAnchorRowAbsolutelyIndex gets anchorRowAbsolutelyIndex field
 func (pgm *PageModel) GetAnchorRowAbsolutelyIndex() index.Index {
 	if pgm == nil {
-		return index.Null
+		return index.Zero
 	}
 	return pgm.modelBody.GetAnchorRowAbsolutelyIndex()
 }
 
-// Update applies terminal size and display actionSequence to the models and rebuild getting display dynamic_row window
-func (pgm *PageModel) Update(sizeTerm ts.TerminalSize, shiftVertical int) *dollyerr.Error {
-	if pgm == nil {
-		return dollyerr.NewError(
-			dollyerr.CodeHelpDisplayReceiverIsNilPointer,
-			fmt.Errorf("PageModel.Shift: receiver is a nil pointer"),
-		)
-	}
-	pgm.sizeTerm = sizeTerm
+// ErrUpdateInvalidTerminalSize - TerminalSize.IsValid returned error
+var ErrUpdateInvalidTerminalSize = errors.New(`PageModel.Update: TerminalSize.IsValid returned error`)
 
-	err := pgm.modelHeader.Update(sizeTerm)
-	if err != nil {
-		return dollyerr.Append(err, fmt.Errorf("PageModel.update: modelHeader updating error"))
+// Update applies terminal size and display actionSequence to the models and rebuild getting display dynamic_row window
+func (pgm *PageModel) Update(sizeTerm ts.TerminalSize, shiftVertical int) error {
+	if pgm == nil {
+		return nil
 	}
+	pgm.usingTermSize = sizeTerm
+
+	if err := sizeTerm.IsValid(); err != nil {
+		return errors.Join(ErrUpdateInvalidTerminalSize, err)
+	}
+
+	pgm.modelHeader.Update(sizeTerm)
 
 	const countHeaderAndFooterRows = 2
-	err = pgm.modelBody.Update(
-		sizeTerm.CloneWithNewHeight(sizeTerm.GetHeight().AddInt(-countHeaderAndFooterRows)),
+	pgm.modelBody.Update(
+		ts.MakeTerminalSize(sizeTerm.GetWidthLimit(), size.AppendHeight(sizeTerm.GetHeight(), -countHeaderAndFooterRows)),
 		shiftVertical,
 	)
-	return dollyerr.Append(err, fmt.Errorf("PageModel.update: modelBody updating error"))
+	return nil
 }
 
 // Shift applies a shift to display dynamic_row window
-func (pgm *PageModel) Shift(terminalHeight size.Height, shift int) *dollyerr.Error {
-	if pgm == nil {
-		return dollyerr.NewError(
-			dollyerr.CodeHelpDisplayReceiverIsNilPointer,
-			fmt.Errorf("PageModel.Shift: receiver is a nil pointer"),
-		)
-	}
-	return pgm.modelBody.Shift(terminalHeight, shift)
+func (pgm *PageModel) Shift(terminalHeight size.Height, shift int) {
+	pgm.GetBodyModel().Shift(terminalHeight, shift)
 }
 
-func (pgm *PageModel) GetUsingTerminalSize() ts.TerminalSize {
+// GetUsingTermSize gets usingTermSize field
+func (pgm *PageModel) GetUsingTermSize() ts.TerminalSize {
 	if pgm == nil {
 		return ts.TerminalSize{}
 	}
-	return pgm.sizeTerm
+	return pgm.usingTermSize
 }
 
+// GetRowCount gets rowCount field
 func (pgm *PageModel) GetRowCount() size.Height {
 	if pgm == nil {
 		return 0
@@ -99,6 +97,7 @@ func (pgm *PageModel) GetRowCount() size.Height {
 	return pgm.rowCount
 }
 
+// GetHeaderModel gets modelHeader field
 func (pgm *PageModel) GetHeaderModel() *header_model.HeaderModel {
 	if pgm == nil {
 		return nil
@@ -106,6 +105,7 @@ func (pgm *PageModel) GetHeaderModel() *header_model.HeaderModel {
 	return pgm.modelHeader
 }
 
+// GetBodyModel gets modelBody field
 func (pgm *PageModel) GetBodyModel() *body_model.BodyModel {
 	if pgm == nil {
 		return nil
@@ -113,6 +113,7 @@ func (pgm *PageModel) GetBodyModel() *body_model.BodyModel {
 	return pgm.modelBody
 }
 
+// GetFooterModel gets modelFooter field
 func (pgm *PageModel) GetFooterModel() *footer_model.FooterModel {
 	if pgm == nil {
 		return nil

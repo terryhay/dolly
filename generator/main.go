@@ -1,83 +1,84 @@
 package main
 
 import (
-	"fmt"
-	parsed "github.com/terryhay/dolly/argparser/parsed_data"
-	confCheck "github.com/terryhay/dolly/generator/config_checker"
-	conf "github.com/terryhay/dolly/generator/config_data_extractor"
+	"github.com/terryhay/dolly/argparser/parsed"
+	ce "github.com/terryhay/dolly/generator/config_entity"
 	confYML "github.com/terryhay/dolly/generator/config_yaml"
 	write "github.com/terryhay/dolly/generator/file_writer"
 	"github.com/terryhay/dolly/generator/generate"
-	"github.com/terryhay/dolly/generator/os_decorator"
 	"github.com/terryhay/dolly/generator/parser"
-	"github.com/terryhay/dolly/utils/dollyerr"
+	"github.com/terryhay/dolly/generator/proxyes/os_proxy"
+)
+
+const (
+	// ExitCodeSuccess - successful completion of the program
+	ExitCodeSuccess os_proxy.ExitCode = iota
+
+	// ExitCodeGetArgsError - os.GetArgs error
+	ExitCodeGetArgsError
+
+	// ExitCodeArgParseError - internal error of command line argument parsing
+	ExitCodeArgParseError
+
+	// ExitCodeGetFlagArgValueError - can't get flag argument value
+	ExitCodeGetFlagArgValueError
+
+	// ExitCodeLoadParseConfigError - can't load parse config
+	ExitCodeLoadParseConfigError
+
+	// ExitCodeConfigEntityMakeError - can't create ConfigEntity object
+	ExitCodeConfigEntityMakeError
+
+	// ExitCodeWriteFileError - can't write file
+	ExitCodeWriteFileError
 )
 
 func main() {
-	osd := os_decorator.NewOSDecorator(nil)
-	osd.Exit(logic(parser.Parse, confYML.GetConfig, osd))
+	proxyOS := os_proxy.New()
+	proxyOS.Exit(process(proxyOS, parser.Parse, confYML.Load))
 }
 
-func logic(
-	dollyParseFunc func(args []string) (res *parsed.ParsedData, err *dollyerr.Error),
-	getYAMLConfigFunc func(configPath string) (*confYML.Config, *dollyerr.Error),
-	osd os_decorator.OSDecorator,
+func process(
+	proxyOS os_proxy.Proxy,
+	funcParse func(args []string) (res *parsed.Result, err error),
+	funcLoadParseConfig func(decOS os_proxy.Proxy, configPath string) (*confYML.Config, error),
 ) (
-	error, uint,
+	os_proxy.ExitCode,
+	error,
 ) {
-
-	argData, err := dollyParseFunc(osd.GetArgs())
-	if err != nil {
-		return err.Error(), err.Code().ToUint()
+	args, errArgs := proxyOS.GetArgs()
+	if errArgs != nil {
+		return ExitCodeGetArgsError, errArgs
 	}
 
-	configYAMLFilePath, contain := argData.GetFlagArgValue(parser.FlagC)
-	if !contain {
-		err = dollyerr.NewError(
-			dollyerr.CodeGeneratorNoRequiredFlag,
-			fmt.Errorf("parser.generator: can't get required flag \"%s\"", parser.FlagC))
-		return err.Error(), err.Code().ToUint()
+	argParsed, errParse := funcParse(args)
+	if errParse != nil {
+		return ExitCodeArgParseError, errParse
 	}
 
-	var generateDirPath parsed.ArgValue
-	generateDirPath, contain = argData.GetFlagArgValue(parser.FlagO)
-	if !contain {
-		err = dollyerr.NewError(
-			dollyerr.CodeGeneratorNoRequiredFlag,
-			fmt.Errorf("parser.generator: can't get required flag \"%s\"", parser.FlagO))
-		return err.Error(), err.Code().ToUint()
+	uploadConfigPath, errFlagC := argParsed.FlagArgValue(parser.FlagC)
+	if errFlagC != nil {
+		return ExitCodeGetFlagArgValueError, errFlagC
 	}
 
-	var config *confYML.Config
-	config, err = getYAMLConfigFunc(string(configYAMLFilePath))
-	if err != nil {
-		return err.Error(), err.Code().ToUint()
+	generateDirPath, errFlagO := argParsed.FlagArgValue(parser.FlagO)
+	if errFlagO != nil {
+		return ExitCodeGetFlagArgValueError, errFlagO
 	}
 
-	var flagDescriptions map[string]*confYML.FlagDescription
-	if flagDescriptions, err = conf.ExtractFlagDescriptionMap(
-		config.GetArgParserConfig().GetFlagDescriptions(),
-	); err != nil {
-		return err.Error(), err.Code().ToUint()
+	config, errLoad := funcLoadParseConfig(proxyOS, string(uploadConfigPath))
+	if errLoad != nil {
+		return ExitCodeLoadParseConfigError, errLoad
 	}
 
-	var commandDescriptions map[string]*confYML.CommandDescription
-	if commandDescriptions, err = conf.ExtractCommandDescriptionMap(
-		config.GetArgParserConfig().GetCommandDescriptions(),
-	); err != nil {
-		return err.Error(), err.Code().ToUint()
+	configEntity, errConfig := ce.MakeConfigEntity(config)
+	if errConfig != nil {
+		return ExitCodeConfigEntityMakeError, errConfig
 	}
 
-	if err = confCheck.Check(
-		config.GetArgParserConfig().GetNamelessCommandDescription(), commandDescriptions, flagDescriptions,
-	); err != nil {
-		return err.Error(), err.Code().ToUint()
+	if errWrite := write.WriteFile(proxyOS, generateDirPath.String(), generate.Generate(configEntity)); errWrite != nil {
+		return ExitCodeWriteFileError, errWrite
 	}
 
-	err = write.WriteFile(
-		osd,
-		generateDirPath.ToString(),
-		generate.Generate(config.GetArgParserConfig(), config.GetHelpOutConfig(), flagDescriptions),
-	)
-	return err.Error(), err.Code().ToUint()
+	return ExitCodeSuccess, nil
 }

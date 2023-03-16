@@ -1,14 +1,15 @@
 package body_model
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/require"
-	"github.com/terryhay/dolly/man_style_help/page"
+	hp "github.com/terryhay/dolly/argparser/help_page/page"
 	rll "github.com/terryhay/dolly/man_style_help/row_len_limiter"
 	rllMock "github.com/terryhay/dolly/man_style_help/row_len_limiter/mock"
-	"github.com/terryhay/dolly/man_style_help/size"
 	ts "github.com/terryhay/dolly/man_style_help/terminal_size"
-	"github.com/terryhay/dolly/utils/index"
-	"testing"
+	"github.com/terryhay/dolly/tools/index"
+	"github.com/terryhay/dolly/tools/size"
 )
 
 func TestBodyModel(t *testing.T) {
@@ -17,56 +18,64 @@ func TestBodyModel(t *testing.T) {
 	t.Run("nil_pointer", func(t *testing.T) {
 		var bdm *BodyModel
 
-		require.Equal(t, size.Height(0), bdm.GetRowCount())
-		require.Equal(t, index.Null, bdm.GetAnchorParagraphIndex())
-		require.Equal(t, index.Null, bdm.GetAnchorParagraphRowIndex())
-		require.Equal(t, index.Null, bdm.GetAnchorRowAbsolutelyIndex())
-		require.Nil(t, bdm.GetParagraph(index.Null))
-		require.Nil(t, bdm.Update(ts.TerminalSize{}, 0))
-		require.Nil(t, bdm.Shift(size.Height(0), 0))
+		require.Equal(t, size.MakeHeight(0), bdm.GetRowCount())
+		require.Equal(t, index.Zero, bdm.GetAnchorRowModelIndex())
+		require.Equal(t, index.Zero, bdm.GetAnchorRowIndex())
+		require.Equal(t, index.Zero, bdm.GetAnchorRowAbsolutelyIndex())
+		require.Nil(t, bdm.GetRowModel(index.Zero))
+		require.NotPanics(t, func() { bdm.Update(ts.TerminalSize{}, 0) })
+		require.NotPanics(t, func() { bdm.Shift(size.MakeHeight(0), 0) })
 	})
 
 	t.Run("errors", func(t *testing.T) {
-		bm := NewBodyModel(page.Page{}, ts.TerminalSize{})
-		require.Nil(t, bm.GetParagraph(0))
-		require.NotNil(t, bm.Update(ts.TerminalSize{}, 0))
+		bm := NewBodyModel(hp.Body{}, ts.TerminalSize{})
+		require.Nil(t, bm.GetRowModel(0))
+		//require.NotNil(t, bm.Update(ts.TerminalSize{}, 0))
 	})
 
 	t.Run("simple", func(t *testing.T) {
 		bdm := NewBodyModel(
-			page.Page{
-				Header: page.MakeParagraph(0, "header"),
-				Paragraphs: []page.Paragraph{
-					page.MakeParagraph(1, "You motherfucker, come on you little ass… fuck with me, eh? You fucking little asshole, dickhead cocksucker…"),
-					page.MakeParagraph(1, "You fuckin' come on, come fuck with me! I'll get your ass, you jerk! Oh, you fuckhead motherfucker!"),
-				},
-			},
-			ts.MakeTerminalSize(rllMock.GetRowLenLimitMin(), size.Height(10)))
-		require.Equal(t, size.Height(12), bdm.GetRowCount())
-		require.Equal(t, index.Null, bdm.GetAnchorParagraphIndex())
-		require.Equal(t, index.Null, bdm.GetAnchorParagraphRowIndex())
-		require.Equal(t, index.Null, bdm.GetAnchorRowAbsolutelyIndex())
-		require.NotNil(t, bdm.GetParagraph(index.Null))
-		require.Nil(t, bdm.GetParagraph(index.MakeIndex(bdm.GetRowCount().ToInt()+1)))
-
-		require.Nil(t, bdm.Shift(size.Height(10), 0))
-	})
-
-	t.Run("updating", func(t *testing.T) {
-		bdm := NewBodyModel(
-			page.Page{
-				Header: page.MakeParagraph(0, "header"),
-				Paragraphs: []page.Paragraph{
-					page.MakeParagraph(1, "You motherfucker, come on you little ass… fuck with me, eh? You fucking little asshole, dickhead cocksucker…"),
-					page.MakeParagraph(1, "You fuckin' come on, come fuck with me! I'll get your ass, you jerk! Oh, you fuckhead motherfucker!"),
-				},
-			},
-			ts.MakeTerminalSize(rllMock.GetRowLenLimitMin(), size.Height(10)),
+			hp.MakeBody([]hp.Row{
+				hp.MakeRow(size.WidthTab,
+					hp.MakeRowChunk("You motherfucker, come on you little ass… fuck with me, eh? You fucking little asshole, dickhead cocksucker…"),
+				),
+				hp.MakeRow(size.WidthTab,
+					hp.MakeRowChunk("You fuckin' come on, come fuck with me! I'll get your ass, you jerk! Oh, you fuckhead motherfucker!"),
+				),
+			}),
+			ts.MakeTerminalSize(rllMock.GetRowLenLimitMin(), size.MakeHeight(10)),
 		)
 
-		require.Nil(t, bdm.Update(ts.MakeTerminalSize(rllMock.GetRowLenLimitMax(), size.Height(10)), 10))
+		require.Equal(t, size.MakeHeight(12), bdm.GetRowCount())
+		require.Equal(t, index.Zero, bdm.GetAnchorRowModelIndex())
+		require.Equal(t, index.Zero, bdm.GetAnchorRowIndex())
+		require.Equal(t, index.Zero, bdm.GetAnchorRowAbsolutelyIndex())
+		require.NotNil(t, bdm.GetRowModel(index.Zero))
+		require.Nil(t, bdm.GetRowModel(index.MakeIndex(bdm.GetRowCount().Int()+1)))
 
-		expectedRows := []string{
+		//require.Nil(t, bdm.Shift(size.MakeHeight(10), 0))
+	})
+}
+
+func TestUpdate(t *testing.T) {
+	t.Parallel()
+
+	t.Run("with_changed_terminal_size", func(t *testing.T) {
+		bm := NewBodyModel(
+			hp.MakeBody([]hp.Row{
+				hp.MakeRow(size.WidthTab,
+					hp.MakeRowChunk("You motherfucker, come on you little ass… fuck with me, eh? You fucking little asshole, dickhead cocksucker…"),
+				),
+				hp.MakeRow(size.WidthTab,
+					hp.MakeRowChunk("You fuckin' come on, come fuck with me! I'll get your ass, you jerk! Oh, you fuckhead motherfucker!"),
+				),
+			}),
+			ts.MakeTerminalSize(rllMock.GetRowLenLimitMin(), size.MakeHeight(10)),
+		)
+
+		bm.Update(ts.MakeTerminalSize(rllMock.GetRowLenLimitMax(), size.MakeHeight(10)), 10)
+
+		expectedRows := [...]string{
 			"    You motherfucker, come on you little ass… fuck with me, eh? You",
 			"    fucking little asshole, dickhead cocksucker…",
 			"    You fuckin' come on, come fuck with me! I'll get your ass, you",
@@ -74,17 +83,52 @@ func TestBodyModel(t *testing.T) {
 		}
 		ei := 0
 
-		for p := 0; p < bdm.GetRowCount().ToInt(); p++ {
-			prm := bdm.GetParagraph(index.MakeIndex(p))
-			for r := 0; r < prm.GetRowCount().ToInt(); r++ {
-				require.Equal(t, expectedRows[ei], prm.GetRow(index.MakeIndex(r)).String())
+		for p := 0; p < bm.GetRowCount().Int(); p++ {
+			prm := bm.GetRowModel(index.MakeIndex(p))
+			for i := index.Zero; i < prm.GetRowCount().Index(); i++ {
+				require.Equal(t, expectedRows[ei], prm.GetRow(i).String())
+				ei++
+			}
+		}
+	})
+
+	t.Run("update_after_shifting", func(t *testing.T) {
+		t.Parallel()
+
+		bm := NewBodyModel(
+			hp.MakeBody([]hp.Row{
+				hp.MakeRow(size.WidthTab,
+					hp.MakeRowChunk("You motherfucker, come on you little ass… fuck with me, eh? You fucking little asshole, dickhead cocksucker…"),
+				),
+				hp.MakeRow(size.WidthTab,
+					hp.MakeRowChunk("You fuckin' come on, come fuck with me! I'll get your ass, you jerk! Oh, you fuckhead motherfucker!"),
+				),
+			}),
+			ts.MakeTerminalSize(rllMock.GetRowLenLimitMin(), size.MakeHeight(50)),
+		)
+
+		bm.Shift(size.MakeHeight(3), 50)
+		bm.Update(ts.MakeTerminalSize(rllMock.GetRowLenLimitMax(), size.MakeHeight(3)), 0)
+
+		expectedRows := [...]string{
+			"    You motherfucker, come on you little ass… fuck with me, eh? You",
+			"    fucking little asshole, dickhead cocksucker…",
+			"    You fuckin' come on, come fuck with me! I'll get your ass, you",
+			"    jerk! Oh, you fuckhead motherfucker!",
+		}
+		ei := 0
+
+		for p := 0; p < bm.GetRowCount().Int(); p++ {
+			prm := bm.GetRowModel(index.MakeIndex(p))
+			for i := index.Zero; i < prm.GetRowCount().Index(); i++ {
+				require.Equal(t, expectedRows[ei], prm.GetRow(i).String())
 				ei++
 			}
 		}
 	})
 }
 
-func TestBodyModelShifting(t *testing.T) {
+func TestShift(t *testing.T) {
 	t.Parallel()
 
 	t.Run("short_text_shifting", func(t *testing.T) {
@@ -92,34 +136,41 @@ func TestBodyModelShifting(t *testing.T) {
 			rll.MakeDefaultRowLenLimit(),
 			10,
 		)
-		bdm := NewBodyModel(page.Page{
-			Paragraphs: []page.Paragraph{
-				page.MakeParagraph(0, "1"),
-				page.MakeParagraph(0, "2"),
-			},
-		},
+		bdm := NewBodyModel(hp.MakeBody([]hp.Row{
+			hp.MakeRow(size.WidthZero,
+				hp.MakeRowChunk("1"),
+			),
+			hp.MakeRow(size.WidthZero,
+				hp.MakeRowChunk("2"),
+			),
+		}),
 			terminalSize,
 		)
 		{
-			require.Nil(t, bdm.Shift(terminalSize.GetHeight(), 2))
+			bdm.Shift(terminalSize.GetHeight(), 2)
 			checkEqual(t, []string{"1", "2"}, bdm)
 		}
 		{
-			require.Nil(t, bdm.Shift(terminalSize.GetHeight(), -2))
+			bdm.Shift(terminalSize.GetHeight(), -2)
+			checkEqual(t, []string{"1", "2"}, bdm)
+		}
+		{
+			bdm.Shift(terminalSize.GetHeight(), 0)
 			checkEqual(t, []string{"1", "2"}, bdm)
 		}
 	})
 
 	t.Run("long_text_shifting", func(t *testing.T) {
 		bdm := NewBodyModel(
-			page.Page{
-				Header: page.MakeParagraph(0, "header"),
-				Paragraphs: []page.Paragraph{
-					page.MakeParagraph(1, "You motherfucker, come on you little ass… fuck with me, eh? You fucking little asshole, dickhead cocksucker…"),
-					page.MakeParagraph(1, "You fuckin' come on, come fuck with me! I'll get your ass, you jerk! Oh, you fuckhead motherfucker!"),
-				},
-			},
-			ts.MakeTerminalSize(rllMock.GetRowLenLimitMin(), size.Height(1)),
+			hp.MakeBody([]hp.Row{
+				hp.MakeRow(size.WidthTab,
+					hp.MakeRowChunk("You motherfucker, come on you little ass… fuck with me, eh? You fucking little asshole, dickhead cocksucker…"),
+				),
+				hp.MakeRow(size.WidthTab,
+					hp.MakeRowChunk("You fuckin' come on, come fuck with me! I'll get your ass, you jerk! Oh, you fuckhead motherfucker!"),
+				),
+			}),
+			ts.MakeTerminalSize(rllMock.GetRowLenLimitMin(), size.MakeHeight(1)),
 		)
 
 		checkStrings := []string{
@@ -137,35 +188,35 @@ func TestBodyModelShifting(t *testing.T) {
 			"motherfucker!",
 		}
 		{
-			require.Nil(t, bdm.Shift(size.Height(1), 15))
+			bdm.Shift(size.MakeHeight(1), 15)
 			checkEqual(t, checkStrings, bdm)
 		}
 		{
-			require.Nil(t, bdm.Shift(size.Height(1), 2))
+			bdm.Shift(size.MakeHeight(1), 2)
 			checkEqual(t, checkStrings, bdm)
 		}
 		{
-			require.Nil(t, bdm.Shift(size.Height(1), 2))
+			bdm.Shift(size.MakeHeight(1), 2)
 			checkEqual(t, checkStrings, bdm)
 		}
 		{
-			require.Nil(t, bdm.Shift(size.Height(1), -2))
+			bdm.Shift(size.MakeHeight(1), -2)
 			checkEqual(t, checkStrings, bdm)
 		}
 		{
-			require.Nil(t, bdm.Shift(size.Height(1), 15))
+			bdm.Shift(size.MakeHeight(1), 15)
 			checkEqual(t, checkStrings, bdm)
 		}
 		{
-			require.Nil(t, bdm.Shift(size.Height(1), -1))
+			bdm.Shift(size.MakeHeight(1), -1)
 			checkEqual(t, checkStrings, bdm)
 		}
 		{
-			require.Nil(t, bdm.Shift(size.Height(1), -5))
+			bdm.Shift(size.MakeHeight(1), -5)
 			checkEqual(t, checkStrings, bdm)
 		}
 		{
-			require.Nil(t, bdm.Shift(size.Height(1), -15))
+			bdm.Shift(size.MakeHeight(1), -15)
 			checkEqual(t, checkStrings, bdm)
 		}
 	})
@@ -173,10 +224,10 @@ func TestBodyModelShifting(t *testing.T) {
 
 func checkEqual(t *testing.T, expected []string, bdm *BodyModel) {
 	i := 0
-	for p := 0; p < bdm.GetRowCount().ToInt(); p++ {
-		prm := bdm.GetParagraph(index.MakeIndex(p))
+	for p := 0; p < bdm.GetRowCount().Int(); p++ {
+		prm := bdm.GetRowModel(index.MakeIndex(p))
 
-		for r := 0; r < prm.GetRowCount().ToInt(); r++ {
+		for r := 0; r < prm.GetRowCount().Int(); r++ {
 			require.Equal(t, expected[i], prm.GetRow(index.MakeIndex(r)).String())
 			i++
 		}

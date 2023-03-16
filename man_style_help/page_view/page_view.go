@@ -1,159 +1,196 @@
 package page_view
 
 import (
+	"errors"
 	"fmt"
+
 	"github.com/nsf/termbox-go"
-	"github.com/terryhay/dolly/man_style_help/page"
+	"github.com/terryhay/dolly/argparser/help_page/page"
 	pgm "github.com/terryhay/dolly/man_style_help/page_model"
 	ri "github.com/terryhay/dolly/man_style_help/row_iterator"
 	rll "github.com/terryhay/dolly/man_style_help/row_len_limiter"
 	"github.com/terryhay/dolly/man_style_help/runes"
-	"github.com/terryhay/dolly/man_style_help/size"
 	tbd "github.com/terryhay/dolly/man_style_help/termbox_decorator"
 	ts "github.com/terryhay/dolly/man_style_help/terminal_size"
-	"github.com/terryhay/dolly/utils/dollyerr"
+	coty "github.com/terryhay/dolly/tools/common_types"
+	"github.com/terryhay/dolly/tools/size"
 )
 
 // PageView renders page of text
 type PageView struct {
-	termBoxDecor  tbd.TermBoxDecorator
+	decTermBox    tbd.TermBoxDecorator
 	rowLenLimiter rll.RowLenLimiter
 	pageModel     *pgm.PageModel
-	exitCodes     map[rune]bool
+	exitCodes     map[rune]struct{}
 }
 
-// Init initializes the instance
-func (pv *PageView) Init(termBoxDecor tbd.TermBoxDecorator, pageData page.Page) *dollyerr.Error {
-	err := termBoxDecor.Init()
-	if err != nil {
-		return dollyerr.Append(err, fmt.Errorf("PageView.Init: can't create a termbox decorator"))
+var (
+	// ErrNewPageViewPageModel - page model construct error
+	ErrNewPageViewPageModel = errors.New(`page_view.Init: page model "New" method returned error`)
+
+	// ErrNewPageViewTermBoxDecorator - term box decorator init error
+	ErrNewPageViewTermBoxDecorator = errors.New(`page_view.Init: termbox "Init" method returned error`)
+)
+
+// NewPageView constructs PageView object
+func NewPageView(termBoxDecor tbd.TermBoxDecorator, appName coty.NameApp, pageBody page.Body) (*PageView, error) {
+	if err := termBoxDecor.Init(); err != nil {
+		return nil, errors.Join(ErrNewPageViewTermBoxDecorator, err)
 	}
 
 	terminalWidth, terminalHeight := termBoxDecor.Size()
 
-	pv.termBoxDecor = termBoxDecor
-	pv.rowLenLimiter = rll.MakeRowLenLimiter()
-	pv.pageModel, err = pgm.NewPageModel(
-		pageData,
+	rowLenLimiter := rll.MakeRowLenLimiter()
+
+	pageModel, err := pgm.New(
+		appName,
+		pageBody,
 		ts.MakeTerminalSize(
-			pv.rowLenLimiter.GetRowLenLimit(size.Width(terminalWidth)),
-			size.Height(terminalHeight),
+			rowLenLimiter.RowLenLimit(size.MakeWidth(terminalWidth)),
+			size.MakeHeight(terminalHeight),
 		),
 	)
 	if err != nil {
-		return dollyerr.Append(err, fmt.Errorf("PageView.Init: can't create a pageModel"))
+		return nil, errors.Join(ErrNewPageViewPageModel, err)
 	}
 
-	pv.exitCodes = map[rune]bool{
-		runes.RuneLwQ:   true,
-		runes.RuneLwQRu: true,
-		runes.RuneUpQ:   true,
-		runes.RuneUpQRu: true,
-	}
-
-	return nil
+	return &PageView{
+		decTermBox:    termBoxDecor,
+		rowLenLimiter: rowLenLimiter,
+		pageModel:     pageModel,
+		exitCodes: map[rune]struct{}{
+			runes.RuneLwQ:   {},
+			runes.RuneLwQRu: {},
+			runes.RuneUpQ:   {},
+			runes.RuneUpQRu: {},
+		},
+	}, nil
 }
 
-func (pv *PageView) Run() *dollyerr.Error {
-	defer pv.termBoxDecor.Close()
+var (
+	// ErrRunProcess - PageView.process method returned error
+	ErrRunProcess = errors.New(`PageView.Run.process call error`)
 
-	{
-		err := pv.process(0)
-		if err != nil {
-			return dollyerr.Append(err, fmt.Errorf("PageView.Run: process call error"))
-		}
+	// ErrRunTermBoxFlush - term box Flush method returned error
+	ErrRunTermBoxFlush = errors.New(`PageView.Run: termbox.Flush call error`)
+)
+
+// Run starts display help page session
+func (pv *PageView) Run() error {
+	defer pv.decTermBox.Close()
+
+	if err := pv.process(0); err != nil {
+		return errors.Join(ErrRunProcess, err)
 	}
-	{
-		err := pv.termBoxDecor.Flush()
-		if err != nil {
-			return dollyerr.Append(err, fmt.Errorf("PageView.Run: termbox.Flush call error"))
-		}
+
+	if err := pv.decTermBox.Flush(); err != nil {
+		return errors.Join(ErrRunTermBoxFlush, err)
 	}
 
 	for {
-		switch ev := pv.termBoxDecor.PollEvent(); ev.Type {
-		case termbox.EventKey:
-			switch ev.Key {
-			case termbox.KeyArrowDown:
-				err := pv.process(1)
-				if err != nil {
-					return dollyerr.Append(err, fmt.Errorf("PageView.Run: process call error for termbox event '%v'", ev))
+		eventTB := pv.decTermBox.PollEvent()
+		switch {
+		case eventTB.Type == termbox.EventKey:
+			switch {
+			case eventTB.Key == termbox.KeyArrowDown:
+				if err := pv.process(1); err != nil {
+					return errors.Join(
+						fmt.Errorf(`%w: termbox event type "%v; event key "%v""`,
+							ErrRunProcess, eventTB.Type, eventTB.Key),
+						err,
+					)
 				}
 
-			case termbox.KeyArrowUp:
-				err := pv.process(-1)
-				if err != nil {
-					return dollyerr.Append(err, fmt.Errorf("PageView.Run: process call error for termbox event '%v'", ev))
+			case eventTB.Key == termbox.KeyArrowUp:
+				if err := pv.process(-1); err != nil {
+					return errors.Join(
+						fmt.Errorf(`%w: termbox event type "%v; event key "%v""`,
+							ErrRunProcess, eventTB.Type, eventTB.Key),
+						err,
+					)
 				}
 
-			case termbox.KeyCtrlTilde:
-				if _, contain := pv.exitCodes[ev.Ch]; contain {
+			case eventTB.Key == termbox.KeyCtrlTilde:
+				if _, contain := pv.exitCodes[eventTB.Ch]; contain {
 					return nil
 				}
-				err := pv.process(0)
-				if err != nil {
-					return dollyerr.Append(err, fmt.Errorf("PageView.Run: process call error for termbox event '%v'", ev))
+				if err := pv.process(0); err != nil {
+					return errors.Join(
+						fmt.Errorf(`%w: termbox event type "%v; event key "%v""`,
+							ErrRunProcess, eventTB.Type, eventTB.Key),
+						err,
+					)
 				}
 
 			default:
-				err := pv.process(0)
-				if err != nil {
-					return dollyerr.Append(err, fmt.Errorf("PageView.Run: process call error for termbox event '%v'", ev))
+				if err := pv.process(0); err != nil {
+					return errors.Join(
+						fmt.Errorf(`%w: termbox event type "%v; event key "%v""`,
+							ErrRunProcess, eventTB.Type, eventTB.Key),
+						err,
+					)
 				}
 			}
 		default:
-			err := pv.process(0)
-			if err != nil {
-				return dollyerr.Append(err, fmt.Errorf("PageView.Run: process call error for termbox event '%v'", ev))
+			if err := pv.process(0); err != nil {
+				return errors.Join(
+					fmt.Errorf(`%w: termbox event type "%v; event key "%v""`,
+						ErrRunProcess, eventTB.Type, eventTB.Key),
+					err,
+				)
 			}
 		}
 
-		err := pv.termBoxDecor.Flush()
-		if err != nil {
-			return dollyerr.Append(err, fmt.Errorf("PageView.Run: termbox.Flush call error"))
+		if err := pv.decTermBox.Flush(); err != nil {
+			return errors.Join(ErrRunTermBoxFlush, err)
 		}
 	}
 }
 
-func (pv *PageView) process(shift int) *dollyerr.Error {
-	err := update(pv.termBoxDecor, pv.pageModel, pv.rowLenLimiter, shift)
-	if err != nil {
-		return err
+// ErrProcessUpdate - update method returned error
+var ErrProcessUpdate = errors.New(`PageView.process: update call error`)
+
+func (pv *PageView) process(shift int) error {
+	if err := update(pv.decTermBox, pv.pageModel, pv.rowLenLimiter, shift); err != nil {
+		return errors.Join(ErrProcessUpdate, err)
 	}
 
-	render(pv.termBoxDecor, ri.MakeRowIterator(pv.pageModel))
+	render(pv.decTermBox, ri.MakeRowIterator(pv.pageModel))
 	return nil
 }
 
-func update(termBoxDecor tbd.TermBoxDecorator, pageModel *pgm.PageModel, rowLenLimiter rll.RowLenLimiter, shift int) *dollyerr.Error {
-	{
-		err := termBoxDecor.Clear()
-		if err != nil {
-			return dollyerr.Append(err, fmt.Errorf("PageView.process: termbox.Clear call error"))
-		}
+var (
+	// ErrUpdateTermBoxClear - TermBoxDecorator.Clear method returned error
+	ErrUpdateTermBoxClear = errors.New(`update: TermBoxDecorator.Clear method returned error`)
+
+	// ErrUpdatePageModelUpdate - PageModel.Update method returned error
+	ErrUpdatePageModelUpdate = errors.New(`update: PageModel.Update method returned error`)
+)
+
+func update(decTermBox tbd.TermBoxDecorator, pageModel *pgm.PageModel, rowLenLimiter rll.RowLenLimiter, shift int) error {
+	if err := decTermBox.Clear(); err != nil {
+		return errors.Join(ErrUpdateTermBoxClear, err)
 	}
 
-	w, h := termBoxDecor.Size()
-
-	err := pageModel.Update(
-		ts.MakeTerminalSize(rowLenLimiter.GetRowLenLimit(size.Width(w)), size.Height(h)),
+	w, h := decTermBox.Size()
+	if err := pageModel.Update(
+		ts.MakeTerminalSize(rowLenLimiter.RowLenLimit(size.MakeWidth(w)), size.MakeHeight(h)),
 		shift,
-	)
-	if err != nil {
-		return dollyerr.Append(err, fmt.Errorf("PageView.process: pageModel.update call error"))
+	); err != nil {
+		return errors.Join(ErrUpdatePageModelUpdate, err)
 	}
 
 	return nil
 }
 
-func render(termBoxDecor tbd.TermBoxDecorator, it ri.RowIterator) {
+func render(termBoxDecor tbd.TermBoxDecorator, itRow ri.RowIterator) {
 	var (
 		x, y int
 		cell termbox.Cell
 	)
-	for ; !it.End(); it.Next() {
-		for x, cell = range it.Row().GetCells() {
-			termBoxDecor.SetCell(it.Row().GetShiftIndex().ToInt()+x, y, cell.Ch, cell.Fg, cell.Bg)
+	for ; !itRow.End(); itRow.Next() {
+		for x, cell = range itRow.RowModel().GetCells() {
+			termBoxDecor.SetCell(itRow.RowModel().GetShiftIndex().Int()+x, y, cell.Ch, cell.Fg, cell.Bg)
 		}
 		y++
 	}

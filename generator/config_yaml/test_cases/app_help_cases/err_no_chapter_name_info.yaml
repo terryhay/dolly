@@ -1,0 +1,48 @@
+version: 1.0.0
+
+arg_parser:
+
+  app_help:
+    app_name: "example"
+    chapter_description_info:
+      - "you can write more detailed description here"
+
+  commands:
+    - main_name: "dir"
+      chapter_description_info: "precesses all file from dir"
+      placeholders:
+        - name: "-lang"
+          chapter_description_info: "HTML code of default language for process files"
+          synopsis_description: "lang code"
+          arg:
+            amount_type: "single"
+            default_values:
+              - "ru"
+            allowed_values:
+              - "en"
+              - "ru"
+
+        - name: "-log"
+          chapter_description_info: "log level for output messages"
+          synopsis_description: "log level"
+          arg:
+            amount_type: "single"
+            default_values:
+              - "i"
+            allowed_values:
+              - "d"
+              - "i"
+              - "w"
+              - "e"
+              - "f"
+
+        - name: "-o"
+          chapter_description_info: "output directory path"
+          arg:
+            amount_type: "single"
+            synopsis_description: "out path"
+
+  help_command:
+    main_name: "help"
+    additional_names:
+      - "-h"

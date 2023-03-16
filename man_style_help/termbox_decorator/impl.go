@@ -1,11 +1,13 @@
 package termbox_decorator
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/nsf/termbox-go"
-	"github.com/terryhay/dolly/utils/dollyerr"
 )
 
-type termBoxDecoratorImpl struct {
+type impl struct {
 	funcClear     func(fg, bg termbox.Attribute) error
 	funcClose     func()
 	funcFlush     func() error
@@ -16,61 +18,82 @@ type termBoxDecoratorImpl struct {
 	funcSize      func() (width int, height int)
 }
 
-func (tbd *termBoxDecoratorImpl) Clear() *dollyerr.Error {
-	if tbd == nil {
+// ErrTermBoxDecoratorClear - termbox.Clear returned error
+var ErrTermBoxDecoratorClear = errors.New(`TermBoxDecorator.Clear: termbox.Clear returned error`)
+
+func (i *impl) Clear() (err error) {
+	if i == nil {
 		return nil
 	}
-	err := tbd.funcClear(termbox.ColorDefault, termbox.ColorDefault)
-	return dollyerr.NewErrorIfItIs(dollyerr.CodeTermBoxDecoratorClearError, "termBoxDecorator.Clear", err)
+
+	if errClear := i.funcClear(termbox.ColorDefault, termbox.ColorDefault); errClear != nil {
+		err = errors.Join(
+			fmt.Errorf(`%w: foreground color "%v", background color "%v"`,
+				ErrTermBoxDecoratorClear, termbox.ColorDefault, termbox.ColorDefault),
+			errClear,
+		)
+	}
+	return err
 }
 
-func (tbd *termBoxDecoratorImpl) Close() {
-	if tbd == nil {
+func (i *impl) Close() {
+	if i == nil {
 		return
 	}
-	tbd.funcClose()
+	i.funcClose()
 }
 
-func (tbd *termBoxDecoratorImpl) Flush() *dollyerr.Error {
-	if tbd == nil {
+// ErrTermBoxDecoratorFlush - termbox.Flush returned error
+var ErrTermBoxDecoratorFlush = errors.New(`TermBoxDecorator.Flush: termbox.Flush returned error`)
+
+func (i *impl) Flush() (err error) {
+	if i == nil {
 		return nil
 	}
-	err := tbd.funcFlush()
-	return dollyerr.NewErrorIfItIs(dollyerr.CodeTermBoxDecoratorFlushError, "termBoxDecorator.Flush", err)
+
+	if errFlush := i.funcFlush(); errFlush != nil {
+		err = errors.Join(ErrTermBoxDecoratorFlush, errFlush)
+	}
+	return err
 }
 
-func (tbd *termBoxDecoratorImpl) Init() *dollyerr.Error {
-	if tbd == nil {
+// ErrTermBoxDecoratorInit - termbox.Init returned error
+var ErrTermBoxDecoratorInit = errors.New(`TermBoxDecorator.Flush: termbox.Init returned error`)
+
+func (i *impl) Init() (err error) {
+	if i == nil {
 		return nil
 	}
-	err := tbd.funcInit()
-	return dollyerr.NewErrorIfItIs(dollyerr.CodeTermBoxDecoratorInitError, "termBoxDecorator.Init", err)
+	if errInit := i.funcInit(); errInit != nil {
+		err = errors.Join(ErrTermBoxDecoratorInit, errInit)
+	}
+	return err
 }
 
-func (tbd *termBoxDecoratorImpl) PollEvent() termbox.Event {
-	if tbd == nil {
+func (i *impl) PollEvent() termbox.Event {
+	if i == nil {
 		return termbox.Event{}
 	}
-	return tbd.funcPollEvent()
+	return i.funcPollEvent()
 }
 
-func (tbd *termBoxDecoratorImpl) SetCell(x, y int, ch rune, fg, bg termbox.Attribute) {
-	if tbd == nil {
+func (i *impl) SetCell(x, y int, ch rune, fg, bg termbox.Attribute) {
+	if i == nil {
 		return
 	}
-	tbd.funcSetCell(x, y, ch, fg, bg)
+	i.funcSetCell(x, y, ch, fg, bg)
 }
 
-func (tbd *termBoxDecoratorImpl) SetRune(x, y int, r rune) {
-	if tbd == nil {
+func (i *impl) SetRune(x, y int, r rune) {
+	if i == nil {
 		return
 	}
-	tbd.funcSetChar(x, y, r)
+	i.funcSetChar(x, y, r)
 }
 
-func (tbd *termBoxDecoratorImpl) Size() (int, int) {
-	if tbd == nil {
+func (i *impl) Size() (int, int) {
+	if i == nil {
 		return 0, 0
 	}
-	return tbd.funcSize()
+	return i.funcSize()
 }

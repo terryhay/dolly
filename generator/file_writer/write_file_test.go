@@ -1,190 +1,220 @@
 package file_writer
 
 import (
-	"fmt"
-	"github.com/brianvoe/gofakeit"
-	"github.com/stretchr/testify/require"
-	fld "github.com/terryhay/dolly/generator/file_decorator"
-	osd "github.com/terryhay/dolly/generator/os_decorator"
-	"github.com/terryhay/dolly/utils/dollyerr"
 	"os"
 	"testing"
+
+	"github.com/brianvoe/gofakeit"
+	"github.com/stretchr/testify/require"
+	"github.com/terryhay/dolly/generator/proxyes/file_proxy"
+	"github.com/terryhay/dolly/generator/proxyes/os_proxy"
+	coty "github.com/terryhay/dolly/tools/common_types"
 )
 
 func TestWrite(t *testing.T) {
 	t.Parallel()
 
-	mockFuncCreateErrRes := fmt.Errorf(gofakeit.Name())
-	mockMkdirAllErrRes := fmt.Errorf(gofakeit.Name())
-
 	dirPath := gofakeit.Color()
 
-	testCases := []struct {
+	errIsExist := coty.RandError()
+	errMkdirAll := coty.RandErrorSecond()
+	errCreate := coty.RandErrorThird()
+	errWriteString := coty.RandErrorFourth()
+	errClose := coty.RandErrorFifth()
+
+	tests := []struct {
 		caseName string
 
-		osDecor  osd.OSDecorator
+		osDecor  os_proxy.Proxy
 		dirPath  string
 		fileBody string
 
-		expectedErrCode dollyerr.Code
+		expErr error
 	}{
 		{
 			caseName: "check_dir_path_error",
 
-			osDecor: osd.NewOSDecorator(
-				&osd.Mock{
-					FuncIsExist: func(path string) bool {
-						return false
-					},
-				}),
-			dirPath:         dirPath,
-			expectedErrCode: dollyerr.CodeGeneratorInvalidPath,
+			osDecor: os_proxy.Mock(os_proxy.Opt{
+				SlotIsExist: func(path string) error {
+					return errIsExist
+				},
+			}),
+			dirPath: dirPath,
+
+			expErr: errIsExist,
 		},
 		{
 			caseName: "check_dir_path_error",
 
-			osDecor: osd.NewOSDecorator(
-				&osd.Mock{
-					FuncIsExist: func(path string) bool {
-						return path == dirPath
-					},
-					FuncMkdirAll: func(path string, perm os.FileMode) error {
-						return mockMkdirAllErrRes
-					},
-				}),
-			dirPath:         dirPath,
-			expectedErrCode: dollyerr.CodeGeneratorCreateDirError,
+			osDecor: os_proxy.Mock(os_proxy.Opt{
+				SlotIsExist: func(path string) error {
+					if path != dirPath {
+						return errIsExist
+					}
+					return nil
+				},
+				SlotMkdirAll: func(path string, perm os.FileMode) error {
+					return errMkdirAll
+				},
+			}),
+			dirPath: dirPath,
+
+			expErr: errMkdirAll,
 		},
 		{
 			caseName: "create_file_error_with_successful_create_dir",
 
-			osDecor: osd.NewOSDecorator(
-				&osd.Mock{
-					FuncCreate: func(string) (fld.FileDecorator, error) {
-						return nil, mockFuncCreateErrRes
-					},
-					FuncIsExist: func(path string) bool {
-						return len(path) > 0
-					},
-					FuncMkdirAll: func(path string, perm os.FileMode) error {
-						return nil
-					},
-				}),
-			dirPath:         dirPath,
-			expectedErrCode: dollyerr.CodeGeneratorCreateFileError,
+			osDecor: os_proxy.Mock(os_proxy.Opt{
+				SlotCreate: func(string) (file_proxy.Proxy, error) {
+					return nil, errCreate
+				},
+				SlotIsExist: func(path string) error {
+					if len(path) == 0 {
+						return errIsExist
+					}
+					return nil
+				},
+				SlotMkdirAll: func(path string, perm os.FileMode) error {
+					return nil
+				},
+			}),
+			dirPath: dirPath,
+
+			expErr: errCreate,
 		},
 		{
 			caseName: "file_create_error",
 
-			osDecor: osd.NewOSDecorator(
-				&osd.Mock{
-					FuncCreate: func(path string) (fld.FileDecorator, error) {
-						return nil, mockFuncCreateErrRes
-					},
-					FuncIsExist: func(path string) bool {
-						return path == dirPath
-					},
-					FuncMkdirAll: func(path string, perm os.FileMode) error {
-						return nil
-					},
-				}),
-			dirPath:         dirPath,
-			expectedErrCode: dollyerr.CodeGeneratorCreateFileError,
+			osDecor: os_proxy.Mock(os_proxy.Opt{
+				SlotCreate: func(path string) (file_proxy.Proxy, error) {
+					return nil, errCreate
+				},
+				SlotIsExist: func(path string) error {
+					if path != dirPath {
+						return errIsExist
+					}
+					return nil
+				},
+				SlotMkdirAll: func(path string, perm os.FileMode) error {
+					return nil
+				},
+			}),
+			dirPath: dirPath,
+
+			expErr: errCreate,
 		},
 		{
 			caseName: "file_create_error",
 
-			osDecor: osd.NewOSDecorator(
-				&osd.Mock{
-					FuncCreate: func(path string) (fld.FileDecorator, error) {
-						return fld.NewFileDecorator(
-								nil,
-								&fld.Mock{
-									FuncClose: func() error {
-										return nil
-									},
-									FuncWriteString: func(s string) (int, error) {
-										return 0, fmt.Errorf(gofakeit.Color())
-									},
-								}),
-							nil
-					},
-					FuncIsExist: func(_ string) bool {
-						return true
-					},
-					FuncMkdirAll: func(path string, perm os.FileMode) error {
-						return nil
-					},
-				}),
-			dirPath:         dirPath,
-			expectedErrCode: dollyerr.CodeFileDecoratorWriteStringError,
+			osDecor: os_proxy.Mock(os_proxy.Opt{
+				SlotCreate: func(path string) (file_proxy.Proxy, error) {
+					return file_proxy.Mock(file_proxy.Opt{
+							SlotClose: func() error {
+								return nil
+							},
+							SlotWriteString: func(s string) error {
+								return errWriteString
+							},
+						}),
+						nil
+				},
+				SlotIsExist: func(string) error {
+					return nil
+				},
+				SlotMkdirAll: func(path string, perm os.FileMode) error {
+					return nil
+				},
+			}),
+			dirPath: dirPath,
+
+			expErr: errWriteString,
 		},
 		{
 			caseName: "write_string_error",
 
-			osDecor: osd.NewOSDecorator(
-				&osd.Mock{
-					FuncCreate: func(path string) (fld.FileDecorator, error) {
-						return fld.NewFileDecorator(
-								nil,
-								&fld.Mock{
-									FuncClose: func() error {
-										return nil
-									},
-									FuncWriteString: func(s string) (int, error) {
-										return 0, fmt.Errorf(gofakeit.Color())
-									},
-								}),
-							nil
-					},
-					FuncIsExist: func(path string) bool {
-						return true
-					},
-					FuncMkdirAll: func(path string, perm os.FileMode) error {
-						return nil
-					},
-				}),
-			dirPath:         dirPath,
-			expectedErrCode: dollyerr.CodeFileDecoratorWriteStringError,
+			osDecor: os_proxy.Mock(os_proxy.Opt{
+				SlotCreate: func(path string) (file_proxy.Proxy, error) {
+					return file_proxy.Mock(file_proxy.Opt{
+							SlotClose: func() error {
+								return nil
+							},
+							SlotWriteString: func(s string) error {
+								return errWriteString
+							},
+						}),
+						nil
+				},
+				SlotIsExist: func(path string) error {
+					return nil
+				},
+				SlotMkdirAll: func(path string, perm os.FileMode) error {
+					return nil
+				},
+			}),
+			dirPath: dirPath,
+			expErr:  errWriteString,
+		},
+		{
+			caseName: "write_string_and_close_errors",
+
+			osDecor: os_proxy.Mock(os_proxy.Opt{
+				SlotCreate: func(path string) (file_proxy.Proxy, error) {
+					return file_proxy.Mock(file_proxy.Opt{
+							SlotClose: func() error {
+								return errClose
+							},
+							SlotWriteString: func(s string) error {
+								return errWriteString
+							},
+						}),
+						nil
+				},
+				SlotIsExist: func(path string) error {
+					return nil
+				},
+				SlotMkdirAll: func(path string, perm os.FileMode) error {
+					return nil
+				},
+			}),
+			dirPath: dirPath,
+			expErr:  errWriteString,
 		},
 		{
 			caseName: "file_close_error",
 
-			osDecor: osd.NewOSDecorator(
-				&osd.Mock{
-					FuncCreate: func(path string) (fld.FileDecorator, error) {
-						return fld.NewFileDecorator(
-								nil,
-								&fld.Mock{
-									FuncClose: func() error {
-										return fmt.Errorf(gofakeit.Color())
-									},
-									FuncWriteString: func(s string) (int, error) {
-										return 0, nil
-									},
-								}),
-							nil
-					},
-					FuncIsExist: func(path string) bool {
-						return true
-					},
-					FuncMkdirAll: func(path string, perm os.FileMode) error {
-						return nil
-					},
-				}),
-			dirPath:         dirPath,
-			expectedErrCode: dollyerr.CodeFileDecoratorCloseError,
+			osDecor: os_proxy.Mock(os_proxy.Opt{
+				SlotCreate: func(path string) (file_proxy.Proxy, error) {
+					return file_proxy.Mock(file_proxy.Opt{
+							SlotClose: func() error {
+								return errClose
+							},
+							SlotWriteString: func(s string) error {
+								return nil
+							},
+						}),
+						nil
+				},
+				SlotIsExist: func(path string) error {
+					return nil
+				},
+				SlotMkdirAll: func(path string, perm os.FileMode) error {
+					return nil
+				},
+			}),
+			dirPath: dirPath,
+
+			expErr: errClose,
 		},
 	}
 
-	for _, tc := range testCases {
+	for _, tc := range tests {
 		t.Run(tc.caseName, func(t *testing.T) {
 			err := WriteFile(tc.osDecor, tc.dirPath, tc.fileBody)
-			if tc.expectedErrCode == dollyerr.CodeNone {
+			if tc.expErr == nil {
 				require.Nil(t, err)
 				return
 			}
-			require.Equal(t, tc.expectedErrCode, err.Code())
+			require.ErrorIs(t, err, tc.expErr)
 		})
 	}
 }

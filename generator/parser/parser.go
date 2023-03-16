@@ -2,93 +2,95 @@ package parser
 
 import (
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	impl "github.com/terryhay/dolly/argparser/arg_parser_impl"
-	cmdArg "github.com/terryhay/dolly/argparser/cmd_arg"
-	"github.com/terryhay/dolly/argparser/parsed_data"
+	"github.com/terryhay/dolly/argparser/parsed"
+	impl "github.com/terryhay/dolly/argparser/parser"
 	helpOut "github.com/terryhay/dolly/argparser/plain_help_out"
-	"github.com/terryhay/dolly/utils/dollyerr"
+	coty "github.com/terryhay/dolly/tools/common_types"
+	fmtd "github.com/terryhay/dolly/tools/fmt_decorator"
 )
 
 const (
-	// CommandIDNullCommand - checks arguments types
-	CommandIDNullCommand apConf.CommandID = iota + 1
-	// CommandIDHelp - print help info
-	CommandIDHelp
+	// ArgGroupConfigPath - yaml file config path argument group
+	ArgGroupConfigPath coty.IDPlaceholder = iota + 1
+
+	// ArgGroupGeneratePackagePath - generate package path argument group
+	ArgGroupGeneratePackagePath
 )
 
 const (
 	// CommandH - print help info
-	CommandH apConf.Command = "-h"
+	CommandH coty.NameCommand = "-h"
+
 	// CommandHelp - print help info
-	CommandHelp = "help"
+	CommandHelp coty.NameCommand = "help"
 )
 
 const (
 	// FlagC - yaml file config path
-	FlagC apConf.Flag = "-c"
+	FlagC coty.NameFlag = "-c"
+
 	// FlagO - generate package path
-	FlagO = "-o"
+	FlagO coty.NameFlag = "-o"
 )
 
 // Parse - processes command line arguments
-func Parse(args []string) (res *parsed_data.ParsedData, err *dollyerr.Error) {
-	appArgConfig := apConf.ArgParserConfigSrc{
-		AppDescription: apConf.ApplicationDescriptionSrc{
-			AppName:      "gen_dolly",
-			NameHelpInfo: "code generator",
-			DescriptionHelpInfo: []string{
-				"generate parser package which contains a command line page parser",
-			},
-		}.ToConst(),
-		FlagDescriptionSlice: []*apConf.FlagDescription{
-			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
-					FlagC,
-				},
-				DescriptionHelpInfo: "yaml file config path",
-				ArgDescription: apConf.ArgumentsDescriptionSrc{
-					AmountType:              apConf.ArgAmountTypeSingle,
-					SynopsisHelpDescription: "file",
-				}.ToConstPtr(),
-			}.ToConstPtr(),
-			apConf.FlagDescriptionSrc{
-				Flags: []apConf.Flag{
-					FlagO,
-				},
-				DescriptionHelpInfo: "generate package path",
-				ArgDescription: apConf.ArgumentsDescriptionSrc{
-					AmountType:              apConf.ArgAmountTypeSingle,
-					SynopsisHelpDescription: "dir",
-				}.ToConstPtr(),
-			}.ToConstPtr(),
-		},
-		HelpCommandDescription: apConf.NewHelpCommandDescription(
-			CommandIDHelp,
-			map[apConf.Command]bool{
-				CommandHelp: true,
-				CommandH:    true,
-			},
-		),
-		NamelessCommandDescription: apConf.NewNamelessCommandDescription(
-			CommandIDNullCommand,
-			"generate parser package",
-			nil,
-			map[apConf.Flag]bool{
-				FlagC: true,
-				FlagO: true,
-			},
-			nil,
-		),
-	}.ToConst()
+func Parse(args []string) (res *parsed.Result, err error) {
+	appArgConfig := apConf.MakeArgParserConfig(apConf.ArgParserConfigOpt{
 
-	res, err = impl.NewCmdArgParserImpl(appArgConfig).Parse(cmdArg.MakeCmdArgIterator(args))
+		CommandNameless: &apConf.NamelessCommandOpt{
+			Placeholders: []*apConf.PlaceholderOpt{
+				{
+					ID: ArgGroupConfigPath,
+					FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+						FlagC: {
+							NameMain: FlagC,
+							HelpInfo: "yaml file config path",
+						},
+					},
+					Argument: &apConf.ArgumentOpt{
+						DescSynopsisHelp: "file",
+					},
+				},
+				{
+					ID: ArgGroupGeneratePackagePath,
+					FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+						FlagO: {
+							NameMain: FlagO,
+							HelpInfo: "generate package path",
+						},
+					},
+					Argument: &apConf.ArgumentOpt{
+						DescSynopsisHelp: "dir",
+					},
+				},
+			},
+		},
+
+		CommandHelpOut: &apConf.HelpOutCommandOpt{
+			NameMain: CommandHelp,
+			NamesAdditional: map[coty.NameCommand]struct{}{
+				CommandH: {},
+			},
+		},
+
+		App: apConf.ApplicationOpt{
+			AppName:         "gen_dolly",
+			InfoChapterNAME: "code generator",
+		},
+
+		HelpInfoChapterDESCRIPTION: []string{
+			"generate parser package which contains a command line page parser",
+		},
+	})
+
+	res, err = impl.Parse(appArgConfig, args)
 	if err != nil {
 		return nil, err
 	}
 
-	if res.GetCommandID() == CommandIDHelp {
-		helpOut.PrintHelpInfo(appArgConfig)
-		return res, nil
+	if res.GetCommandMainName() == CommandHelp {
+		err = helpOut.PrintHelpInfo(fmtd.New(), appArgConfig)
+		return res, err
 	}
 
 	return res, nil

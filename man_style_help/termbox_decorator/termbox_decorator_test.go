@@ -1,18 +1,17 @@
 package termbox_decorator
 
 import (
-	"fmt"
+	"testing"
+
 	"github.com/nsf/termbox-go"
 	"github.com/stretchr/testify/require"
-	"github.com/terryhay/dolly/utils/dollyerr"
-	"testing"
 )
 
 func TestTermBoxDecorator(t *testing.T) {
 	t.Parallel()
 
 	t.Run("nil_pointer", func(t *testing.T) {
-		var termBoxDecor *termBoxDecoratorImpl
+		var termBoxDecor *impl
 
 		require.Nil(t, termBoxDecor.Clear())
 		termBoxDecor.Close()
@@ -27,64 +26,63 @@ func TestTermBoxDecorator(t *testing.T) {
 	})
 
 	t.Run("methods", func(t *testing.T) {
-		funcClearRes := dollyerr.NewErrorIfItIs(
-			dollyerr.CodeTermBoxDecoratorClearError,
-			"termBoxDecorator.Clear",
-			fmt.Errorf("funcClearRes"))
+		funcClearRes := ErrTermBoxDecoratorClear
 		funcCloseRes := false
-		funcFlushRes := dollyerr.NewErrorIfItIs(dollyerr.CodeTermBoxDecoratorFlushError, "termBoxDecorator.Flush", fmt.Errorf("funcFlushRes"))
-		funcInitRes := dollyerr.NewErrorIfItIs(dollyerr.CodeTermBoxDecoratorInitError, "termBoxDecorator.Init", fmt.Errorf("funcInitRes"))
+		funcFlushRes := ErrTermBoxDecoratorFlush
+		funcInitRes := ErrTermBoxDecoratorInit
 		funcPollEventRes := termbox.Event{Type: termbox.EventKey}
 		funcSetCellRes := false
 		funcSetCharRes := false
 		funcSizeResW, funcSizeResH := 0, 0
 
-		termBoxDecor := NewTermBoxDecorator(
-			&Mock{
-				FuncClear: func(_, _ termbox.Attribute) error {
-					return funcClearRes.Error()
-				},
-				FuncClose: func() {
-					funcCloseRes = true
-				},
-				FuncFlush: func() error {
-					return funcFlushRes.Error()
-				},
-				FuncInit: func() error {
-					return funcInitRes.Error()
-				},
-				FuncPollEvent: func() termbox.Event {
-					return funcPollEventRes
-				},
-				FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
-					funcSetCellRes = true
-				},
-				FuncSetChar: func(x, y int, ch rune) {
-					funcSetCharRes = true
-				},
-				FuncSize: func() (width int, height int) {
-					return funcSizeResW, funcSizeResH
-				},
-			})
+		decTermBox := NewTermBoxDecorator()
+		require.NotNil(t, decTermBox)
 
-		require.Equal(t, funcClearRes.Code(), termBoxDecor.Clear().Code())
+		decTermBox = TermBoxDecoratorMock{
+			FuncClear: func(_, _ termbox.Attribute) error {
+				return ErrTermBoxDecoratorClear
+			},
+			FuncClose: func() {
+				funcCloseRes = true
+			},
+			FuncFlush: func() error {
+				return ErrTermBoxDecoratorFlush
+			},
+			FuncInit: func() error {
+				return funcInitRes
+			},
+			FuncPollEvent: func() termbox.Event {
+				return funcPollEventRes
+			},
+			FuncSetCell: func(x, y int, ch rune, fg, bg termbox.Attribute) {
+				funcSetCellRes = true
+			},
+			FuncSetChar: func(x, y int, ch rune) {
+				funcSetCharRes = true
+			},
+			FuncSize: func() (width int, height int) {
+				return funcSizeResW, funcSizeResH
+			},
+		}.Create()
 
-		termBoxDecor.Close()
+		require.ErrorIs(t, decTermBox.Clear(), funcClearRes)
+
+		decTermBox.Close()
 		require.True(t, funcCloseRes)
 
-		require.Equal(t, funcFlushRes.Code(), termBoxDecor.Flush().Code())
+		require.ErrorIs(t, decTermBox.Flush(), funcFlushRes)
 
-		require.Equal(t, funcInitRes.Code(), termBoxDecor.Init().Code())
+		require.ErrorIs(t, decTermBox.Init(), funcInitRes)
 
-		require.Equal(t, funcPollEventRes, termBoxDecor.PollEvent())
+		require.Equal(t, funcPollEventRes, decTermBox.PollEvent())
 
-		termBoxDecor.SetCell(0, 0, rune(1), termbox.AttrBlink, termbox.AttrBlink)
+		decTermBox.SetCell(0, 0, rune(1), termbox.AttrBlink, termbox.AttrBlink)
 		require.True(t, funcSetCellRes)
 
-		termBoxDecor.SetRune(0, 0, rune(1))
+		decTermBox.SetRune(0, 0, rune(1))
 		require.True(t, funcSetCharRes)
 
-		w, h := termBoxDecor.Size()
+		w, h := decTermBox.Size()
 		require.Equal(t, funcSizeResW, w)
 		require.Equal(t, funcSizeResH, h)
 	})

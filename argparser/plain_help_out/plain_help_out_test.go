@@ -1,99 +1,132 @@
 package plain_help_out
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	apConf "github.com/terryhay/dolly/argparser/arg_parser_config"
-	tools "github.com/terryhay/dolly/utils/test_tools"
-	"testing"
+	hp "github.com/terryhay/dolly/argparser/help_page/page"
+	coty "github.com/terryhay/dolly/tools/common_types"
+	fmtd "github.com/terryhay/dolly/tools/fmt_decorator"
 )
 
 func TestPrintHelpInfo(t *testing.T) {
 	t.Parallel()
 
 	t.Run("empty_config", func(t *testing.T) {
-		out := tools.CatchStdOut(func() {
-			PrintHelpInfo(apConf.ArgParserConfig{})
-		})
+		t.Parallel()
 
-		ok, msg := tools.CheckSpaces(out)
-		require.True(t, ok, msg)
+		fmtCatcher := fmtd.NewCatcher()
+		err := PrintHelpInfo(fmtCatcher, apConf.ArgParserConfig{})
 
-		require.Equal(t, `[1mNAME[0m
-	[1m[0m – 
-
-[1mSYNOPSIS[0m
-
-[1mDESCRIPTION[0m
-
-`, out)
+		require.ErrorIs(t, err, ErrPrintHelpInfo)
+		require.Empty(t, fmtCatcher.GetPrintln())
 	})
 
-	t.Run("simple_case", func(t *testing.T) {
-		out := tools.CatchStdOut(func() {
-			PrintHelpInfo(
-				apConf.ArgParserConfigSrc{
-					AppDescription: apConf.ApplicationDescriptionSrc{
-						AppName:      "appname",
-						NameHelpInfo: "name help info",
-					}.ToConst(),
-					CommandDescriptions: []*apConf.CommandDescription{
-						apConf.CommandDescriptionSrc{
-							ID:                  1,
-							DescriptionHelpInfo: "command id 1 description help info",
-							Commands: map[apConf.Command]bool{
-								"command": true,
+	t.Run("common", func(t *testing.T) {
+		t.Parallel()
+
+		conf := apConf.MakeArgParserConfig(apConf.ArgParserConfigOpt{
+			App: apConf.ApplicationOpt{
+				AppName:         "appname",
+				InfoChapterNAME: "name help info",
+			},
+			CommandNameless: &apConf.NamelessCommandOpt{
+				HelpInfo: "nameless command description",
+			},
+			Commands: []*apConf.CommandOpt{
+				{
+					NameMain: "cmd",
+					HelpInfo: "command description help info",
+					Placeholders: []*apConf.PlaceholderOpt{
+						{
+							ID: coty.IDPlaceholder(1),
+							Argument: &apConf.ArgumentOpt{
+								DescSynopsisHelp: "str",
 							},
-							ArgDescription: apConf.ArgumentsDescriptionSrc{
-								AmountType:              apConf.ArgAmountTypeSingle,
-								SynopsisHelpDescription: "str",
-							}.ToConstPtr(),
-							RequiredFlags: map[apConf.Flag]bool{
-								"-rf1": true,
+						},
+						{
+							ID: coty.IDPlaceholder(2),
+							FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+								"-rf": {
+									NameMain: "-rf",
+									HelpInfo: "flag -rf description",
+								},
 							},
-							OptionalFlags: map[apConf.Flag]bool{
-								"-of1": true,
+							Argument: &apConf.ArgumentOpt{
+								DescSynopsisHelp: "str",
 							},
-						}.ToConstPtr(),
-						apConf.CommandDescriptionSrc{
-							ID:                  2,
-							DescriptionHelpInfo: "command id 2 description help info",
-							Commands: map[apConf.Command]bool{
-								"longcommand": true,
+						},
+						{
+							ID:             coty.IDPlaceholder(3),
+							IsFlagOptional: true,
+							FlagsByNames: map[coty.NameFlag]*apConf.FlagOpt{
+								"-of": {
+									NameMain: "-of",
+									HelpInfo: "flag -of description",
+								},
 							},
-						}.ToConstPtr(),
+						},
 					},
-					NamelessCommandDescription: apConf.NewNamelessCommandDescription(
-						0,
-						"nameless command description",
-						nil,
-						nil,
-						nil,
-					),
-				}.ToConst(),
-			)
+				},
+				{
+					NameMain: "longcommand",
+					HelpInfo: "longcommand description help info",
+				},
+			},
 		})
 
-		ok, msg := tools.CheckSpaces(out)
-		require.True(t, ok, msg)
+		fmtCatcher := fmtd.NewCatcher()
+		require.NoError(t, PrintHelpInfo(fmtCatcher, conf))
 
-		require.Equal(t, `[1mNAME[0m
-	[1mappname[0m – name help info
+		out := fmtCatcher.GetPrintln()
+
+		require.Equal(t, `
+[1mNAME[0m
+    [1mappname[0m – name help info
 
 [1mSYNOPSIS[0m
-	[1mappname[0m
-	[1mappname command[0m [4mstr[0m [1m-rf1[0m [[1m-of1[0m]
-	[1mappname longcommand[0m
+    [1mappname [0m
+    [1mappname cmd [0m [4mstr[0m [1m-rf[0m [4mstr[0m [[1m-of[0m]
+    [1mappname longcommand [0m
 
 [1mDESCRIPTION[0m
-
 The commands are as follows:
-	[1m<empty>[0m	nameless command description
+    [1m<empty>[0m nameless command description
 
-	[1mcommand[0m	command id 1 description help info
+    [1mcmd[0m     command description help info
 
-	[1mlongcommand[0m
-		command id 2 description help info
+    [1mlongcommand[0m
+            longcommand description help info
 
+The flags are as follows:
+    [1m-of[0m     flag -of description
+
+    [1m-rf[0m [4mstr[0m flag -rf description
 `, out)
+
+		require.Equal(t, `
+NAME
+    appname – name help info
+
+SYNOPSIS
+    appname 
+    appname cmd  str -rf str [-of]
+    appname longcommand 
+
+DESCRIPTION
+The commands are as follows:
+    <empty> nameless command description
+
+    cmd     command description help info
+
+    longcommand
+            longcommand description help info
+
+The flags are as follows:
+    -of     flag -of description
+
+    -rf str flag -rf description
+`, hp.RemoveStyleTextMarkers(out))
 	})
 }

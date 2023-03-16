@@ -1,3 +1,6 @@
 /examples/bin/generators/gen_dolly
 *.html
 *.out
+/.idea/inspectionProfiles/Project_Default.xml
+gen_dolly
+/.idea/watcherTasks.xml

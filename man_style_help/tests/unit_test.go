@@ -2,22 +2,22 @@ package tests
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/stretchr/testify/require"
-	"github.com/terryhay/dolly/man_style_help/page"
+	hp "github.com/terryhay/dolly/argparser/help_page/page"
 	pgm "github.com/terryhay/dolly/man_style_help/page_model"
 	ri "github.com/terryhay/dolly/man_style_help/row_iterator"
 	rll "github.com/terryhay/dolly/man_style_help/row_len_limiter"
-	"github.com/terryhay/dolly/man_style_help/size"
-	"github.com/terryhay/dolly/man_style_help/terminal_size"
+	ts "github.com/terryhay/dolly/man_style_help/terminal_size"
 	tt "github.com/terryhay/dolly/man_style_help/tests/page_model_test_tools"
-	"github.com/terryhay/dolly/utils/dollyerr"
-	"testing"
+	"github.com/terryhay/dolly/tools/size"
 )
 
 func TestPageViewShifting(t *testing.T) {
 	t.Parallel()
 
-	testCases := []struct {
+	tests := []struct {
 		caseName string
 
 		defaultWidth   size.Width
@@ -31,7 +31,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth100,
 			defaultHeight: tt.TerminalHeight100,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftBy0,
+				tt.ActionShiftDownBy0,
 			},
 		},
 		{
@@ -40,7 +40,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth20,
 			defaultHeight: tt.TerminalHeight100,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftBy0,
+				tt.ActionShiftDownBy0,
 			},
 		},
 
@@ -51,7 +51,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth100,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftBy0,
+				tt.ActionShiftDownBy0,
 			},
 		},
 		{
@@ -60,7 +60,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth20,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftBy0,
+				tt.ActionShiftDownBy0,
 			},
 		},
 		{
@@ -69,7 +69,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth100,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftForwardBy1,
+				tt.ActionShiftDownBy1,
 			},
 		},
 		{
@@ -78,7 +78,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth100,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftBackBy1,
+				tt.ActionShiftUpBy1,
 			},
 		},
 		{
@@ -87,7 +87,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth100,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftForwardBy30,
+				tt.ActionShiftDownBy30,
 			},
 		},
 
@@ -98,8 +98,8 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth100,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftForwardBy1,
-				tt.ActionShiftBackBy1,
+				tt.ActionShiftDownBy1,
+				tt.ActionShiftUpBy1,
 			},
 		},
 		{
@@ -108,8 +108,8 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth100,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftForwardBy30,
-				tt.ActionShiftForwardBy30,
+				tt.ActionShiftDownBy30,
+				tt.ActionShiftDownBy30,
 			},
 		},
 		{
@@ -118,7 +118,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth20,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftForwardBy1,
+				tt.ActionShiftDownBy1,
 			},
 		},
 		{
@@ -127,7 +127,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth20,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftForwardBy7,
+				tt.ActionShiftDownBy7,
 			},
 		},
 		{
@@ -136,9 +136,9 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth100,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftForwardBy7,
-				tt.ActionShiftBackBy1,
-				tt.ActionShiftBackBy7,
+				tt.ActionShiftDownBy7,
+				tt.ActionShiftUpBy1,
+				tt.ActionShiftUpBy7,
 			},
 		},
 		{
@@ -147,7 +147,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth100,
 			defaultHeight: tt.TerminalHeight40,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftBackBy7,
+				tt.ActionShiftUpBy7,
 			},
 		},
 
@@ -189,7 +189,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
 				tt.ActionResizeToMinWeight,
-				tt.ActionShiftForwardBy7,
+				tt.ActionShiftDownBy7,
 			},
 		},
 		{
@@ -198,7 +198,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth100,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftForwardBy7,
+				tt.ActionShiftDownBy7,
 				tt.ActionResizeToMaxWeight,
 			},
 		},
@@ -208,7 +208,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth20,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftForwardBy7,
+				tt.ActionShiftDownBy7,
 				tt.ActionResizeToMaxWeight,
 			},
 		},
@@ -218,7 +218,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth20,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftForwardBy5,
+				tt.ActionShiftDownBy5,
 				tt.ActionResizeToMaxWeight,
 			},
 		},
@@ -228,7 +228,7 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth20,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftForwardBy50,
+				tt.ActionShiftDownBy50,
 				tt.ActionResizeToMaxWeight,
 			},
 		},
@@ -239,10 +239,10 @@ func TestPageViewShifting(t *testing.T) {
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
 				tt.ActionResizeToMinWeight,
-				tt.ActionShiftForwardBy7,
+				tt.ActionShiftDownBy7,
 				tt.ActionResizeToMaxWeight,
-				tt.ActionShiftBackBy7,
-				tt.ActionShiftBackBy1,
+				tt.ActionShiftUpBy7,
+				tt.ActionShiftUpBy1,
 			},
 		},
 
@@ -253,10 +253,10 @@ func TestPageViewShifting(t *testing.T) {
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
 				tt.ActionResizeToMinWeight,
-				tt.ActionShiftForwardBy50,
+				tt.ActionShiftDownBy50,
 				tt.ActionResizeToMaxWeight,
-				tt.ActionShiftBackBy30,
-				tt.ActionShiftBackBy1,
+				tt.ActionShiftUpBy30,
+				tt.ActionShiftUpBy1,
 			},
 		},
 		{
@@ -265,9 +265,9 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth100,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftForwardBy7,
+				tt.ActionShiftDownBy7,
 				tt.ActionResizeToMinWeight,
-				tt.ActionShiftForwardBy50,
+				tt.ActionShiftDownBy50,
 			},
 		},
 		{
@@ -276,12 +276,12 @@ func TestPageViewShifting(t *testing.T) {
 			defaultWidth:  tt.TerminalWidth100,
 			defaultHeight: tt.TerminalHeight7,
 			actionSequence: []tt.TestAction{
-				tt.ActionShiftForwardBy7,
+				tt.ActionShiftDownBy7,
 				tt.ActionResizeToMinWeight,
-				tt.ActionShiftForwardBy50,
+				tt.ActionShiftDownBy50,
 				tt.ActionResizeToMaxWeight,
-				tt.ActionShiftBackBy30,
-				tt.ActionShiftBackBy1,
+				tt.ActionShiftUpBy30,
+				tt.ActionShiftUpBy1,
 			},
 		},
 	}
@@ -292,20 +292,20 @@ func TestPageViewShifting(t *testing.T) {
 		absShift     int
 	)
 
-	for _, tc := range testCases {
+	for _, tc := range tests {
 		t.Run(tc.caseName+"_step_by_step_updating", func(t *testing.T) {
 			terminalWidth := tc.defaultWidth
 			terminalHeight := tc.defaultHeight
 
 			rowLenLimiter := rll.MakeRowLenLimiter()
-			pageModel := getPageModel(rowLenLimiter.GetRowLenLimit(terminalWidth), terminalHeight)
+			pageModel := getPageModel(rowLenLimiter.RowLenLimit(terminalWidth), terminalHeight)
 			absShift = 0
 
 			for actionIndex, action := range tc.actionSequence {
 				shift = 0
 
 				oldTerminalWidth, _ := terminalWidth, terminalHeight
-				expectedRows, terminalWidth, terminalHeight, absShift = tt.GetExpectedData(action, terminalWidth, terminalHeight, absShift)
+				expectedRows, terminalWidth, terminalHeight, absShift = tt.ExpectedData(action, terminalWidth, terminalHeight, absShift)
 				if action < tt.ActionResizeToMinWeight {
 					shift = int(action)
 				}
@@ -316,10 +316,11 @@ func TestPageViewShifting(t *testing.T) {
 						added = -1
 					}
 
-					for width := oldTerminalWidth.ToInt() + added; width != terminalWidth.ToInt(); width += added {
-						require.Nil(t, pageModel.Update(terminal_size.MakeTerminalSize(rowLenLimiter.GetRowLenLimit(size.Width(width)), terminalHeight), 0))
+					for width := oldTerminalWidth.Int() + added; width != terminalWidth.Int(); width += added {
+						require.Nil(t, pageModel.Update(ts.MakeTerminalSize(rowLenLimiter.RowLenLimit(size.MakeWidth(width)), terminalHeight), 0))
+						// tt.PrintTerminalContentState(pageModel) // uncomment for debug
 					}
-					require.Nil(t, pageModel.Update(terminal_size.MakeTerminalSize(rowLenLimiter.GetRowLenLimit(terminalWidth), terminalHeight), 0))
+					require.Nil(t, pageModel.Update(ts.MakeTerminalSize(rowLenLimiter.RowLenLimit(terminalWidth), terminalHeight), 0))
 				}
 
 				if shift != 0 {
@@ -330,10 +331,11 @@ func TestPageViewShifting(t *testing.T) {
 					delta := absInt(shift)
 
 					for i := 0; i < delta; i++ {
-						require.Nil(t, pageModel.Update(terminal_size.MakeTerminalSize(rowLenLimiter.GetRowLenLimit(terminalWidth), terminalHeight), added))
+						require.Nil(t, pageModel.Update(ts.MakeTerminalSize(rowLenLimiter.RowLenLimit(terminalWidth), terminalHeight), added))
 					}
 				}
 
+				// tt.PrintTerminalContentState(pageModel) // uncomment for debug
 				checkRows(t, expectedRows, absShift, terminalWidth, actionIndex, shift, pageModel)
 			}
 		})
@@ -343,18 +345,18 @@ func TestPageViewShifting(t *testing.T) {
 			terminalHeight := tc.defaultHeight
 
 			rowLenLimiter := rll.MakeRowLenLimiter()
-			pageModel := getPageModel(rowLenLimiter.GetRowLenLimit(terminalWidth), terminalHeight)
+			pageModel := getPageModel(rowLenLimiter.RowLenLimit(terminalWidth), terminalHeight)
 			absShift = 0
 
 			for actionIndex, action := range tc.actionSequence {
 				shift = 0
 
-				expectedRows, terminalWidth, terminalHeight, absShift = tt.GetExpectedData(action, terminalWidth, terminalHeight, absShift)
+				expectedRows, terminalWidth, terminalHeight, absShift = tt.ExpectedData(action, terminalWidth, terminalHeight, absShift)
 				if action < tt.ActionResizeToMinWeight {
 					shift = int(action)
 				}
 
-				require.Nil(t, pageModel.Update(terminal_size.MakeTerminalSize(rowLenLimiter.GetRowLenLimit(terminalWidth), terminalHeight), shift))
+				require.Nil(t, pageModel.Update(ts.MakeTerminalSize(rowLenLimiter.RowLenLimit(terminalWidth), terminalHeight), shift))
 
 				checkRows(t, expectedRows, absShift, terminalWidth, actionIndex, shift, pageModel)
 			}
@@ -364,7 +366,7 @@ func TestPageViewShifting(t *testing.T) {
 
 func checkRows(t *testing.T, expectedRows []string, absShift int, terminalWidth size.Width, actionIndex, shift int, pgm *pgm.PageModel) {
 	//pageModel.update(terminalWidth, terminalHeight, shift)
-	require.Equal(t, absShift, pgm.GetAnchorRowAbsolutelyIndex().ToInt(),
+	require.Equal(t, absShift, pgm.GetAnchorRowAbsolutelyIndex().Int(),
 		fmt.Sprintf("absolutely shift must be equal anchorRowAbsolutelyIndex. Action iter №%d; current shift: %d", actionIndex, shift))
 
 	counter := 0
@@ -372,12 +374,12 @@ func checkRows(t *testing.T, expectedRows []string, absShift int, terminalWidth 
 		require.True(t, counter < len(expectedRows),
 			fmt.Sprintf("can't get expected dynamic_row. Action iter №: %d; shift: %d, iteration: %d", actionIndex, shift, counter))
 
-		r := it.Row().String()
+		r := it.RowModel().String()
 
 		require.Equal(t, expectedRows[counter], r,
 			fmt.Sprintf("rows must be equal. Action iter №: %d; shift: %d, iteration: %d", actionIndex, shift, counter))
 
-		require.True(t, len([]rune(r)) <= terminalWidth.ToInt(), fmt.Sprintf("rune amount must be less or equal to terminal width. Action iter №: %d; shift: %d, iteration: %d", actionIndex, shift, counter))
+		require.True(t, len([]rune(r)) <= terminalWidth.Int(), fmt.Sprintf("rune amount must be less or equal to terminal width. Action iter №: %d; shift: %d, iteration: %d", actionIndex, shift, counter))
 
 		counter++
 	}
@@ -387,56 +389,80 @@ func checkRows(t *testing.T, expectedRows []string, absShift int, terminalWidth 
 }
 
 func getPageModel(rowLenLimit rll.RowLenLimit, terminalHeight size.Height) *pgm.PageModel {
-	modelPage, _ := pgm.NewPageModel(
-		page.Page{
-			Header: page.MakeParagraph(0, "example"),
-			Paragraphs: []page.Paragraph{
-				page.MakeParagraph(0, `[1mNAME[0m`),
-				page.MakeParagraph(1, `[1mexample[0m – shows how argtools generator works`),
-				page.MakeParagraph(0, ""),
+	modelPage, _ := pgm.New(
+		"example",
+		hp.MakeBody([]hp.Row{
+			hp.MakeRow(size.WidthZero, hp.MakeRowChunk("NAME")),
+			hp.MakeRow(size.WidthTab, hp.MakeRowChunk("example", hp.StyleTextBold), hp.MakeRowChunk(" – shows how argtools generator works")),
+			{},
+			hp.MakeRow(size.WidthZero, hp.MakeRowChunk("SYNOPSIS")),
+			hp.MakeRow(size.WidthTab,
+				hp.MakeRowChunk("example", hp.StyleTextBold),
+				hp.MakeRowChunk(" ["), hp.MakeRowChunk("-fl", hp.StyleTextBold),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk("str", hp.StyleTextUnderlined),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk("...", hp.StyleTextUnderlined),
+				hp.MakeRowChunk("] ["), hp.MakeRowChunk(`-il`, hp.StyleTextBold),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk("str", hp.StyleTextUnderlined),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk(`...`, hp.StyleTextUnderlined),
+				hp.MakeRowChunk("] ["), hp.MakeRowChunk("-sl", hp.StyleTextBold),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk("str", hp.StyleTextUnderlined),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk("...", hp.StyleTextUnderlined),
+				hp.MakeRowChunk("]"),
+			),
+			hp.MakeRow(size.WidthTab,
+				hp.MakeRowChunk(`example print [--checkargs]`, hp.StyleTextBold),
+				hp.MakeRowChunk(" ["), hp.MakeRowChunk(`-f`, hp.StyleTextBold),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk(`str`, hp.StyleTextUnderlined),
+				hp.MakeRowChunk("] ["), hp.MakeRowChunk(`-fl`, hp.StyleTextBold),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk(`str`, hp.StyleTextUnderlined),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk(`...`, hp.StyleTextUnderlined),
+				hp.MakeRowChunk("] ["), hp.MakeRowChunk(`-i`, hp.StyleTextBold),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk(`str`, hp.StyleTextUnderlined),
+				hp.MakeRowChunk("] ["), hp.MakeRowChunk(`-il`, hp.StyleTextBold),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk("str", hp.StyleTextUnderlined),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk(`...`, hp.StyleTextUnderlined),
+				hp.MakeRowChunk("] ["), hp.MakeRowChunk(`-s`, hp.StyleTextBold),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk(`str`, hp.StyleTextUnderlined),
+				hp.MakeRowChunk("] ["), hp.MakeRowChunk(`-sl`, hp.StyleTextBold),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk("str", hp.StyleTextUnderlined),
+				hp.MakeRowChunk(" "), hp.MakeRowChunk(`...`, hp.StyleTextUnderlined),
+				hp.MakeRowChunk("]"),
+			),
+			{},
+			hp.MakeRow(size.WidthZero, hp.MakeRowChunk("DESCRIPTION")),
+			hp.MakeRow(size.WidthTab, hp.MakeRowChunk("you can write more detailed description here")),
+			{},
+			hp.MakeRow(size.WidthTab, hp.MakeRowChunk("and use several paragraphs")),
+			{},
+			hp.MakeRow(size.WidthZero, hp.MakeRowChunk("The commands are as follows:")),
+			hp.MakeRow(size.WidthTab, hp.MakeRowChunk(`<empty>`, hp.StyleTextBold), hp.MakeRowChunk(" checks arguments types")),
+			{},
+			hp.MakeRow(size.WidthTab, hp.MakeRowChunk(`print`, hp.StyleTextBold), hp.MakeRowChunk("   print command line arguments with optional checking")),
+			{},
+			hp.MakeRow(size.WidthZero, hp.MakeRowChunk(`The flags are as follows:`)),
 
-				page.MakeParagraph(0, `[1mSYNOPSIS[0m`),
-				page.MakeParagraph(1, `[1mexample[0m [[1m-fl[0m [4mstr[0m [4m...[0m] [[1m-il[0m [4mstr[0m [4m...[0m] [[1m-sl[0m [4mstr[0m [4m...[0m]`),
-				page.MakeParagraph(1, `[1mexample print[0m [[1m-checkargs[0m] [[1m-f[0m [4mstr[0m] [[1m-fl[0m [4mstr[0m [4m...[0m] [[1m-i[0m [4mstr[0m] [[1m-il[0m [4mstr[0m [4m...[0m] [[1m-s[0m [4mstr[0m] [[1m-sl[0m [4mstr[0m [4m...[0m]`),
-				page.MakeParagraph(0, ""),
+			hp.MakeRow(size.WidthTab, hp.MakeRowChunk(`--checkargs`, hp.StyleTextBold)),
+			hp.MakeRow(size.WidthTab+size.WidthTab+size.WidthTab, hp.MakeRowChunk(`do arguments checking`)),
+			hp.MakeRow(size.WidthZero, hp.MakeRowChunk("")),
 
-				page.MakeParagraph(0, `[1mDESCRIPTION[0m`),
-				page.MakeParagraph(1, `you can write more detailed description here`),
-				page.MakeParagraph(0, ""),
-				page.MakeParagraph(1, `and use several paragraphs`),
-				page.MakeParagraph(0, ""),
+			hp.MakeRow(size.WidthTab, hp.MakeRowChunk(`-f`), hp.MakeRowChunk(`      single float`)),
+			hp.MakeRow(size.WidthZero, hp.MakeRowChunk("")),
 
-				page.MakeParagraph(0, `The commands are as follows:`),
-				page.MakeParagraph(1, `[1m<empty>[0m	checks arguments types`),
-				page.MakeParagraph(0, ""),
-				page.MakeParagraph(1, `[1mprint[0m	print command line arguments with optional checking`),
-				page.MakeParagraph(0, ""),
+			hp.MakeRow(size.WidthTab, hp.MakeRowChunk(`-fl`), hp.MakeRowChunk(`     float list`)),
+			hp.MakeRow(size.WidthZero, hp.MakeRowChunk("")),
 
-				page.MakeParagraph(0, `The flags are as follows:`),
+			hp.MakeRow(size.WidthTab, hp.MakeRowChunk(`-i`), hp.MakeRowChunk(`      int string`)),
+			hp.MakeRow(size.WidthZero, hp.MakeRowChunk("")),
 
-				page.MakeParagraph(1, `[1m-checkargs[0m`),
-				page.MakeParagraph(2, `do arguments checking`),
-				page.MakeParagraph(0, ""),
+			hp.MakeRow(size.WidthTab, hp.MakeRowChunk(`-il`), hp.MakeRowChunk(`     int list`)),
+			hp.MakeRow(size.WidthZero, hp.MakeRowChunk("")),
 
-				page.MakeParagraph(1, `[1m-f[0m	single float`),
-				page.MakeParagraph(0, ""),
+			hp.MakeRow(size.WidthTab, hp.MakeRowChunk(`-s`), hp.MakeRowChunk(`      single string`)),
+			hp.MakeRow(size.WidthZero, hp.MakeRowChunk("")),
 
-				page.MakeParagraph(1, `[1m-fl[0m	float list`),
-				page.MakeParagraph(0, ""),
-
-				page.MakeParagraph(1, `[1m-i[0m	int string`),
-				page.MakeParagraph(0, ""),
-
-				page.MakeParagraph(1, `[1m-il[0m	int list`),
-				page.MakeParagraph(0, ""),
-
-				page.MakeParagraph(1, `[1m-s[0m	single string`),
-				page.MakeParagraph(0, ""),
-
-				page.MakeParagraph(1, `[1m-sl[0m	string list`),
-			},
-		},
-		terminal_size.MakeTerminalSize(rowLenLimit, terminalHeight),
+			hp.MakeRow(size.WidthTab, hp.MakeRowChunk(`-sl`), hp.MakeRowChunk(`     string list`)),
+		}),
+		ts.MakeTerminalSize(rowLenLimit, terminalHeight),
 	)
 	return modelPage
 }
@@ -445,15 +471,10 @@ func TestErrors(t *testing.T) {
 	t.Parallel()
 
 	rowLenLimiter := rll.MakeRowLenLimiter()
-	pageModel := getPageModel(rowLenLimiter.GetRowLenLimit(tt.TerminalWidth20), tt.TerminalHeight100)
-	{
-		err := pageModel.Update(terminal_size.MakeTerminalSize(rowLenLimiter.GetRowLenLimit(0), 0), 0)
-		require.Equal(t, dollyerr.CodeHelpDisplayTerminalWidthLimitError, err.Code())
-	}
-	/*{
-		pageModel.bodyModel = nil
-		require.Error(t, pageModel.Update(terminal_size.MakeTerminalSize(rowLenLimiter.GetRowLenLimit(40), 1), 0))
-	}//*/
+	pageModel := getPageModel(rowLenLimiter.RowLenLimit(tt.TerminalWidth20), tt.TerminalHeight100)
+
+	err := pageModel.Update(ts.MakeTerminalSize(rowLenLimiter.RowLenLimit(0), 0), 0)
+	require.ErrorIs(t, err, pgm.ErrUpdateInvalidTerminalSize)
 }
 
 // absInt returns absolutely value of v

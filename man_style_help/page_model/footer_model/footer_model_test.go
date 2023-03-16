@@ -1,8 +1,9 @@
 package footer_model
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestFooterModel(t *testing.T) {

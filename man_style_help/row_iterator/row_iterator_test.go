@@ -2,15 +2,17 @@ package row_iterator
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/terryhay/dolly/man_style_help/page"
+	hp "github.com/terryhay/dolly/argparser/help_page/page"
 	pgm "github.com/terryhay/dolly/man_style_help/page_model"
 	"github.com/terryhay/dolly/man_style_help/row"
 	rllMock "github.com/terryhay/dolly/man_style_help/row_len_limiter/mock"
-	"github.com/terryhay/dolly/man_style_help/size"
 	ts "github.com/terryhay/dolly/man_style_help/terminal_size"
-	"testing"
+	coty "github.com/terryhay/dolly/tools/common_types"
+	"github.com/terryhay/dolly/tools/size"
 )
 
 func TestRowIterator(t *testing.T) {
@@ -39,15 +41,16 @@ func TestRowIterator(t *testing.T) {
 	})
 
 	t.Run("common", func(t *testing.T) {
-		pageModel, err := pgm.NewPageModel(
-			page.Page{},
-			ts.MakeTerminalSize(rllMock.GetRowLenLimitMin(), size.Height(10)),
+		pageModel, err := pgm.New(
+			coty.AppNameUndefined,
+			hp.Body{},
+			ts.MakeTerminalSize(rllMock.GetRowLenLimitMin(), size.MakeHeight(10)),
 		)
 		require.Nil(t, err)
 		ri := MakeRowIterator(pageModel)
 
 		require.False(t, ri.End())
-		assert.Equal(t, row.MakeRow(7, nil), ri.Row())
+		assert.Equal(t, row.MakeRow(7, nil), ri.RowModel())
 		ri.Next()
 	})
 
@@ -66,24 +69,26 @@ func TestRowIterator(t *testing.T) {
 		}
 
 		ri := MakeRowIterator(mustNewPageModel(
-			page.Page{
-				Header: page.MakeParagraph(0, "header"),
-				Paragraphs: []page.Paragraph{
-					page.MakeParagraph(1, "You motherfucker, come on you little ass… fuck with me, eh? You fucking little asshole, dickhead cocksucker…"),
-					page.MakeParagraph(1, "You fuckin' come on, come fuck with me! I'll get your ass, you jerk! Oh, you fuckhead motherfucker!"),
-				},
-			},
-			ts.MakeTerminalSize(rllMock.GetRowLenLimitMin(), size.Height(10)),
+			"header",
+			hp.MakeBody([]hp.Row{
+				hp.MakeRow(size.WidthTab,
+					hp.MakeRowChunk("You motherfucker, come on you little ass… fuck with me, eh? You fucking little asshole, dickhead cocksucker…"),
+				),
+				hp.MakeRow(size.WidthTab,
+					hp.MakeRowChunk("You fuckin' come on, come fuck with me! I'll get your ass, you jerk! Oh, you fuckhead motherfucker!"),
+				),
+			}),
+			ts.MakeTerminalSize(rllMock.GetRowLenLimitMin(), size.MakeHeight(10)),
 		))
 
 		for i, ex := range expected {
-			require.Equal(t, ex, ri.Row().String(), fmt.Sprintf("iteration %v: strings are not equal", i))
+			require.Equal(t, ex, ri.RowModel().String(), fmt.Sprintf("iteration %v: strings are not equal", i))
 			ri.Next()
 		}
 	})
 }
 
-func mustNewPageModel(pageData page.Page, size ts.TerminalSize) *pgm.PageModel {
-	hm, _ := pgm.NewPageModel(pageData, size)
+func mustNewPageModel(appName coty.NameApp, pageBody hp.Body, size ts.TerminalSize) *pgm.PageModel {
+	hm, _ := pgm.New(appName, pageBody, size)
 	return hm
 }

@@ -1,0 +1,92 @@
+version: 1.0.0
+
+arg_parser:
+
+  app_help:
+    app_name: "example"
+    chapter_name_info: "shows how parser generator works"
+    chapter_description_info:
+      - "you can write more detailed description here"
+      - "and use several paragraphs"
+
+  help_command:
+    main_name: "help"
+    additional_names: # optional
+      - "-h"
+
+  placeholders: # optional
+    - name: &stringSingle "string_single"
+      flags:
+        - main_name: "-s"
+          chapter_description_info: "single string"
+      is_flag_optional: true # optional
+      arg: # optional
+        help_name: "arg"
+
+    - name: &stringList "string_list"
+      flags:
+        - main_name: "-sl" # optional if arg is set
+          chapter_description_info: "string list"
+      arg: # optional if flag is set
+        help_name: "arg"
+        amount_type: "list" # optional
+
+    - name: &intSingle "int_single"
+      flags:
+        - main_name: "-i" # optional if arg is set
+          chapter_description_info: "int string"
+      is_flag_optional: true # optional
+      arg: # optional
+        help_name: "arg"
+
+    - name: &intList "int_list"
+      flags:
+        - main_name: "-il" # optional if arg is set
+          chapter_description_info: "int list"
+      arg: # optional if flag is set
+        help_name: "arg"
+        amount_type: "list" # optional
+
+    - name: &floatSingle "float_single"
+      flags:
+        - main_name: "-f" # optional if arg is set
+          chapter_description_info: "single float"
+      is_flag_optional: true # optional
+      arg: # optional if flag is set
+        help_name: "arg"
+
+    - name: &floatList "float_list"
+      flags:
+        - main_name: "-fl"
+          chapter_description_info: "float list"
+      arg: # optional if flag is set
+        help_name: "arg"
+        amount_type: "list" # optional
+
+    - name: &doTypeChecking "-checkargs"
+      is_flag_optional: true # optional
+      flags:
+        - main_name: "--checkargs"
+          chapter_description_info: "do arguments checking"
+
+  nameless_command: # optional if commands are set
+    chapter_description_info: "checks arguments types"
+    using_placeholders: # optional
+      - *stringList
+      - *intList
+      - *floatList
+
+  commands: # optional if nameless_command is set
+    - main_name: "print"
+      chapter_description_info: "print command line arguments with optional checking"
+      using_placeholders: # optional
+        - *stringSingle
+        - *stringList
+        - *intSingle
+        - *intList
+        - *floatSingle
+        - *floatList
+        - *doTypeChecking
+
+help_out_config:
+  using_tool: "man_style"

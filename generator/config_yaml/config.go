@@ -1,8 +1,8 @@
 package config_yaml
 
 import (
+	"errors"
 	"fmt"
-	"unsafe"
 )
 
 // Config - code struct of a config yaml file
@@ -12,58 +12,78 @@ type Config struct {
 	helpOutConfig   *HelpOutConfig
 }
 
-// GetVersion - version field getter
+// GetVersion gets version field
 func (c *Config) GetVersion() string {
 	if c == nil {
 		return ""
 	}
+
 	return c.version
 }
 
+// GetArgParserConfig gets ArgParserConfig
 func (c *Config) GetArgParserConfig() *ArgParserConfig {
 	if c == nil {
 		return nil
 	}
+
 	return c.argParserConfig
 }
 
+// GetHelpOutConfig gets HelpOutConfig
 func (c *Config) GetHelpOutConfig() *HelpOutConfig {
 	if c == nil {
 		return nil
 	}
+
 	return c.helpOutConfig
 }
 
-// UnmarshalYAML - custom unmarshal logic with checking required fields
-func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	_ = c
+var (
+	// ErrConfigNilPointer - Config pointer is nil
+	ErrConfigNilPointer = errors.New(`Config.IsValid: Config pointer is nil`)
 
-	src := ConfigSrc{}
-	err := unmarshal(&src)
-	if err != nil {
-		return err
+	// ErrConfigNoVersion - no 'version' filed in source yaml file
+	ErrConfigNoVersion = errors.New(`Config.IsValid: no required field 'version' in source yaml file`)
+)
+
+// IsValid cascade checks if Config is valid
+func (c *Config) IsValid() error {
+	if c == nil {
+		return ErrConfigNilPointer
 	}
 
-	if len(src.Version) == 0 {
-		return fmt.Errorf(`config unmarshal error: no required field "version"`)
-	}
-	if src.ArgParserConfig == nil {
-		return fmt.Errorf(`config unmarshal error: no required field "arg_parser_config"`)
+	if len(c.version) == 0 {
+		return ErrConfigNoVersion
 	}
 
-	*c = *src.ToConstPtr()
+	if err := c.argParserConfig.IsValid(); err != nil {
+		return fmt.Errorf(`Config.IsValid: %w`, err)
+	}
+
+	if err := c.helpOutConfig.IsValid(); err != nil {
+		return fmt.Errorf(`Config.IsValid: %w`, err)
+	}
 
 	return nil
 }
 
-// ConfigSrc - source for construct a struct of a config file
-type ConfigSrc struct {
-	Version         string           `yaml:"version"`
-	ArgParserConfig *ArgParserConfig `yaml:"arg_parser_config"`
-	HelpOutConfig   *HelpOutConfig   `yaml:"help_out_config"`
+// ConfigOpt - source for construct a struct of a config file
+type ConfigOpt struct {
+	Version         string              `yaml:"version"`
+	ArgParserConfig *ArgParserConfigOpt `yaml:"arg_parser"`
+	HelpOutConfig   *HelpOutConfigOpt   `yaml:"help_out_config"`
 }
 
-// ToConstPtr converts src to Config pointer
-func (m ConfigSrc) ToConstPtr() *Config {
-	return (*Config)(unsafe.Pointer(&m))
+// NewConfig converts opt to Config pointer
+func NewConfig(opt *ConfigOpt) *Config {
+	if opt == nil {
+		return nil
+	}
+
+	return &Config{
+		version:         opt.Version,
+		argParserConfig: NewArgParserConfig(opt.ArgParserConfig),
+		helpOutConfig:   NewHelpOutConfig(opt.HelpOutConfig),
+	}
 }

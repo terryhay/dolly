@@ -1,14 +1,17 @@
 package parser
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestDolly(t *testing.T) {
 	t.Parallel()
 
 	t.Run("no_args", func(t *testing.T) {
+		t.Parallel()
+
 		res, err := Parse(nil)
 
 		require.Nil(t, res)
@@ -16,14 +19,18 @@ func TestDolly(t *testing.T) {
 	})
 
 	t.Run("call_help", func(t *testing.T) {
+		t.Parallel()
+
 		res, err := Parse([]string{"help"})
 
-		require.Equal(t, CommandIDHelp, res.GetCommandID())
+		require.Equal(t, CommandHelp, res.GetCommandMainName())
 		require.Nil(t, err)
 	})
 
 	t.Run("success_result", func(t *testing.T) {
-		res, err := Parse([]string{"-c", "config path", "-o", "out path"})
+		t.Parallel()
+
+		res, err := Parse([]string{"-c", "config/path", "-o", "out/path"})
 
 		require.NotNil(t, res)
 		require.Nil(t, err)

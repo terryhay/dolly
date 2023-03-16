@@ -1,72 +1,79 @@
 package config_yaml
 
 import (
-	"fmt"
-	"github.com/stretchr/testify/require"
-	"github.com/terryhay/dolly/utils/dollyerr"
 	"testing"
+
+	osd "github.com/terryhay/dolly/generator/proxyes/os_proxy"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestHelpOutConfig(t *testing.T) {
 	t.Parallel()
 
 	t.Run("nil_pointer", func(t *testing.T) {
-		var pointer *HelpOutConfig
+		var opt *HelpOutConfigOpt
+		pointer := NewHelpOutConfig(opt)
+		require.Nil(t, pointer)
 
 		require.Equal(t, HelpOutToolPlainText, pointer.GetUsingTool())
 	})
 
 	t.Run("initialized_pointer", func(t *testing.T) {
-		src := HelpOutConfigSrc{
-			UsingTool: HelpOutToolManStyle,
+		opt := HelpOutConfigOpt{
+			UsingTool: usingToolManStyle,
 		}
-		pointer := src.ToConstPtr()
+		pointer := NewHelpOutConfig(&opt)
+		require.NotNil(t, pointer)
 
-		require.Equal(t, src.UsingTool, pointer.GetUsingTool())
-	})
-
-	t.Run("fake_unmarshal_error", func(t *testing.T) {
-		pointer := &HelpOutConfig{}
-		err := pointer.UnmarshalYAML(func(interface{}) error {
-			return fmt.Errorf("error")
-		})
-
-		require.NotNil(t, err)
+		require.Equal(t, makeHelpOutTool(opt.UsingTool), pointer.GetUsingTool())
 	})
 }
 
-func TestHelpOutConfigUnmarshalErrors(t *testing.T) {
+func TestHelpOutConfigIsValidErrors(t *testing.T) {
 	t.Parallel()
 
-	testCases := []struct {
-		yamlFileName      string
-		expectedErrorText string
+	tests := []struct {
+		caseFile string
+		expError error
 	}{
 		{
-			yamlFileName:      "invalid_using_tool_value.yaml",
-			expectedErrorText: "confYML.GetConfig: unmarshal error: help_out_config.using_tool unmarshal error: unexpected value invalid_value (expected: \"plain\", \"man_style\")",
+			caseFile: "./test_cases/help_out_config_cases/err_invalid_using_tool_value.yaml",
+			expError: ErrHelpOutUnexpectedTool,
 		},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.yamlFileName, func(t *testing.T) {
-			config, err := GetConfig(fmt.Sprintf("./test_cases/help_out_config_cases/%s", tc.yamlFileName))
-			require.Nil(t, config)
-			require.NotNil(t, err)
-			require.Equal(t, dollyerr.CodeGetConfigUnmarshalError, err.Code())
-			require.Equal(t, tc.expectedErrorText, err.Error().Error())
+	for _, tc := range tests {
+		t.Run(tc.caseFile, func(t *testing.T) {
+			config, err := Load(osd.New(), tc.caseFile)
+			require.NotNil(t, config)
+			require.NoError(t, err)
+
+			err = config.IsValid()
+			require.ErrorIs(t, err, tc.expError)
 		})
 	}
 }
 
-func TestUnmarshalHelpOutConfig(t *testing.T) {
+func TestHelpOutConfigIsValidSuccess(t *testing.T) {
 	t.Parallel()
 
-	config, err := GetConfig("./test_cases/help_out_config_cases/plain.yaml")
-	require.Nil(t, err)
-	require.NotNil(t, config)
+	tests := []struct {
+		caseFile string
+	}{
+		{
+			caseFile: "./test_cases/help_out_config_cases/plain.yaml",
+		},
+		{
+			caseFile: "./test_cases/help_out_config_cases/man_style.yaml",
+		},
+	}
 
-	config, err = GetConfig("./test_cases/help_out_config_cases/man_style.yaml")
-	require.Nil(t, err)
-	require.NotNil(t, config)
+	for _, tc := range tests {
+		t.Run(tc.caseFile, func(t *testing.T) {
+			config, err := Load(osd.New(), tc.caseFile)
+			require.NoError(t, err)
+			require.NoError(t, config.IsValid())
+		})
+	}
 }

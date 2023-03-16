@@ -1,0 +1,34 @@
+version: 1.0.0
+
+arg_parser:
+
+  app_help:
+    app_name: "example"
+    chapter_name_info: "shows how parser generator works"
+    chapter_description_info:
+      - "you can write more detailed description here"
+
+  placeholders:
+    - name: &lang "lang"
+      is_flag_optional: true
+      flags:
+        - main_name: "--lang"
+          chapter_description_info: "HTML code of default language for process files"
+      argument:
+        help_name: "lang"
+        default_values:
+          - "ru$"
+        allowed_values:
+          - "en"
+          - "ru"
+
+  commands:
+    - main_name: "file"
+      chapter_description_info: "precesses all file from dir"
+      using_placeholders:
+        - *lang
+
+  help_command:
+    main_name: "help"
+    additional_names:
+      - "-h"

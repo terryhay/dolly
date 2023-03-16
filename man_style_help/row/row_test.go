@@ -1,19 +1,20 @@
 package row
 
 import (
+	"testing"
+
 	"github.com/brianvoe/gofakeit"
 	"github.com/nsf/termbox-go"
 	"github.com/stretchr/testify/require"
 	"github.com/terryhay/dolly/man_style_help/runes"
-	"github.com/terryhay/dolly/man_style_help/size"
-	"testing"
+	"github.com/terryhay/dolly/tools/size"
 )
 
 func TestRow(t *testing.T) {
 	t.Parallel()
 
 	t.Run("getters", func(t *testing.T) {
-		shiftIndex := size.Width(gofakeit.Uint32())
+		shiftIndex := size.MakeWidth(gofakeit.Uint32())
 		cells := []termbox.Cell{
 			{
 				Ch: runes.RuneColon,

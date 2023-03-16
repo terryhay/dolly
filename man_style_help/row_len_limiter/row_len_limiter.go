@@ -1,11 +1,10 @@
 package row_len_limiter
 
-import "github.com/terryhay/dolly/man_style_help/size"
+import (
+	"github.com/terryhay/dolly/tools/size"
+)
 
 const (
-	// TabSize - horizontal paragraph shift point size (space count)
-	TabSize size.Width = 4
-
 	// TerminalMinWidth - expected min size of a terminal
 	TerminalMinWidth size.Width = 20
 
@@ -16,12 +15,14 @@ const (
 	calcRowLenLimitOptimumB = -0.8571428571428571 // += 0.5 for rounding result
 )
 
+// RowLenLimiter contains data for calculate RowLenLimit
 type RowLenLimiter struct {
 	lastTerminalWidth  size.Width
 	rowLenLimit        RowLenLimit
 	defaultRowLenLimit RowLenLimit
 }
 
+// MakeRowLenLimiter constructs RowLenLimiter object
 func MakeRowLenLimiter() RowLenLimiter {
 	defaultRowLenLimit := MakeDefaultRowLenLimit()
 
@@ -33,7 +34,8 @@ func MakeRowLenLimiter() RowLenLimiter {
 	}
 }
 
-func (i *RowLenLimiter) GetRowLenLimit(terminalWidth size.Width) RowLenLimit {
+// RowLenLimit calculates and returns RowLenLimit
+func (i *RowLenLimiter) RowLenLimit(terminalWidth size.Width) RowLenLimit {
 	if terminalWidth < defaultRowLenMax {
 		if i.lastTerminalWidth == terminalWidth {
 			return i.rowLenLimit
@@ -42,7 +44,7 @@ func (i *RowLenLimiter) GetRowLenLimit(terminalWidth size.Width) RowLenLimit {
 
 		i.rowLenLimit.min = calcRowLenLimitMin(terminalWidth)
 		i.rowLenLimit.optimum = calcRowLenLimitOptimum(terminalWidth)
-		i.rowLenLimit.max = terminalWidth.ToInt()
+		i.rowLenLimit.max = terminalWidth.Int()
 
 		return i.rowLenLimit
 	}

@@ -1,107 +1,117 @@
 package config_yaml
 
 import (
-	"fmt"
-	"github.com/stretchr/testify/require"
-	"github.com/terryhay/dolly/utils/dollyerr"
 	"testing"
+
+	osd "github.com/terryhay/dolly/generator/proxyes/os_proxy"
+
+	"github.com/stretchr/testify/require"
+	coty "github.com/terryhay/dolly/tools/common_types"
 )
 
 func TestArgParserConfigGetters(t *testing.T) {
 	t.Parallel()
 
 	t.Run("nil_pointer", func(t *testing.T) {
-		var pointer *ArgParserConfig
+		var opt *ArgParserConfigOpt
+		pointer := NewArgParserConfig(opt)
+		require.Nil(t, pointer)
 
-		require.Nil(t, pointer.GetAppHelpDescription())
-		require.Nil(t, pointer.GetHelpCommandDescription())
-		require.Nil(t, pointer.GetNamelessCommandDescription())
-		require.Nil(t, pointer.GetCommandDescriptions())
-		require.Nil(t, pointer.GetFlagDescriptions())
+		require.ErrorIs(t, pointer.IsValid(), ErrArgParserConfigNilPointer)
+		require.Nil(t, pointer.GetAppHelp())
+		require.Nil(t, pointer.GetHelpCommand())
+		require.Nil(t, pointer.GetNamelessCommand())
+		require.Nil(t, pointer.GetCommandsSorted())
+		require.Nil(t, pointer.GetPlaceholders())
+		require.Nil(t, pointer.GetChapterDescriptionInfo())
+
 	})
 
 	t.Run("initialized_pointer", func(t *testing.T) {
-		src := ArgParserConfigSrc{
-			AppHelpDescription:         &AppHelpDescription{},
-			HelpCommandDescription:     &HelpCommandDescription{},
-			NamelessCommandDescription: &NamelessCommandDescription{},
-			CommandDescriptions:        []*CommandDescription{{}},
-			FlagDescriptions:           []*FlagDescription{{}},
+		opt := ArgParserConfigOpt{
+			AppHelp:                &AppHelpOpt{},
+			HelpCommand:            &HelpCommandOpt{},
+			NamelessCommand:        &NamelessCommandOpt{},
+			Commands:               []*CommandOpt{{}},
+			InfoChapterDESCRIPTION: []string{coty.RandInfoChapterDescription().String()},
 		}
-		pointer := src.ToConstPtr()
+		pointer := NewArgParserConfig(&opt)
 
-		require.Equal(t, src.AppHelpDescription, pointer.GetAppHelpDescription())
-		require.Equal(t, src.HelpCommandDescription, pointer.GetHelpCommandDescription())
-		require.Equal(t, src.NamelessCommandDescription, pointer.GetNamelessCommandDescription())
-		require.Equal(t, src.CommandDescriptions, pointer.GetCommandDescriptions())
-		require.Equal(t, src.FlagDescriptions, pointer.GetFlagDescriptions())
+		require.Equal(t, NewAppHelp(opt.AppHelp), pointer.GetAppHelp())
+		require.Equal(t, NewHelpCommand(opt.HelpCommand), pointer.GetHelpCommand())
+		require.Equal(t, NewNamelessCommand(opt.NamelessCommand), pointer.GetNamelessCommand())
+		require.Equal(t, toCommandSortedSlice(opt.Commands), pointer.GetCommandsSorted())
+		require.Equal(t, toPlaceholderSlice(opt.Placeholders), pointer.GetPlaceholders())
+		require.Equal(t, coty.ToSliceTypesSorted[coty.InfoChapterDESCRIPTION](opt.InfoChapterDESCRIPTION), pointer.GetChapterDescriptionInfo())
 	})
 }
 
-func TestArgParserConfigUnmarshalErrors(t *testing.T) {
+func TestArgParserConfigIsValidErrors(t *testing.T) {
 	t.Parallel()
 
-	testCases := []struct {
-		yamlFileName      string
-		expectedErrorText string
+	tests := []struct {
+		caseFile string
+		expError error
 	}{
 		{
-			yamlFileName:      "no_app_help_description.yaml",
-			expectedErrorText: "confYML.GetConfig: unmarshal error: config unmarshal error: no required field \"app_help_description\"",
+			caseFile: "./test_cases/arg_parser_config_cases/err_no_arg_parser.yaml",
+			expError: ErrArgParserConfigNilPointer,
 		},
 		{
-			yamlFileName:      "no_help_description.yaml",
-			expectedErrorText: "confYML.GetConfig: unmarshal error: config unmarshal error: no required field \"help_command_description\"",
+			caseFile: "./test_cases/arg_parser_config_cases/err_no_any_command.yaml",
+			expError: ErrArgParserConfigNoAnyCommand,
 		},
 		{
-			yamlFileName:      "no_help_command_description.yaml",
-			expectedErrorText: "confYML.GetConfig: unmarshal error: config unmarshal error: no required field \"help_command_description\"",
+			caseFile: "./test_cases/arg_parser_config_cases/err_duplicate_command_name.yaml",
+			expError: ErrArgParserConfigDuplicateCommandName,
 		},
 		{
-			yamlFileName:      "no_command_description_and_nameless_command.yaml",
-			expectedErrorText: "confYML.GetConfig: unmarshal error: config unmarshal error: one or more of fields \"nameless_command_description\" or \"command_descriptions\" must be set",
+			caseFile: "./test_cases/arg_parser_config_cases/err_duplicate_command_additional_name.yaml",
+			expError: ErrArgParserConfigDuplicateCommandName,
+		},
+		{
+			caseFile: "./test_cases/arg_parser_config_cases/err_duplicate_flag_name.yaml",
+			expError: ErrArgParserConfigDuplicateFlagName,
+		},
+		{
+			caseFile: "./test_cases/arg_parser_config_cases/err_duplicate_flag_additional_name.yaml",
+			expError: ErrArgParserConfigDuplicateFlagName,
 		},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.yamlFileName, func(t *testing.T) {
-			config, err := GetConfig(fmt.Sprintf("./test_cases/arg_parser_config_cases/%s", tc.yamlFileName))
-			require.Nil(t, config)
-			require.NotNil(t, err)
-			require.Equal(t, dollyerr.CodeGetConfigUnmarshalError, err.Code())
-			require.Equal(t, tc.expectedErrorText, err.Error().Error())
-		})
-	}
-
-	t.Run("fake_unmarshal_error", func(t *testing.T) {
-		pointer := &Config{}
-		err := pointer.UnmarshalYAML(func(interface{}) error {
-			return fmt.Errorf("error")
-		})
-
-		require.NotNil(t, err)
-	})
-}
-
-func TestConfigUnmarshalNoErrorWhenNoOptionalFields(t *testing.T) {
-	t.Parallel()
-
-	testCases := []struct {
-		yamlFileName string
-	}{
-		{
-			yamlFileName: "no_flag_descriptions.yaml",
-		},
-		{
-			yamlFileName: "no_command_descriptions_but_has_nameless_command_description.yaml",
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.yamlFileName, func(t *testing.T) {
-			config, err := GetConfig(fmt.Sprintf("./test_cases/arg_parser_config_cases/%s", tc.yamlFileName))
+	for _, tc := range tests {
+		t.Run(tc.caseFile, func(t *testing.T) {
+			config, err := Load(osd.New(), tc.caseFile)
 			require.NotNil(t, config)
-			require.Nil(t, err)
+			require.NoError(t, err)
+
+			err = config.IsValid()
+			require.ErrorIs(t, err, tc.expError)
+		})
+	}
+}
+
+func TestArgParserConfigIsValidSuccess(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		caseFile string
+	}{
+		{
+			caseFile: "./test_cases/arg_parser_config_cases/no_placeholders.yaml",
+		},
+		{
+			caseFile: "./test_cases/arg_parser_config_cases/has_only_nameless_command.yaml",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.caseFile, func(t *testing.T) {
+			config, err := Load(osd.New(), tc.caseFile)
+			require.NotNil(t, config)
+			require.NoError(t, err)
+
+			require.NoError(t, config.IsValid())
 		})
 	}
 }

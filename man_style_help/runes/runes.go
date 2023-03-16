@@ -1,36 +1,36 @@
 package runes
 
 const (
-	// RuneBr - "\n"
-	RuneBr = rune(10)
+	// RuneBr - '\n'
+	RuneBr rune = '\n'
 
-	// RuneColon - ":"
-	RuneColon = rune(58)
+	// RuneColon - ':'
+	RuneColon rune = ':'
 
-	// RuneDot - "."
-	RuneDot = rune(46)
+	// RuneDot - '.'
+	RuneDot rune = '.'
 
-	// RuneEsc - escape
-	RuneEsc = rune(27)
+	// RuneEsc - ''
+	RuneEsc rune = ''
 
-	// RuneTab - "\t"
-	RuneTab = rune(9)
+	// RuneTab - '\t'
+	RuneTab rune = '\t'
 
-	// RuneLwM - "m"
-	RuneLwM = rune(109)
+	// RuneLwM - 'm'
+	RuneLwM rune = 'm'
 
-	// RuneLwQ - "q"
-	RuneLwQ = rune(113)
+	// RuneLwQ - 'q'
+	RuneLwQ rune = 'q'
 
-	// RuneLwQRu - "й"
-	RuneLwQRu = rune(1081)
+	// RuneLwQRu - 'й'
+	RuneLwQRu rune = 'й'
 
-	// RuneUpQ - "Q"
-	RuneUpQ = rune(81)
+	// RuneUpQ - 'Q'
+	RuneUpQ rune = 'Q'
 
-	// RuneUpQRu - "Й"
-	RuneUpQRu = rune(1049)
+	// RuneUpQRu - 'Й'
+	RuneUpQRu rune = 'Й'
 
-	// RuneSpace - " "
-	RuneSpace = rune(32)
+	// RuneSpace - ' '
+	RuneSpace rune = ' '
 )

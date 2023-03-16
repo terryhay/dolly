@@ -1,9 +1,10 @@
 package rowLenLimitMock
 
 import (
+	"testing"
+
 	"github.com/stretchr/testify/assert"
 	rll "github.com/terryhay/dolly/man_style_help/row_len_limiter"
-	"testing"
 )
 
 func TestRowLenLimitMock(t *testing.T) {

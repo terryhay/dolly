@@ -1,10 +1,10 @@
 package terminal_size
 
 import (
-	"fmt"
+	"errors"
+
 	rll "github.com/terryhay/dolly/man_style_help/row_len_limiter"
-	"github.com/terryhay/dolly/man_style_help/size"
-	"github.com/terryhay/dolly/utils/dollyerr"
+	"github.com/terryhay/dolly/tools/size"
 )
 
 // TerminalSize contains terminal size page
@@ -21,41 +21,24 @@ func MakeTerminalSize(widthLimit rll.RowLenLimit, height size.Height) TerminalSi
 	}
 }
 
+// ErrIsValidWidthLimit - RowLenLimit.IsValid returned error
+var ErrIsValidWidthLimit = errors.New(`TerminalSize.IsValid: RowLenLimit.IsValid returned error`)
+
 // IsValid returns if the object is initialized
-func (ts TerminalSize) IsValid() *dollyerr.Error {
-	if !ts.widthLimit.IsValid() {
-		return dollyerr.NewError(
-			dollyerr.CodeHelpDisplayTerminalWidthLimitError,
-			fmt.Errorf("PageModel.update: invalid RowLenLimit: %d", ts.widthLimit),
-		)
+func (ts TerminalSize) IsValid() error {
+	if err := ts.widthLimit.IsValid(); err != nil {
+		return errors.Join(ErrIsValidWidthLimit, err)
 	}
 
 	return nil
 }
 
-// GetWidthLimit - width field getter
+// GetWidthLimit gets width field
 func (ts TerminalSize) GetWidthLimit() rll.RowLenLimit {
 	return ts.widthLimit
 }
 
-// GetHeight - height field getter
+// GetHeight gets height field
 func (ts TerminalSize) GetHeight() size.Height {
 	return ts.height
-}
-
-// CloneWithNewWidthLimit does a clone of the object with change widthLimit field
-func (ts TerminalSize) CloneWithNewWidthLimit(widthLimit rll.RowLenLimit) TerminalSize {
-	return TerminalSize{
-		widthLimit: widthLimit,
-		height:     ts.GetHeight(),
-	}
-}
-
-// CloneWithNewHeight does a clone of the object with change height field
-func (ts TerminalSize) CloneWithNewHeight(height size.Height) TerminalSize {
-	width := ts.GetWidthLimit()
-	return TerminalSize{
-		widthLimit: width.Clone(),
-		height:     height,
-	}
 }

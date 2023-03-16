@@ -1,82 +1,112 @@
 package arg_parser_config
 
-import "unsafe"
+import coty "github.com/terryhay/dolly/tools/common_types"
 
-// ArgParserConfig contains specifications of flags, arguments and command groups of application
+// ArgParserConfig contains specifications of namesAdditional, arguments and command groups of application
 type ArgParserConfig struct {
-	appDescription             ApplicationDescription
-	flagDescriptionSlice       []*FlagDescription
-	commandDescriptions        []*CommandDescription
-	helpCommandDescription     HelpCommandDescription
-	namelessCommandDescription NamelessCommandDescription
+	commandNameless *Command
+	commands        []*Command
+	commandHelpOut  *Command
+	app             Application
+
+	helpInfoChapterDESCRIPTION []coty.InfoChapterDESCRIPTION
 }
 
-// ArgParserConfigSrc contains source data for cast to ArgParserConfig
-type ArgParserConfigSrc struct {
-	AppDescription             ApplicationDescription
-	FlagDescriptionSlice       []*FlagDescription
-	CommandDescriptions        []*CommandDescription
-	HelpCommandDescription     HelpCommandDescription
-	NamelessCommandDescription NamelessCommandDescription
+// ArgParserConfigOpt contains source data for cast to ArgParserConfig
+type ArgParserConfigOpt struct {
+	CommandNameless *NamelessCommandOpt
+	Commands        []*CommandOpt
+	CommandHelpOut  *HelpOutCommandOpt
+	App             ApplicationOpt
+
+	HelpInfoChapterDESCRIPTION []string
 }
 
-// ToConst converts src to ArgParserConfig object
-func (src ArgParserConfigSrc) ToConst() ArgParserConfig {
-	return *(*ArgParserConfig)(unsafe.Pointer(&src))
-}
+// MakeArgParserConfig converts opt to ArgParserConfig object
+func MakeArgParserConfig(opt ArgParserConfigOpt) ArgParserConfig {
+	return ArgParserConfig{
+		commandNameless: NewNamelessCommand(opt.CommandNameless),
+		commands:        toCommandSlice(opt.Commands),
+		commandHelpOut:  NewHelpOutCommand(opt.CommandHelpOut),
+		app:             MakeApplication(opt.App),
 
-// GetAppDescription gets appDescription field
-func (apc *ArgParserConfig) GetAppDescription() ApplicationDescription {
-	if apc == nil {
-		return ApplicationDescription{}
+		helpInfoChapterDESCRIPTION: coty.ToSliceTypesSorted[coty.InfoChapterDESCRIPTION](opt.HelpInfoChapterDESCRIPTION),
 	}
-	return apc.appDescription
 }
 
-// GetCommandDescriptions gets commandDescriptions field
-func (apc *ArgParserConfig) GetCommandDescriptions() []*CommandDescription {
-	if apc == nil {
-		return nil
-	}
-	return apc.commandDescriptions
-}
+// CommandByName returns Command by CommandName
+func (apc *ArgParserConfig) CommandByName(name coty.NameCommand) *Command {
+	for _, command := range apc.GetCommands() {
+		if name == command.GetNameMain() {
+			return command
+		}
 
-// GetFlagDescriptionSlice gets flagDescriptionSlice field
-func (apc *ArgParserConfig) GetFlagDescriptionSlice() []*FlagDescription {
-	if apc == nil {
-		return nil
-	}
-	return apc.flagDescriptionSlice
-}
-
-// ExtractFlagDescriptionMap creates and returns flagDescriptionSlice field
-func (apc *ArgParserConfig) ExtractFlagDescriptionMap() map[Flag]*FlagDescription {
-	if apc == nil || len(apc.flagDescriptionSlice) == 0 {
-		return nil
-	}
-
-	flagDescriptionMap := make(map[Flag]*FlagDescription, len(apc.flagDescriptionSlice)*2)
-	for _, description := range apc.flagDescriptionSlice {
-		for _, flag := range description.GetFlags() {
-			flagDescriptionMap[flag] = description
+		if _, contain := command.GetNamesAdditional()[name]; contain {
+			return command
 		}
 	}
 
-	return flagDescriptionMap
+	if apc.GetCommandHelpOut() != nil {
+		if name == apc.GetCommandHelpOut().GetNameMain() {
+			return apc.GetCommandHelpOut()
+		}
+
+		if _, contain := apc.GetCommandHelpOut().GetNamesAdditional()[name]; contain {
+			return apc.commandHelpOut
+		}
+	}
+
+	return nil
 }
 
-// GetHelpCommandDescription gets helpCommandDescription field
-func (apc *ArgParserConfig) GetHelpCommandDescription() HelpCommandDescription {
+// GetCommandNameless gets commandNameless field
+func (apc *ArgParserConfig) GetCommandNameless() *Command {
 	if apc == nil {
 		return nil
 	}
-	return apc.helpCommandDescription
+	return apc.commandNameless
 }
 
-// GetNamelessCommandDescription gets namelessCommandDescription field
-func (apc *ArgParserConfig) GetNamelessCommandDescription() NamelessCommandDescription {
+// GetCommands gets commands field
+func (apc *ArgParserConfig) GetCommands() []*Command {
 	if apc == nil {
 		return nil
 	}
-	return apc.namelessCommandDescription
+	return apc.commands
+}
+
+// GetCommandHelpOut gets commandHelpOut field
+func (apc *ArgParserConfig) GetCommandHelpOut() *Command {
+	if apc == nil {
+		return nil
+	}
+	return apc.commandHelpOut
+}
+
+// GetAppDescription gets app field
+func (apc *ArgParserConfig) GetAppDescription() Application {
+	if apc == nil {
+		return Application{}
+	}
+	return apc.app
+}
+
+// GetHelpInfoChapterDESCRIPTION gets infoChapterNAME field
+func (apc *ArgParserConfig) GetHelpInfoChapterDESCRIPTION() []coty.InfoChapterDESCRIPTION {
+	if apc == nil {
+		return nil
+	}
+	return apc.helpInfoChapterDESCRIPTION
+}
+
+func toCommandSlice(opts []*CommandOpt) []*Command {
+	if len(opts) == 0 {
+		return nil
+	}
+
+	commands := make([]*Command, 0, len(opts))
+	for _, opt := range opts {
+		commands = append(commands, NewCommand(*opt))
+	}
+	return commands
 }
